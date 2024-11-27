@@ -8,6 +8,7 @@ sys.path.append(root_path)
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
+from tqdm import tqdm
 
 from CAM_Beta.vgg import vgg16_bn
 from CAM_Beta.dataset import my_Dataset, dsCls_Dataset
@@ -16,7 +17,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def main():
-    ds_dir = r'D:\my_phd\dataset\Stage3\D1_ECPDaytime'
+    ds_dir = r'/kaggle/input/stage4-d1-ecpdaytime-7augs/Stage4_D1_ECPDaytime_7Augs'
     txt_path = 'test.txt'
 
     test_dataset = my_Dataset(ds_dir, txt_path, cls_label=0)
@@ -33,7 +34,7 @@ def main():
 
     all_msg = ''
     with torch.no_grad():
-        for image, label, ds_label, image_name in test_loader:
+        for image, label, ds_label, image_name in tqdm(test_loader):
 
             image = image.to(DEVICE)
             label = label.to(DEVICE)
@@ -77,6 +78,10 @@ def main():
 
             break
 
+
+    with open(r'/kaggle/working/M1onD1_res.txt', 'a') as f:
+        for item in all_msg:
+            f.write(item)
 
 
 
