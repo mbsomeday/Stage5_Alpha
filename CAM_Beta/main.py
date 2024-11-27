@@ -54,11 +54,11 @@ def main():
             # 数据集检测
             dsCls_out = dsCls_model(image)
 
-            print(pedCls_out)
-            print('dsCls_out:', dsCls_out)
+            label_0 = pedCls_prob.cpu()
+            label_0 = np.array(label_0[0][0])
 
-            label_0 = np.array(pedCls_prob[0][0])
-            label_1 = np.array(pedCls_prob[0][1])
+            label_1 = pedCls_prob.cpu()
+            label_1 = np.array(label_1[0][1])
 
             # 数据集检测
             dsCls_out = dsCls_model(image)
