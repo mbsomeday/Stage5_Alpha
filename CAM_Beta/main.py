@@ -72,12 +72,12 @@ def main():
                 dsCls_flag = False
 
             dsCls_pred = dsCls_pred.cpu()
-            ds_pred = 'D' + str(np.array(dsCls_pred)[0])
+            ds_pred = 'D' + str(np.array(dsCls_pred)[0] + 1)
 
-            if dsCls_flag == False:
-                print('dsCls_pred:', dsCls_pred)
-                print('ds_label:', ds_label)
-                print('ds_pred:', ds_pred)
+            # if dsCls_flag == False:
+            #     print('dsCls_pred:', dsCls_pred)
+            #     print('ds_label:', ds_label)
+            #     print('ds_pred:', ds_pred)
 
 
             msg = str(image_name[0]) + ' ' + str('%.6f' % label_0) + ' ' + str('%.6f' % label_1) + ' ' + str(pedCls_flag) + ' ' + str(ds_pred) + ' ' + str(dsCls_flag) + '\n'
