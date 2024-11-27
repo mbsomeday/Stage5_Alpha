@@ -25,7 +25,7 @@ def main():
     ds_dir = r'/kaggle/input/stage4-d2-citypersons-7augs/Stage4_D2_CityPersons_7Augs'
     txt_path = 'test.txt'
 
-    test_dataset = my_Dataset(ds_dir, txt_path, cls_label=2)
+    test_dataset = my_Dataset(ds_dir, txt_path, cls_label=1)
     test_loader = DataLoader(test_dataset, batch_size=1)
 
     dsCls_model = vgg16_bn(num_class=4)
