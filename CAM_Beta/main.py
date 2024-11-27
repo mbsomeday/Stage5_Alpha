@@ -25,7 +25,7 @@ def main():
     ds_dir = r'/kaggle/input/stage4-d3-ecpnight-7augs'
     txt_path = 'test.txt'
 
-    test_dataset = my_Dataset(ds_dir, txt_path, cls_label=0)
+    test_dataset = my_Dataset(ds_dir, txt_path, cls_label=2)
     test_loader = DataLoader(test_dataset, batch_size=1)
 
     dsCls_model = vgg16_bn(num_class=4)
@@ -93,7 +93,7 @@ def main():
             all_msg += msg
 
 
-    with open(r'/kaggle/working/M1onD1_res.txt', 'a') as f:
+    with open(r'/kaggle/working/M3onD3_res.txt', 'a') as f:
         for item in all_msg:
             f.write(item)
 
