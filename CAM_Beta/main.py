@@ -22,7 +22,7 @@ def reload_model(model, weights_path):
     return model
 
 def main():
-    ds_dir = r'/kaggle/input/stage4-d3-ecpnight-7augs'
+    ds_dir = r'/kaggle/input/stage4-d2-citypersons-7augs/Stage4_D2_CityPersons_7Augs'
     txt_path = 'test.txt'
 
     test_dataset = my_Dataset(ds_dir, txt_path, cls_label=2)
@@ -31,7 +31,7 @@ def main():
     dsCls_model = vgg16_bn(num_class=4)
     pedCls_model = vgg16_bn(num_class=2)
 
-    reload_model(pedCls_model, weights_path=r'/kaggle/input/stage4-baseline-weights/vgg16bn-D3-025-0.9303.pth')
+    reload_model(pedCls_model, weights_path=r'/kaggle/input/stage4-baseline-weights/vgg16bn-D2-025-0.9124.pth')
     reload_model(dsCls_model, weights_path=r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth')
 
     dsCls_model.eval()
@@ -93,7 +93,7 @@ def main():
             all_msg += msg
 
 
-    with open(r'/kaggle/working/M3onD3_res.txt', 'a') as f:
+    with open(r'/kaggle/working/M2onD2_res.txt', 'a') as f:
         for item in all_msg:
             f.write(item)
 
