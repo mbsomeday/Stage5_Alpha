@@ -16,13 +16,13 @@ from CAM_Beta.dataset import my_Dataset, dsCls_Dataset
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def reload_model(model, weights_path):
-    checkpoints = torch.load(weights_path, map_location=DEVICE)
+    checkpoints = torch.load(weights_path, map_location=DEVICE, weights_only=True)
     model.load_state_dict(checkpoints['model_state_dict'])
 
     return model
 
 def main():
-    ds_dir = r'/kaggle/input/stage4-d1-ecpdaytime-7augs/Stage4_D1_ECPDaytime_7Augs'
+    ds_dir = r'/kaggle/input/stage4-d2-citypersons-7augs/Stage4_D2_CityPersons_7Augs'
     txt_path = 'test.txt'
 
     test_dataset = my_Dataset(ds_dir, txt_path, cls_label=0)
@@ -31,7 +31,7 @@ def main():
     dsCls_model = vgg16_bn(num_class=4)
     pedCls_model = vgg16_bn(num_class=2)
 
-    reload_model(pedCls_model, weights_path=r'/kaggle/input/stage4-baseline-weights/vgg16bn-D1-014-0.9740.pth')
+    reload_model(pedCls_model, weights_path=r'/kaggle/input/stage4-baseline-weights/vgg16bn-D2-025-0.9124.pth')
     reload_model(dsCls_model, weights_path=r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth')
 
     dsCls_model.eval()
