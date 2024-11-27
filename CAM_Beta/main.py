@@ -50,6 +50,7 @@ def main():
             else:
                 pedCls_flag = False
 
+
             # 数据集检测
             dsCls_out = dsCls_model(image)
 
