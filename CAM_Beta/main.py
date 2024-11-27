@@ -38,6 +38,7 @@ def main():
 
             image = image.to(DEVICE)
             label = label.to(DEVICE)
+            ds_label = ds_label.to(DEVICE)
 
             # 行人检测
             pedCls_out = pedCls_model(image)
