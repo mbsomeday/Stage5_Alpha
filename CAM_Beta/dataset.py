@@ -26,7 +26,9 @@ class my_Dataset(Dataset):
             data = f.readlines()
 
         for item in data:
-            item = item.strip().split()
+            item = item.strip()
+            item = item.replace('//', os.sep)
+            item = item.split()
             image_path = os.path.join(self.ds_dir, item[0])
 
             labels.append(item[-1])
