@@ -73,10 +73,6 @@ def main():
             msg = str(image_name[0]) + ' ' + str('%.6f' % label_0) + ' ' + str('%.6f' % label_1) + ' ' + str(pedCls_flag) + ' ' + str(ds_pred) + ' ' + str(dsCls_flag) + '\n'
 
             all_msg += msg
-            print(msg)
-
-
-            break
 
 
     with open(r'/kaggle/working/M1onD1_res.txt', 'a') as f:
@@ -84,24 +80,7 @@ def main():
             f.write(item)
 
 
-
-
-
 # TODO 1: 对 D1 的 test 进行 dataset classification
-def dsCls_eval():
-    ds_dir = r'D:\my_phd\dataset\Stage3\D1_ECPDaytime'
-    txt_path = 'test.txt'
-
-    train_dataset = dsCls_Dataset(ds_dir, txt_path, label=0)
-    train_loader = DataLoader(train_dataset, batch_size=4)
-
-    model = vgg16_bn(num_class=4)
-
-    model.eval()
-
-    # with torch.no_grad():
-    #     for image, label in train_loader
-
 
 
 # TODO 2: 对归类为D1的图片，用M1进行分类
