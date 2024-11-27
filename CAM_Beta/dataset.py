@@ -27,7 +27,7 @@ class my_Dataset(Dataset):
 
         for item in data:
             item = item.strip()
-            item = item.replace('//', os.sep)
+            item = item.replace('\\', os.sep)
             item = item.split()
             image_path = os.path.join(self.ds_dir, item[0])
 
