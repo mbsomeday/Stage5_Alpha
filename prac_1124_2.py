@@ -5,8 +5,8 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 import cv2
 
-from cam_utils import GradCAM, show_cam_on_image, center_crop_img
-from VGG import vgg16_bn
+from cam_utils import GradCAM, show_cam_on_image
+from models.VGG import vgg16_bn
 
 from CAM import util
 from CAM.FG_CAM import FG_CAM
@@ -27,8 +27,6 @@ dsCls_weights = r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-dsCls-029-0.97
 
 pedCls_model = reload_clsModel(pedCls_weights, 2)
 dsCls_model = reload_clsModel(dsCls_weights, 4)
-
-from torchvision.models import vgg16, VGG16_Weights
 
 # Best available weights (currently alias for IMAGENET1K_V2)
 # Note that these weights may change across versions

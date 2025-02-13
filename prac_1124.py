@@ -1,12 +1,11 @@
 import torch
-from torchvision import models, transforms
+from torchvision import transforms
 from PIL import Image
 import numpy as np
-from torchsummary import summary
 import matplotlib.pyplot as plt
 
-from cam_utils import GradCAM, show_cam_on_image, center_crop_img
-from VGG import vgg16_bn
+from cam_utils import GradCAM, show_cam_on_image
+from models.VGG import vgg16_bn
 
 
 if __name__ == '__main__':
