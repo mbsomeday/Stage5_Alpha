@@ -3,6 +3,8 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from time import time
 
+from data.dataset import my_dataset
+
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
@@ -35,7 +37,7 @@ class train_model():
             images = images.to(DEVICE)
             labels = labels.to(DEVICE)
 
-            out = model(images)
+            out = self.model(images)
             loss = self.loss_fn(out, labels)
 
             self.optimizer.zero_grad()
@@ -49,7 +51,7 @@ class train_model():
         print(f'Training time for epoch:{epoch + 1}: {(time() - start_time):.2f}s, training loss:{training_loss:.6f}')
 
     def val_on_epoch_end(self):
-        model.eval()
+        self.model.eval()
         val_loss = 0.0
         val_correct_num = 0
 
@@ -59,7 +61,7 @@ class train_model():
                 images = images.to(DEVICE)
                 labels = labels.to(DEVICE)
 
-                out = model(images)
+                out = self.model(images)
                 loss = self.loss_fn(out, labels)
                 _, pred = torch.max(out, 1)
                 val_correct_num += (pred == labels).sum()
@@ -75,7 +77,7 @@ class train_model():
 
     def train(self):
 
-        model.to(DEVICE)
+        self.model.to(DEVICE)
 
         print('-' * 20 + 'training Info' + '-' * 20)
         print('Total training Samples:', len(self.train_dataset))
@@ -93,20 +95,9 @@ class train_model():
 
             # 这里放训练epoch的callbacks
 
-            break
+            # break
 
 
-
-
-if __name__ == '__main__':
-    from data.dataset import my_dataset
-    from models.VGG import vgg16_bn
-
-    ds_name_list = ['D3', 'D4']
-    model_name = 'vgg16_bn'
-    model = vgg16_bn()
-
-    train_model = train(model_name, model, ds_name_list, batch_size=4, epochs=10)
 
 
 
