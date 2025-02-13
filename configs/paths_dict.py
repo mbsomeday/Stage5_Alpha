@@ -54,13 +54,13 @@ cwd = os.getcwd()
 print('-' * 50)
 
 if 'my_phd' in cwd:
-    print(f'Run on Local -- {cwd}')
+    print(f'Run on Local -- working dir: {cwd}')
     PATHS = LOCAL
 elif 'kaggle' in cwd:
-    print(f'Run on kaggle -- {cwd}')
+    print(f'Run on kaggle -- working dir: {cwd}')
     PATHS = KAGGLE
 elif 'veracruz' in cwd:
-    print(f'Run on lca -- {cwd}')
+    print(f'Run on lca -- working dir: {cwd}')
     PATHS = LCA
 else:
     raise Exception('运行平台未知，需配置路径!')
