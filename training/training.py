@@ -4,6 +4,7 @@ from tqdm import tqdm
 from time import time
 
 from data.dataset import my_dataset
+from training.train_callbacks import EarlyStopping
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -23,6 +24,8 @@ class train_model():
 
         self.val_dataset = my_dataset(ds_name_list, 'val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
+
+        self.early_stopping = EarlyStopping(model_name, )
 
     def train_one_epoch(self, epoch):
 
@@ -90,7 +93,7 @@ class train_model():
 
         self.model.to(DEVICE)
 
-        print('-' * 20 + 'training Info' + '-' * 20)
+        print('-' * 20 + 'Training Info' + '-' * 20)
         print('Total training Samples:', len(self.train_dataset))
         print(f'From dataset: {self.ds_name_list}')
         print('Total Batch:', len(self.train_loader))
@@ -103,11 +106,11 @@ class train_model():
         for epoch in range(self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             self.train_one_epoch(epoch)
-            self.val_on_epoch_end()
+            val_loss, val_accuracy = self.val_on_epoch_end()
 
             # 这里放训练epoch的callbacks
 
-            # break
+            self.early_stopping(epoch, self.model, val_accuracy, self.optimizer)
 
 
 
