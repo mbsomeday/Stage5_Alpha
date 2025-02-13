@@ -27,7 +27,7 @@ class train_model():
 
         self.early_stopping = EarlyStopping(save_prefix, top_k=2)
 
-    def train_one_epoch(self, epoch):
+    def train_one_epoch(self):
 
         self.model.train()
 
@@ -105,12 +105,12 @@ class train_model():
 
         for epoch in range(self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
-            self.train_one_epoch(epoch)
+            self.train_one_epoch()
             val_loss, val_accuracy = self.val_on_epoch_end()
 
             # 这里放训练epoch的callbacks
 
-            self.early_stopping(epoch, self.model, val_accuracy, self.optimizer)
+            self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
 
 
 
