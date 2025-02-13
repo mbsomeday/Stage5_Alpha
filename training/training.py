@@ -1,7 +1,9 @@
-import torch
+import os.path
+
+import torch, torchvision
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from time import time
+import numpy as np
 
 from data.dataset import my_dataset
 from training.train_callbacks import EarlyStopping
@@ -10,7 +12,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class train_model():
-    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=10, save_prefix=None):
+    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=10, save_prefix=None, gen_img=False):
         self.model_name = model_name
         self.model = model
         self.epochs = epochs
@@ -25,7 +27,14 @@ class train_model():
         self.val_dataset = my_dataset(ds_name_list, 'val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
+        # callbacks
         self.early_stopping = EarlyStopping(save_prefix, top_k=2)
+        self.gen_img = gen_img
+        if self.gen_img and batch_size >= 4:
+            print(f'Image will be saved after each epoch.')
+            self.image_logger_dir = os.path.join(os.getcwd(), 'images')
+            if not os.path.exists(self.image_logger_dir):
+                os.mkdir(self.image_logger_dir)
 
     def train_one_epoch(self):
 
@@ -33,7 +42,6 @@ class train_model():
 
         training_loss = 0.0
         training_correct_num = 0
-        # start_time = time()
 
         for batch, data in enumerate(tqdm(self.train_loader)):
             # 将image和label放到GPU中
@@ -54,21 +62,19 @@ class train_model():
             _, pred = torch.max(out, 1)
             training_correct_num += (pred == labels).sum()
 
-
         train_accuracy = training_correct_num / len(self.train_dataset)
         train_acc_100 = train_accuracy * 100
 
-        # print(f'Training time for epoch:{epoch + 1}: {(time() - start_time):.2f}s')
         print('Training Loss:{:.6f}, Training accuracy:{:.6f}% ({} / {})'.format(training_loss, train_acc_100, training_correct_num,
                                                                        len(self.val_dataset)))
 
-    def val_on_epoch_end(self):
+    def val_on_epoch_end(self, epoch):
         self.model.eval()
         val_loss = 0.0
         val_correct_num = 0
 
         with torch.no_grad():
-            for data in (self.val_loader):
+            for data in self.val_loader:
                 images = data['image']
                 labels = data['label']
                 images = images.to(DEVICE)
@@ -80,6 +86,14 @@ class train_model():
                 _, pred = torch.max(out, 1)
                 val_correct_num += (pred == labels).sum()
                 val_loss += loss.item()
+
+            if self.gen_img:
+                grid_images = torch.cat(list(images[:4]), dim=2)
+                grid_recons = torch.cat(list(out[:4]), dim=2)
+                grid_img = torch.cat((grid_images, grid_recons), dim=1)
+                grid = torchvision.utils.make_grid(grid_img, nrow=4)
+                image_save_name = '{}.jpg'.format(epoch)
+                torchvision.utils.save_image(grid, image_save_name)
 
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_acc_100 = val_accuracy * 100
@@ -106,10 +120,9 @@ class train_model():
         for epoch in range(self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             self.train_one_epoch()
-            val_loss, val_accuracy = self.val_on_epoch_end()
+            val_loss, val_accuracy = self.val_on_epoch_end(epoch)
 
             # 这里放训练epoch的callbacks
-
             self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
 
 

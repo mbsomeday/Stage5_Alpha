@@ -19,9 +19,6 @@ def get_args():
 
 model_name = 'vgg16'
 model = vgg16_bn(num_class=2)
-# ds_name_list = ['D3']
-# batch_size = 32
-# epochs = 3
 
 args = get_args()
 ds_name_list = args.ds_name_list
@@ -32,7 +29,6 @@ save_prefix = args.save_prefix
 
 training = train_model(model_name, model, ds_name_list, batch_size, epochs, save_prefix)
 training.train()
-
 
 
 

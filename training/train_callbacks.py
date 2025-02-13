@@ -60,7 +60,7 @@ class EarlyStopping():
         for weights in all_weights_temp:
             if weights.endswith('.pth'):
                 all_weights.append(weights)
-        print('Current ckpt files: ', len(all_weights), all_weights_temp)
+
         # 按存储格式来： save_name = prefix_{epoch}_{acc}.pth
         if len(all_weights) > self.top_k:
             sorted = []
@@ -96,6 +96,11 @@ class EarlyStopping():
         torch.save(checkpoint, save_path)
         self.best_val_acc = val_acc
 
+
+
+class ImageLogger():
+    def __init__(self):
+        pass
 
 
 
