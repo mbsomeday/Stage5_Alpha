@@ -1,17 +1,15 @@
-from torch.utils.data import DataLoader
 
-from data.dataset import my_dataset
 from models.VGG import vgg16_bn
+from training.training import train_model
 
 
-ds_name_list = ['D3', 'D4']
-txt_name = 'val.txt'
-
-cur_dataset = my_dataset(ds_name_list, txt_name)
-cur_loader = DataLoader(cur_dataset, batch_size=4)
-
+model_name = 'vgg16'
 model = vgg16_bn(num_class=2)
+ds_name_list = ['D3']
+batch_size = 32
+epochs = 10
 
+training = train_model(model_name, model, ds_name_list, batch_size, epochs)
 
 
 
