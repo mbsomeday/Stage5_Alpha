@@ -41,12 +41,13 @@ class train_model():
 
             out = self.model(images)
             loss = self.loss_fn(out, labels)
+            training_loss += loss.item()
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
-            training_loss += loss.item()
+
             _, pred = torch.max(out, 1)
             training_correct_num += (pred == labels).sum()
 
