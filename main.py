@@ -10,7 +10,7 @@ batch_size = 32
 epochs = 3
 
 training = train_model(model_name, model, ds_name_list, batch_size, epochs)
-
+training.train()
 
 
 
