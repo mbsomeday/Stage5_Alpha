@@ -13,6 +13,7 @@ class train_model():
         self.model_name = model_name
         self.model = model
         self.epochs = epochs
+        self.ds_name_list = ds_name_list
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
@@ -29,7 +30,7 @@ class train_model():
 
         training_loss = 0.0
         training_correct_num = 0
-        start_time = time()
+        # start_time = time()
 
         for batch, data in enumerate(tqdm(self.train_loader)):
             # 将image和label放到GPU中
@@ -47,11 +48,16 @@ class train_model():
             loss.backward()
             self.optimizer.step()
 
-
             _, pred = torch.max(out, 1)
             training_correct_num += (pred == labels).sum()
 
-        print(f'Training time for epoch:{epoch + 1}: {(time() - start_time):.2f}s, training loss:{training_loss:.6f}')
+
+        train_accuracy = training_correct_num / len(self.train_dataset)
+        train_acc_100 = train_accuracy * 100
+
+        # print(f'Training time for epoch:{epoch + 1}: {(time() - start_time):.2f}s')
+        print('Training Loss:{:.6f}, Training accuracy:{:.6f}% ({} / {})'.format(training_loss, train_acc_100, training_correct_num,
+                                                                       len(self.val_dataset)))
 
     def val_on_epoch_end(self):
         self.model.eval()
@@ -67,6 +73,7 @@ class train_model():
 
                 out = self.model(images)
                 loss = self.loss_fn(out, labels)
+
                 _, pred = torch.max(out, 1)
                 val_correct_num += (pred == labels).sum()
                 val_loss += loss.item()
@@ -85,6 +92,7 @@ class train_model():
 
         print('-' * 20 + 'training Info' + '-' * 20)
         print('Total training Samples:', len(self.train_dataset))
+        print(f'From dataset: {self.ds_name_list}')
         print('Total Batch:', len(self.train_loader))
         print('Total EPOCH:', self.epochs)
         print('Runing device:', DEVICE)
