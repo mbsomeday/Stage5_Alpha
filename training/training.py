@@ -10,7 +10,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class train_model():
-    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=10):
+    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=10, save_prefix=None):
         self.model_name = model_name
         self.model = model
         self.epochs = epochs
@@ -25,7 +25,7 @@ class train_model():
         self.val_dataset = my_dataset(ds_name_list, 'val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
-        self.early_stopping = EarlyStopping(model_name, )
+        self.early_stopping = EarlyStopping(save_prefix, top_k=2)
 
     def train_one_epoch(self, epoch):
 

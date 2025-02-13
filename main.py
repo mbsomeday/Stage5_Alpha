@@ -10,6 +10,7 @@ def get_args():
     parser.add_argument('-d', '--ds_name_list', nargs='+', help='dataset list')
     parser.add_argument('-bs', '--batch_size', type=int)
     parser.add_argument('--epochs', type=int)
+    parser.add_argument('--save_prefix', type=str)
 
     args = parser.parse_args()
     return args
@@ -27,7 +28,9 @@ ds_name_list = args.ds_name_list
 batch_size = args.batch_size
 epochs = args.epochs
 
-training = train_model(model_name, model, ds_name_list, batch_size, epochs)
+save_prefix = args.save_prefix
+
+training = train_model(model_name, model, ds_name_list, batch_size, epochs, save_prefix)
 training.train()
 
 
