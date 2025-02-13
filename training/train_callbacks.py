@@ -9,7 +9,7 @@ class EarlyStopping():
     '''
 
     def __init__(self, save_prefix, top_k=3,
-                 patience=10, verbose=False, delta=0.000001,
+                 patience=10, delta=0.000001,
                  model_save_dir=None):
         '''
             这个 early stopping关注的是 accuracy
