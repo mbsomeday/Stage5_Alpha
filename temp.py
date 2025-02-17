@@ -65,8 +65,8 @@ for epoch in range(10):
 
             val_correct_num += (pred == ped_labels).sum()
 
-            loss_val += loss_fn(preds=out, targets=ped_labels, images=images, ped_model=ped_model, ds_labels=ds_labels)
-            val_loss += loss_val.item()
+            # loss_val += loss_fn(preds=out, targets=ped_labels, images=images, ped_model=ped_model, ds_labels=ds_labels)
+            # val_loss += loss_val.item()
 
         val_accuracy = val_correct_num / len(val_dataset)
         val_acc_100 = val_accuracy * 100
