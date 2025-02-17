@@ -20,8 +20,8 @@ def reload_model(model, weights_path):
     return model
 
 # ped_model = reload_model(vgg16_bn(num_class=2), PATHS['ped_cls_ckpt'][ds_name])
-ped_model = vgg16_bn(2)
-ds_model = reload_model(vgg16_bn(num_class=4), PATHS['ds_cls_ckpt'])
+ped_model = vgg16_bn(2).to(DEVICE)
+ds_model = reload_model(vgg16_bn(num_class=4), PATHS['ds_cls_ckpt']).to(DEVICE)
 
 train_dataset = my_dataset([ds_name], txt_name='augmentation_train.txt')
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
