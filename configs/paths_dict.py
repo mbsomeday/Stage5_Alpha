@@ -49,6 +49,8 @@ KAGGLE = {
         'D4': r'/kaggle/input/stage4-d4-7augs'
     },
 
+    'ds_cls_ckpt': r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth',
+
     'autoencoder_ckpt_dict': {
         'D1': r'/kaggle/input/stage5-weights-ldm-d1/D1_epo26_00894.ckpt',
         'D2': r'/kaggle/input/stage5-weights-ldm-d2/D2_epo59_01239.ckpt',
