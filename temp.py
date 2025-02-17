@@ -4,6 +4,7 @@
 
 import torch, os
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from configs.paths_dict import PATHS
 from models.VGG import vgg16_bn
@@ -36,7 +37,7 @@ for epoch in range(10):
     print(f'Epoch: {epoch}')
 
     # train
-    for idx, data_dict in enumerate(train_loader):
+    for idx, data_dict in enumerate(tqdm(train_loader)):
         images = data_dict['image'].to(DEVICE)
         ped_labels = data_dict['ped_label'].to(DEVICE)
         ds_labels = data_dict['ds_label'].to(DEVICE)
