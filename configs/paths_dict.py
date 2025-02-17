@@ -24,6 +24,15 @@ LOCAL = {
         'D4': r'D:\my_phd\dataset\Stage3\D4_BDD100K',
     },
 
+    'ped_cls_ckpt': {
+        'D1': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D1-014-0.9740.pth',
+        'D2': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D2-025-0.9124.pth',
+        'D3': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D3-025-0.9303.pth',
+        'D4': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D4-013-0.9502.pth',
+    },
+
+    'ds_cls_ckpt': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-dsCls-029-0.9777.pth',
+
     'autoencoder_ckpt_dict': {
         'D1': r'D:\my_phd\Model_Weights\Stage5\LDM_AE_ckpt\D1_epo26_00894.ckpt',
         'D2': r'D:\my_phd\Model_Weights\Stage5\LDM_AE_ckpt\D2_epo59_01239.ckpt',

@@ -10,18 +10,22 @@ from configs.paths_dict import PATHS
 class my_dataset(Dataset):
     def __init__(self, ds_name_list, txt_name):
         self.ds_name_list = ds_name_list
+        self.ds_label_list = []
+        for ds_name in ds_name_list:
+            self.ds_label_list.append(int(ds_name[1]) - 1)
+
         self.txt_name = txt_name
         self.img_transforms = transforms.Compose([
             transforms.ToTensor()
         ])
-        self.images, self.labels = self.init_ImagesLabels()
+        self.images, self.ped_labels, self.ds_labels = self.init_ImagesLabels()
         # print(f'Get dataset: {ds_name_list}, txt_name: {txt_name}, total {len(self.labels)} images')
 
-
     def init_ImagesLabels(self):
-        images, labels = [], []
+        images, ped_labels, ds_labels = [], [], []
 
-        for ds_name in self.ds_name_list:
+        for ds_idx, ds_name in enumerate(self.ds_name_list):
+            ds_label = self.ds_label_list[ds_idx]
             ds_dir = PATHS['dataset_dict'][ds_name]
             txt_path = os.path.join(ds_dir, 'dataset_txt', self.txt_name)
 
@@ -35,35 +39,40 @@ class my_dataset(Dataset):
 
                 image_path = os.path.join(ds_dir, contents[0])
                 images.append(image_path)
-                labels.append(contents[-1])
+                ped_labels.append(contents[-1])
+                ds_labels.append(ds_label)
 
-        return images, labels
+
+        return images, ped_labels, ds_labels
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
         image_path = self.images[idx]
-        label = self.labels[idx]
+        ped_label = self.ped_labels[idx]
+        ds_label = self.ds_labels[idx]
 
         image = Image.open(image_path)
         image = self.img_transforms(image)
-        label = np.array(label).astype(np.int64)
+        ped_label = np.array(ped_label).astype(np.int64)
+        ds_label = np.array(ds_label).astype(np.int64)
 
         image_name = image_path.split(os.sep)[-1]
 
         image_dict = {
             'image': image,
+            'img_name': image_name,
             'file_path': image_path,
-            'label': label
+            'ped_label': ped_label,
+            'ds_label': ds_label
         }
 
         return image_dict
 
 
-
-
-
+# if __name__ == '__main__':
+#     ds = my_dataset(['D1', 'D2'], txt_name='val.txt')
 
 
 
