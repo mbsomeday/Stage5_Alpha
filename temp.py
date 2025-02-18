@@ -16,7 +16,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 ds_name = 'D3'
 print(f'ds name: {ds_name}')
 def reload_model(model, weights_path):
-    checkpoints = torch.load(weights_path, map_location=DEVICE)
+    checkpoints = torch.load(weights_path, map_location=DEVICE, weights_only=True)
     model.load_state_dict(checkpoints['model_state_dict'])
     return model
 
