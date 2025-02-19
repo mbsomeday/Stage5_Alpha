@@ -33,26 +33,26 @@ def ped_test(model, ds_name, test_dataset, test_loader):
     correct_num = 0
     y_true = []
     y_pred = []
-    with torch.no_grad():
-        for idx, data_dict in enumerate(tqdm(test_loader)):
-            images = data_dict['image'].to(DEVICE)
-            ped_labels = data_dict['ped_label'].to(DEVICE)
+    # with torch.no_grad():
+    for idx, data_dict in enumerate(tqdm(test_loader)):
+        images = data_dict['image'].to(DEVICE)
+        ped_labels = data_dict['ped_label'].to(DEVICE)
 
-            ped_out = model(images)
-            ped_pred = torch.argmax(ped_out, dim=1)
+        ped_out = model(images)
+        ped_pred = torch.argmax(ped_out, dim=1)
 
-            correct_num += (ped_pred == ped_labels).sum()
+        correct_num += (ped_pred == ped_labels).sum()
 
-            y_true.extend(ped_labels.cpu().numpy())
-            y_pred.extend(ped_pred.cpu().numpy())
+        y_true.extend(ped_labels.cpu().numpy())
+        y_pred.extend(ped_pred.cpu().numpy())
 
-        test_accuracy = correct_num / len(test_dataset)
-        print(f'test_accuracy: {test_accuracy.item()} - {correct_num}/{len(test_dataset)}')
+    test_accuracy = correct_num / len(test_dataset)
+    print(f'test_accuracy: {test_accuracy.item()} - {correct_num}/{len(test_dataset)}')
 
-        # 绘制混淆矩阵
-        label_names = ['ped', 'nonPed']
-        title = f'Ped Cls CM on {ds_name}'
-        plot_cm(y_true, y_pred, label_names, title=title)
+    # 绘制混淆矩阵
+    label_names = ['ped', 'nonPed']
+    title = f'Ped Cls CM on {ds_name}'
+    plot_cm(y_true, y_pred, label_names, title=title)
 
 
 
