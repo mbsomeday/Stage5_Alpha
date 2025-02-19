@@ -65,7 +65,7 @@ if __name__ == '__main__':
     test_dataset = my_dataset(ds_name_list=[ds_name], txt_name='test.txt', key_name=ds_key_name)
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
-    model = vgg16_bn(num_class=2)
+    model = vgg16_bn(num_class=2).to(DEVICE)
     ckpt = torch.load(PATHS['ped_cls_ckpt'][ds_name], map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt)
 
