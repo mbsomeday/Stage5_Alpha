@@ -19,11 +19,11 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_on', type=str)
-    parser.add_argument('-d', '--ds_name', type=str, help='dataset that the model is tested on')
+    # parser.add_argument('--train_on', type=str)
+    # parser.add_argument('-d', '--ds_name', type=str, help='dataset that the model is tested on')
     parser.add_argument('-b', '--batch_size', type=int, default=4)
     parser.add_argument('--ds_key_name', type=str)
-    parser.add_argument('--txt_name', type=str)
+    # parser.add_argument('--txt_name', type=str)
 
     args = parser.parse_args()
     return args
@@ -92,7 +92,6 @@ def ds_test(model, test_dataset, test_loader):
 
 
 
-
 if __name__ == '__main__':
 
     # pedestrian classification
@@ -101,7 +100,7 @@ if __name__ == '__main__':
     # train_on = args.train_on
     # ds_name = args.ds_name
     batch_size = args.batch_size
-    # ds_key_name = args.ds_key_name
+    ds_key_name = args.ds_key_name
     # txt_name = args.txt_name
     #
     # model = vgg16_bn(num_class=2).to(DEVICE)
@@ -123,7 +122,7 @@ if __name__ == '__main__':
     model.load_state_dict(ckpt['model_state_dict'])
 
     ds_name_list = ['D1', 'D2', 'D3', 'D4']
-    test_dataset = my_dataset(ds_name_list=[], txt_name='test.txt', key_name='AE1_dataset')
+    test_dataset = my_dataset(ds_name_list=[], txt_name='test.txt', key_name=ds_key_name)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     ds_test(model, test_dataset, test_loader)
 
