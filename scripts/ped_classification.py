@@ -19,6 +19,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--ds_name', type=str)
     parser.add_argument('-b', '--batch_size', type=int, default=4)
+    parser.add_argument('--ds_key_name', type=str)
 
     args = parser.parse_args()
     return args
@@ -58,8 +59,9 @@ if __name__ == '__main__':
     args = get_args()
     ds_name = args.ds_name
     batch_size = args.batch_size
+    ds_key_name = args.ds_key_name
 
-    test_dataset = my_dataset(ds_name_list=[ds_name], txt_name='test.txt', key_name='dataset_dict')
+    test_dataset = my_dataset(ds_name_list=[ds_name], txt_name='test.txt', key_name=ds_key_name)
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
     model = vgg16_bn(num_class=2)
