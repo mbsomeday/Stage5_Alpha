@@ -45,8 +45,8 @@ def ped_test(model, ds_name, test_dataset, test_loader):
             y_true.extend(ped_labels)
             y_pred.extend(ped_pred)
 
-        test_accuracy = np.round(correct_num / len(test_dataset), 6)
-        print(test_accuracy)
+        test_accuracy = correct_num / len(test_dataset)
+        print(f'test_accuracy: {test_accuracy.item()} - {correct_num}/{len(test_dataset)}')
 
         # 绘制混淆矩阵
         label_names = ['ped', 'nonPed']
