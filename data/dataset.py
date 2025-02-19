@@ -49,7 +49,6 @@ class my_dataset(Dataset):
                 ped_labels.append(contents[-1])
                 ds_labels.append(ds_label)
 
-
         return images, ped_labels, ds_labels
 
     def __len__(self):

@@ -73,10 +73,10 @@ KAGGLE = {
     },
 
     'autoencoder_ckpt_dict': {
-        'D1': r'/kaggle/input/stage5-weights-ldm-d1/D1_epo26_00894.ckpt',
-        'D2': r'/kaggle/input/stage5-weights-ldm-d2/D2_epo59_01239.ckpt',
-        'D3': r'/kaggle/input/stage5-weights-ldm-d3/D3_epo49_01236.ckpt',
-        'D4': r'/kaggle/input/stage5-weights-ldm-d4/D4_epo34_01236.ckpt'
+        'D1': r'/kaggle/input/stage4-baseline-weights/vgg16bn-D1-014-0.9740.pth',
+        'D2': r'/kaggle/input/stage4-baseline-weights/vgg16bn-D2-025-0.9124.pth',
+        'D3': r'/kaggle/input/stage4-baseline-weights/vgg16bn-D3-025-0.9303.pth',
+        'D4': r'/kaggle/input/stage4-baseline-weights/vgg16bn-D4-013-0.9502.pth'
     },
 
 }
