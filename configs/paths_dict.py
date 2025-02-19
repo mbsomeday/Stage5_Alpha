@@ -65,6 +65,13 @@ KAGGLE = {
 
     'ds_cls_ckpt': r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth',
 
+    'ped_cls_ckpt': {
+        'D1': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D1-014-0.9740.pth',
+        'D2': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D2-025-0.9124.pth',
+        'D3': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D3-025-0.9303.pth',
+        'D4': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D4-013-0.9502.pth',
+    },
+
     'autoencoder_ckpt_dict': {
         'D1': r'/kaggle/input/stage5-weights-ldm-d1/D1_epo26_00894.ckpt',
         'D2': r'/kaggle/input/stage5-weights-ldm-d2/D2_epo59_01239.ckpt',

@@ -8,7 +8,7 @@ from configs.paths_dict import PATHS
 
 
 class my_dataset(Dataset):
-    def __init__(self, ds_name_list, txt_name):
+    def __init__(self, ds_name_list, txt_name, key_name='dataset_dict'):
         self.ds_name_list = ds_name_list
         self.ds_label_list = []
         for ds_name in ds_name_list:
@@ -28,6 +28,7 @@ class my_dataset(Dataset):
             ds_label = self.ds_label_list[ds_idx]
             ds_dir = PATHS['dataset_dict'][ds_name]
             txt_path = os.path.join(ds_dir, 'dataset_txt', self.txt_name)
+            print(f'Lodaing {txt_path}')
 
             with open(txt_path, 'r') as f:
                 data = f.readlines()
