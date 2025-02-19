@@ -40,10 +40,12 @@ def ped_test(model, ds_name, test_dataset, test_loader):
 
             ped_out = model(images)
             ped_pred = torch.argmax(ped_out, dim=1)
-            print(f'ped_labels: {ped_labels}')
-            print('ped_pred:', ped_pred)
 
             correct_num += (ped_pred == ped_labels).sum()
+
+            print(f'ped_labels: {ped_labels}')
+            print('ped_pred:', ped_pred)
+            print(f'correct_num: {correct_num}')
 
             y_true.extend(ped_labels.cpu().numpy())
             y_pred.extend(ped_pred.cpu().numpy())
