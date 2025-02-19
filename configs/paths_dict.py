@@ -49,6 +49,20 @@ KAGGLE = {
         'D4': r'/kaggle/input/stage4-d4-7augs'
     },
 
+    'AEOrg_dataset': {
+        'D1': r'/kaggle/input/stage5-dataset-orgrecons/D1_Recon/D1',
+        'D2': r'/kaggle/input/stage5-dataset-orgrecons/D1_Recon/D2',
+        'D3': r'/kaggle/input/stage5-dataset-orgrecons/D1_Recon/D3',
+        'D4': r'/kaggle/input/stage5-dataset-orgrecons/D1_Recon/D4',
+    },
+
+    'AE1_dataset': {
+        'D1': r'/kaggle/input/stage5-dataset-orgrecons/D1_Recon/D1',
+        'D2': r'/kaggle/input/stage5-dataset-ae1recons/AE1D2_test/D2',
+        'D3': r'/kaggle/input/stage5-dataset-ae1recons/AE1D3_test/D3',
+        'D4': r'/kaggle/input/stage5-dataset-ae1recons/AE1D4_test/D4',
+    },
+
     'ds_cls_ckpt': r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth',
 
     'autoencoder_ckpt_dict': {
@@ -56,7 +70,8 @@ KAGGLE = {
         'D2': r'/kaggle/input/stage5-weights-ldm-d2/D2_epo59_01239.ckpt',
         'D3': r'/kaggle/input/stage5-weights-ldm-d3/D3_epo49_01236.ckpt',
         'D4': r'/kaggle/input/stage5-weights-ldm-d4/D4_epo34_01236.ckpt'
-    }
+    },
+
 }
 
 
