@@ -61,34 +61,71 @@ def ped_test(model, ds_name, test_dataset, test_loader):
         plot_cm(y_true, y_pred, label_names, title=title)
 
 
+def ds_test(model, test_dataset, test_loader):
+    model.eval()
+
+    correct_num = 0
+    y_true = []
+    y_pred = []
+    with torch.no_grad():
+        for idx, data_dict in enumerate(tqdm(test_loader)):
+            images = data_dict['image']
+            ds_labels = data_dict['ds_label']
+
+            ds_out = model(images)
+            ds_pred = torch.argmax(ds_out, dim=1)
+            correct_num += (ds_pred == ds_labels).sum()
+
+            y_true.extend(ds_labels.cpu().numpy())
+            y_pred.extend(ds_pred.cpu().numpy())
+
+        test_accuracy = correct_num / len(test_dataset)
+        bc = balanced_accuracy_score(y_true, y_pred)
+
+        print(f'test_accuracy: {test_accuracy} - balanced accuracy: {bc}  \n{correct_num}/{len(test_dataset)}')
+
+        # 绘制混淆矩阵
+        label_names = ['ped', 'nonPed']
+        title = f'Dataset Cls CM on AE1 Recons Datasets'
+        plot_cm(y_true, y_pred, label_names, title=title)
+
+
+
+
 
 if __name__ == '__main__':
 
+    # pedestrian classification
+
     args = get_args()
-    train_on = args.train_on
-
-    ds_name = args.ds_name
+    # train_on = args.train_on
+    # ds_name = args.ds_name
     batch_size = args.batch_size
-    ds_key_name = args.ds_key_name
-    txt_name = args.txt_name
-    # print(ds_key_name)
+    # ds_key_name = args.ds_key_name
+    # txt_name = args.txt_name
+    #
+    # model = vgg16_bn(num_class=2).to(DEVICE)
+    # weights_path = PATHS['ped_cls_ckpt'][train_on]
+    # print(f"Reload model {weights_path}")
+    # ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
+    # model.load_state_dict(ckpt['model_state_dict'])
+    #
+    # test_dataset = my_dataset(ds_name_list=[ds_name], txt_name=txt_name, key_name=ds_key_name)
+    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    # ped_test(model, ds_name=ds_name, test_dataset=test_dataset, test_loader=test_loader)
 
 
-    model = vgg16_bn(num_class=2).to(DEVICE)
-    weights_path = PATHS['ped_cls_ckpt'][train_on]
+    # AE1 Reconstruction dataset classification
+    model = vgg16_bn(num_class=4)
+    weights_path = PATHS['ds_cls_ckpt']
     print(f"Reload model {weights_path}")
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt['model_state_dict'])
 
-    test_dataset = my_dataset(ds_name_list=[ds_name], txt_name=txt_name, key_name=ds_key_name)
+    ds_name_list = ['D1', 'D2', 'D3', 'D4']
+    test_dataset = my_dataset(ds_name_list=[], txt_name='test.txt', key_name='AE1_dataset')
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    ped_test(model, ds_name=ds_name, test_dataset=test_dataset, test_loader=test_loader)
-
-
-
-
-
-
+    ds_test(model, test_dataset, test_loader)
 
 
 
