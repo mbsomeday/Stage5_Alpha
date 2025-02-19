@@ -2,8 +2,8 @@ import torch, os, argparse
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-from models.VGG import vgg16_bn
 from data.dataset import my_dataset
+from models.VGG import vgg16_bn
 from configs.paths_dict import PATHS
 from utils.utils import plot_cm
 
