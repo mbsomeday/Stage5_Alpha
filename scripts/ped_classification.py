@@ -67,6 +67,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
     model = vgg16_bn(num_class=2).to(DEVICE)
+    print(f"Reload model {PATHS['ped_cls_ckpt'][ds_name]}")
     ckpt = torch.load(PATHS['ped_cls_ckpt'][ds_name], map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt)
 
