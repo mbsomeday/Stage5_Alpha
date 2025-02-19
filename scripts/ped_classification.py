@@ -69,8 +69,8 @@ def ds_test(model, test_dataset, test_loader):
     y_pred = []
     with torch.no_grad():
         for idx, data_dict in enumerate(tqdm(test_loader)):
-            images = data_dict['image']
-            ds_labels = data_dict['ds_label']
+            images = data_dict['image'].to(DEVICE)
+            ds_labels = data_dict['ds_label'].to(DEVICE)
 
             ds_out = model(images)
             ds_pred = torch.argmax(ds_out, dim=1)
@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
 
     # AE1 Reconstruction dataset classification
-    model = vgg16_bn(num_class=4)
+    model = vgg16_bn(num_class=4).to(DEVICE)
     weights_path = PATHS['ds_cls_ckpt']
     print(f"Reload model {weights_path}")
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
