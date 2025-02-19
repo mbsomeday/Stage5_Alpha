@@ -25,7 +25,7 @@ class my_dataset(Dataset):
             transforms.ToTensor()
         ])
         self.images, self.ped_labels, self.ds_labels = self.init_ImagesLabels()
-        print(f'Get dataset: {ds_name_list}, txt_name: {txt_name}, total {len(self.labels)} images')
+        print(f'Get dataset: {ds_name_list}, txt_name: {txt_name}, total {len(self.images)} images')
 
     def init_ImagesLabels(self):
         images, ped_labels, ds_labels = [], [], []

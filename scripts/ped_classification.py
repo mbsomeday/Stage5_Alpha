@@ -122,7 +122,7 @@ if __name__ == '__main__':
     model.load_state_dict(ckpt['model_state_dict'])
 
     ds_name_list = ['D1', 'D2', 'D3', 'D4']
-    test_dataset = my_dataset(ds_name_list=[], txt_name='test.txt', key_name=ds_key_name)
+    test_dataset = my_dataset(ds_name_list=ds_name_list, txt_name='test.txt', key_name=ds_key_name)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     # ds_test(model, test_dataset, test_loader)
 
