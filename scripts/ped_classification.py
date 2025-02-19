@@ -38,6 +38,7 @@ def ped_test(model, test_dataset, test_loader):
 if __name__ == '__main__':
 
     args = get_args()
+    ds_name = args.ds_name
 
     test_dataset = my_dataset(ds_name_list=[ds_name], txt_name='test.txt', key_name='dataset_dict')
     test_loader = DataLoader(test_dataset, batch_size=4)
