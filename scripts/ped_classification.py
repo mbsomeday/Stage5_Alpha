@@ -42,8 +42,8 @@ def ped_test(model, ds_name, test_dataset, test_loader):
 
             correct_num += (ped_pred == ped_labels).sum()
 
-            y_true.extend(ped_labels)
-            y_pred.extend(ped_pred)
+            y_true.extend(ped_labels.cpu().numpy())
+            y_pred.extend(ped_pred.cpu().numpy())
 
         test_accuracy = correct_num / len(test_dataset)
         print(f'test_accuracy: {test_accuracy.item()} - {correct_num}/{len(test_dataset)}')
