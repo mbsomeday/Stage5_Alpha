@@ -8,6 +8,7 @@ import torch, os, argparse
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 import numpy as np
+from sklearn.metrics import balanced_accuracy_score
 
 from data.dataset import my_dataset
 from models.VGG import vgg16_bn
@@ -43,16 +44,15 @@ def ped_test(model, ds_name, test_dataset, test_loader):
 
             correct_num += (ped_pred == ped_labels).sum()
 
-            # print(f'ped_labels: {ped_labels}')
-            # print('ped_pred:', ped_pred)
-            # print(f'correct_num: {correct_num}')
-
             y_true.extend(ped_labels.cpu().numpy())
             y_pred.extend(ped_pred.cpu().numpy())
             # break
 
         test_accuracy = correct_num / len(test_dataset)
-        print(f'test_accuracy: {test_accuracy} - {correct_num}/{len(test_dataset)}')
+        bc = balanced_accuracy_score(y_true, y_pred)
+
+        print(f'test_accuracy: {test_accuracy} - balanced accuracy: {bc}  \n{correct_num}/{len(test_dataset)}')
+
 
         # 绘制混淆矩阵
         label_names = ['ped', 'nonPed']
