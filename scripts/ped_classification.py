@@ -7,6 +7,7 @@ sys.path.append(root_path)
 import torch, os, argparse
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+import numpy as np
 
 from data.dataset import my_dataset
 from models.VGG import vgg16_bn
@@ -44,7 +45,7 @@ def ped_test(model, ds_name, test_dataset, test_loader):
             y_true.extend(ped_labels)
             y_pred.extend(ped_pred)
 
-        test_accuracy = round(correct_num / len(test_dataset), 6)
+        test_accuracy = np.round(correct_num / len(test_dataset), 6)
         print(test_accuracy)
 
         # 绘制混淆矩阵
