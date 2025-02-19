@@ -39,7 +39,7 @@ def ped_test(model, ds_name, test_dataset, test_loader):
             ped_labels = data_dict['ped_label'].to(DEVICE)
 
             ped_out = model(images)
-            ped_pred = torch.argmax(ped_out, dim=1)
+            ped_pred = torch.max(ped_out, dim=1)
 
             correct_num += (ped_pred == ped_labels).sum()
 
@@ -47,7 +47,7 @@ def ped_test(model, ds_name, test_dataset, test_loader):
             y_pred.extend(ped_pred.cpu().numpy())
 
         test_accuracy = correct_num / len(test_dataset)
-        print(f'test_accuracy: {test_accuracy.item()} - {correct_num}/{len(test_dataset)}')
+        print(f'test_accuracy: {test_accuracy} - {correct_num}/{len(test_dataset)}')
 
         # 绘制混淆矩阵
         label_names = ['ped', 'nonPed']
