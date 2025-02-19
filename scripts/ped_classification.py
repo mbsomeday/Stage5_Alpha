@@ -60,6 +60,7 @@ if __name__ == '__main__':
     ds_name = args.ds_name
     batch_size = args.batch_size
     ds_key_name = args.ds_key_name
+    print(ds_key_name)
 
     test_dataset = my_dataset(ds_name_list=[ds_name], txt_name='test.txt', key_name=ds_key_name)
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
