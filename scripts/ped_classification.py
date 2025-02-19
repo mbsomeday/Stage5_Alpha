@@ -1,4 +1,4 @@
-import torch, os
+import torch, os, argparse
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
@@ -7,6 +7,14 @@ from data.dataset import my_dataset
 from configs.paths_dict import PATHS
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--ds_name', type=str)
+
+    args = parser.parse_args()
+    return args
+
 
 def ped_test(model, test_dataset, test_loader):
     model.eval()
@@ -29,7 +37,8 @@ def ped_test(model, test_dataset, test_loader):
 
 if __name__ == '__main__':
 
-    ds_name = 'D3'
+    args = get_args()
+
     test_dataset = my_dataset(ds_name_list=[ds_name], txt_name='test.txt', key_name='dataset_dict')
     test_loader = DataLoader(test_dataset, batch_size=4)
 
