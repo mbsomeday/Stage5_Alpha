@@ -85,7 +85,7 @@ def ds_test(model, test_dataset, test_loader):
         print(f'test_accuracy: {test_accuracy} - balanced accuracy: {bc}  \n{correct_num}/{len(test_dataset)}')
 
         # 绘制混淆矩阵
-        label_names = ['ped', 'nonPed']
+        label_names = ['D1', 'D2', 'D3', 'D4']
         title = f'Dataset Cls CM on AE1 Recons Datasets'
         plot_cm(y_true, y_pred, label_names, title=title)
 
