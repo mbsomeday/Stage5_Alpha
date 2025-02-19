@@ -16,6 +16,7 @@ class my_dataset(Dataset):
     def __init__(self, ds_name_list, txt_name, key_name='dataset_dict'):
         self.ds_name_list = ds_name_list
         self.ds_label_list = []
+        self.key_name = key_name
         for ds_name in ds_name_list:
             self.ds_label_list.append(int(ds_name[1]) - 1)
 
@@ -31,7 +32,7 @@ class my_dataset(Dataset):
 
         for ds_idx, ds_name in enumerate(self.ds_name_list):
             ds_label = self.ds_label_list[ds_idx]
-            ds_dir = PATHS['dataset_dict'][ds_name]
+            ds_dir = PATHS[self.key_name][ds_name]
             txt_path = os.path.join(ds_dir, 'dataset_txt', self.txt_name)
             print(f'Lodaing {txt_path}')
 
