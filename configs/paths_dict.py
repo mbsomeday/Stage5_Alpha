@@ -73,10 +73,10 @@ KAGGLE = {
     },
 
     'autoencoder_ckpt_dict': {
-        'D1': r'/kaggle/input/stage5-weights-ldm-d1/D1_epo26_00894.ckpt',
-        'D2': r'/kaggle/input/stage5-weights-ldm-d2/D2_epo59_01239.ckpt',
-        'D3': r'/kaggle/input/stage5-weights-ldm-d3/D3_epo49_01236.ckpt',
-        'D4': r'/kaggle/input/stage5-weights-ldm-d4/D4_epo34_01236.ckpt'
+        'D1': r'/kaggle/input/stage3-baselineweights/vgg-D1_ECPDaytime-020-0.97007483.pth',
+        'D2': r'/kaggle/input/stage3-baselineweights/vgg-D2_CityPersons-019-0.95496535.pth',
+        'D3': r'/kaggle/input/stage3-baselineweights/vgg-D3_ECPNight-028-0.94842410.pth',
+        'D4': r'/kaggle/input/stage3-baselineweights/vgg-D4_BDD100K-020-0.91304350.pth'
     },
 
 }
