@@ -51,9 +51,9 @@ KAGGLE = {
 
     'AEOrg_dataset': {
         'D1': r'/kaggle/input/stage5-dataset-orgrecons/D1_Recon/D1',
-        'D2': r'/kaggle/input/stage5-dataset-orgrecons/D2_Recon/D2',
-        'D3': r'/kaggle/input/stage5-dataset-orgrecons/D3_Recon/D3',
-        'D4': r'/kaggle/input/stage5-dataset-orgrecons/D4_Recon/D4',
+        'D2': r'/kaggle/input/stage5-dataset-orgrecons/D2_Recons/D2',
+        'D3': r'/kaggle/input/stage5-dataset-orgrecons/D3_Recons/D3',
+        'D4': r'/kaggle/input/stage5-dataset-orgrecons/D4_Recons/D4',
     },
 
     'AE1_dataset': {
