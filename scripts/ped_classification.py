@@ -66,7 +66,7 @@ if __name__ == '__main__':
     # print(ds_key_name)
 
     test_dataset = my_dataset(ds_name_list=[ds_name], txt_name=txt_name, key_name=ds_key_name)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     model = vgg16_bn(num_class=2).to(DEVICE)
     print(f"Reload model {PATHS['ped_cls_ckpt'][ds_name]}")
