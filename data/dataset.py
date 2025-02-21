@@ -13,10 +13,10 @@ from configs.paths_dict import PATHS
 
 
 class my_dataset(Dataset):
-    def __init__(self, ds_name_list, txt_name, key_name='dataset_dict'):
+    def __init__(self, ds_name_list, path_key, txt_name):
         self.ds_name_list = ds_name_list
         self.ds_label_list = []
-        self.key_name = key_name
+        self.path_key = path_key
         for ds_name in ds_name_list:
             self.ds_label_list.append(int(ds_name[1]) - 1)
 
@@ -32,7 +32,7 @@ class my_dataset(Dataset):
 
         for ds_idx, ds_name in enumerate(self.ds_name_list):
             ds_label = self.ds_label_list[ds_idx]
-            ds_dir = PATHS[self.key_name][ds_name]
+            ds_dir = PATHS[self.path_key][ds_name]
             txt_path = os.path.join(ds_dir, 'dataset_txt', self.txt_name)
             print(f'Lodaing {txt_path}')
 
@@ -69,7 +69,7 @@ class my_dataset(Dataset):
         image_dict = {
             'image': image,
             'img_name': image_name,
-            'file_path': image_path,
+            'img_path': image_path,
             'ped_label': ped_label,
             'ds_label': ds_label
         }
@@ -77,8 +77,31 @@ class my_dataset(Dataset):
         return image_dict
 
 
-# if __name__ == '__main__':
-#     ds = my_dataset(['D1', 'D2'], txt_name='val.txt')
+def get_data(ds_name_list, path_key, txt_name, batch_size, shuffle=True):
+    get_dataset = my_dataset(ds_name_list, path_key, txt_name)
+    get_loader = DataLoader(get_dataset, batch_size=batch_size, shuffle=shuffle)
+    return get_dataset, get_loader
+
+
+
+if __name__ == '__main__':
+    ds_name_list = list(['D3', 'D4'])
+    path_key = 'org_dataset'
+    txt_name = 'val.txt'
+    batch_size = 8
+    shuffle = True
+
+    val_dataset, val_loader = get_data(ds_name_list, path_key, txt_name, batch_size, shuffle)
+
+    for idx, data_dict in enumerate(val_loader):
+        images = data_dict['image']
+        ds_label = data_dict['ds_label']
+        img_paths = data_dict['img_path']
+        ped_label = data_dict['ped_label']
+
+
+
+        break
 
 
 
