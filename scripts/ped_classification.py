@@ -19,17 +19,18 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def get_args():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--train_on', type=str)
-    # parser.add_argument('-d', '--ds_name', type=str, help='dataset that the model is tested on')
+    parser.add_argument('--train_on', type=str)
+    parser.add_argument('-d', '--ds_name', type=str, help='dataset that the model is tested on')
     parser.add_argument('-b', '--batch_size', type=int, default=4)
     parser.add_argument('--ds_key_name', type=str)
-    # parser.add_argument('--txt_name', type=str)
+    parser.add_argument('--txt_name', type=str)
 
     args = parser.parse_args()
     return args
 
 
 def ped_test(model, ds_name, test_dataset, test_loader):
+    model = model.to(DEVICE)
     model.eval()
 
     correct_num = 0
@@ -62,6 +63,7 @@ def ped_test(model, ds_name, test_dataset, test_loader):
 
 
 def ds_test(model, test_dataset, test_loader):
+    model = model.to(DEVICE)
     model.eval()
 
     correct_num = 0
@@ -93,37 +95,36 @@ def ds_test(model, test_dataset, test_loader):
 
 if __name__ == '__main__':
     args = get_args()
-    # train_on = args.train_on
-    # ds_name = args.ds_name
+    train_on = args.train_on
+    ds_name = args.ds_name
     batch_size = args.batch_size
     ds_key_name = args.ds_key_name
-    # txt_name = args.txt_name
+    txt_name = args.txt_name
 
     # pedestrian classification
 
-    #
-    # model = vgg16_bn(num_class=2).to(DEVICE)
-    # weights_path = PATHS['ped_cls_ckpt'][train_on]
-    # print(f"Reload model {weights_path}")
-    # ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
-    # model.load_state_dict(ckpt['model_state_dict'])
-    #
-    # test_dataset = my_dataset(ds_name_list=[ds_name], txt_name=txt_name, key_name=ds_key_name)
-    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    # ped_test(model, ds_name=ds_name, test_dataset=test_dataset, test_loader=test_loader)
-
-
-    # AE Reconstruction dataset classification
-    model = vgg16_bn(num_class=4).to(DEVICE)
-    weights_path = PATHS['ds_cls_ckpt']
+    model = vgg16_bn(num_class=2).to(DEVICE)
+    weights_path = PATHS['ped_cls_ckpt'][train_on]
     print(f"Reload model {weights_path}")
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt['model_state_dict'])
 
-    ds_name_list = ['D1', 'D2', 'D3', 'D4']
-    test_dataset = my_dataset(ds_name_list=ds_name_list, path_key='AE4_dataset',txt_name='test.txt')
+    test_dataset = my_dataset(ds_name_list=[ds_name], txt_name=txt_name, path_key='AE4_dataset')
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    ds_test(model, test_dataset, test_loader)
+    ped_test(model, ds_name=ds_name, test_dataset=test_dataset, test_loader=test_loader)
+
+
+    # # AE Reconstruction dataset classification
+    # model = vgg16_bn(num_class=4).to(DEVICE)
+    # weights_path = PATHS['ds_cls_ckpt']
+    # print(f"Reload model {weights_path}")
+    # ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
+    # model.load_state_dict(ckpt['model_state_dict'])
+    #
+    # ds_name_list = ['D1', 'D2', 'D3', 'D4']
+    # test_dataset = my_dataset(ds_name_list=ds_name_list, path_key='AE4_dataset',txt_name='test.txt')
+    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    # ds_test(model, test_dataset, test_loader)
 
 
 
