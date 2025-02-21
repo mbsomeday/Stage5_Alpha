@@ -17,7 +17,7 @@ LCA = {
 }
 
 LOCAL = {
-    'dataset_dict': {
+    'org_dataset': {
         'D1': r'D:\my_phd\dataset\Stage3\D1_ECPDaytime',
         'D2': r'D:\my_phd\dataset\Stage3\D2_CityPersons',
         'D3': r'D:\my_phd\dataset\Stage3\D3_ECPNight',
@@ -42,14 +42,14 @@ LOCAL = {
 }
 
 KAGGLE = {
-    'dataset_dict': {
+    'org_dataset': {
         'D1': r'/kaggle/input/stage4-d1-ecpdaytime-7augs',
         'D2': r'/kaggle/input/stage4-d2-citypersons-7augs',
         'D3': r'/kaggle/input/stage4-d3-ecpnight-7augs',
         'D4': r'/kaggle/input/stage4-d4-7augs'
     },
 
-    'AEOrg_dataset': {
+    'AE_same_dataset': {
         'D1': r'/kaggle/input/stage5-dataset-orgrecons/D1_Recon/D1',
         'D2': r'/kaggle/input/stage5-dataset-orgrecons/D2_Recons/D2',
         'D3': r'/kaggle/input/stage5-dataset-orgrecons/D3_Recons/D3',
@@ -61,6 +61,13 @@ KAGGLE = {
         'D2': r'/kaggle/input/stage5-dataset-ae1recons/AE1D2_test/D2',
         'D3': r'/kaggle/input/stage5-dataset-ae1recons/AE1D3_test/D3',
         'D4': r'/kaggle/input/stage5-dataset-ae1recons/AE1D4_test/D4',
+    },
+
+    'AE4_dataset': {
+        'D1': r'/kaggle/input/stage5-dataset-ae4recons/AE4D1_test',
+        'D2': r'/kaggle/input/stage5-dataset-ae4recons/AE4D2_test',
+        'D3': r'/kaggle/input/stage5-dataset-ae4recons/AE4D3_test',
+        'D4': r'/kaggle/input/stage5-dataset-ae4recons/AE4D4_test',
     },
 
     'ds_cls_ckpt': r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth',
