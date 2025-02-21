@@ -86,7 +86,7 @@ def ds_test(model, test_dataset, test_loader):
 
         # 绘制混淆矩阵
         label_names = ['D1', 'D2', 'D3', 'D4']
-        title = f'Dataset Cls CM on AE1 Recons Datasets'
+        title = f'Dataset Cls CM on AE4 Recons Datasets'
         plot_cm(y_true, y_pred, label_names, title=title)
 
 
