@@ -13,7 +13,8 @@ def plot_cm(y_true, y_pred, label_names, title='Confusion Matrix'):
     plt.ylabel('Label')
     plt.xlabel('Prediction')
     plt.savefig(f'{title}.png')
-    plt.show()
+    print(f'Image save to {title}.png')
+    # plt.show()
 
 
 
