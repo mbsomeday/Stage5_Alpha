@@ -91,17 +91,16 @@ def ds_test(model, test_dataset, test_loader):
 
 
 
-
 if __name__ == '__main__':
-
-    # pedestrian classification
-
     args = get_args()
     # train_on = args.train_on
     # ds_name = args.ds_name
     batch_size = args.batch_size
     ds_key_name = args.ds_key_name
     # txt_name = args.txt_name
+
+    # pedestrian classification
+
     #
     # model = vgg16_bn(num_class=2).to(DEVICE)
     # weights_path = PATHS['ped_cls_ckpt'][train_on]
@@ -114,7 +113,7 @@ if __name__ == '__main__':
     # ped_test(model, ds_name=ds_name, test_dataset=test_dataset, test_loader=test_loader)
 
 
-    # AE1 Reconstruction dataset classification
+    # AE Reconstruction dataset classification
     model = vgg16_bn(num_class=4).to(DEVICE)
     weights_path = PATHS['ds_cls_ckpt']
     print(f"Reload model {weights_path}")
@@ -122,7 +121,7 @@ if __name__ == '__main__':
     model.load_state_dict(ckpt['model_state_dict'])
 
     ds_name_list = ['D1', 'D2', 'D3', 'D4']
-    test_dataset = my_dataset(ds_name_list=ds_name_list, txt_name='test.txt', key_name=ds_key_name)
+    test_dataset = my_dataset(ds_name_list=ds_name_list, path_key='AE4_dataset',txt_name='test.txt')
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     ds_test(model, test_dataset, test_loader)
 
