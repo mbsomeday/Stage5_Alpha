@@ -8,10 +8,10 @@ import torch
 
 from models.VGG import vgg16_bn
 from data.dataset import my_dataset, get_data
-from utils.utils import get_ds_model, get_orgPed_model
+from utils.utils import get_ds_model, get_orgPed_model, DEVICE
 
 
-ds_name = 'D1'
+ds_name = 'D3'
 path_key ='org_dataset'
 txt_name ='test.txt'
 batch_size = 6
@@ -28,9 +28,9 @@ dsW_pedW = []
 dsW_pedR = []
 
 for idx, data_dict in enumerate(test_loader):
-    image = data_dict['image']
-    ds_label = data_dict['ds_label']
-    ped_label = data_dict['ped_label']
+    image = data_dict['image'].to(DEVICE)
+    ds_label = data_dict['ds_label'].to(DEVICE)
+    ped_label = data_dict['ped_label'].to(DEVICE)
 
     ds_out = ds_model(image)
     ds_pred = torch.argmax(ds_out, dim=1)
