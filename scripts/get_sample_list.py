@@ -27,6 +27,7 @@ dsR_pedW = []
 dsW_pedW = []
 dsW_pedR = []
 
+correct = 0
 for idx, data_dict in enumerate(test_loader):
     image = data_dict['image'].to(DEVICE)
     ds_label = data_dict['ds_label'].to(DEVICE)
@@ -38,16 +39,19 @@ for idx, data_dict in enumerate(test_loader):
     ped_out = ped_model(image)
     ped_pred = torch.argmax(ped_out, dim=1)
 
-    print('ds_label:', ds_label)
-    print('ds_pred:', ds_pred)
-
-    print('-' * 50)
-    print('ped label:', ped_label)
-    print('ped_pred:', ped_pred)
-
-    break
+    correct += (ped_pred == ped_label).sum()
 
 
+    # print('ds_label:', ds_label)
+    # print('ds_pred:', ds_pred)
+    #
+    # print('-' * 50)
+    # print('ped label:', ped_label)
+    # print('ped_pred:', ped_pred)
+
+    # break
+
+print(f'{correct} / {len(test_loader)}')
 
 
 

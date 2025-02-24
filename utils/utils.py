@@ -38,7 +38,7 @@ def get_ds_model():
 
 def get_orgPed_model(ds_name):
     model = vgg16_bn(num_class=2)
-    weight_path = PATHS['org_dataset'][ds_name]
+    weight_path = PATHS['ped_cls_ckpt'][ds_name]
     checkpoints = torch.load(weight_path, map_location=DEVICE)
     model.load_state_dict(checkpoints['model_state_dict'])
     model.to(DEVICE)
