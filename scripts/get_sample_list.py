@@ -20,6 +20,9 @@ shuffle = False
 ds_model = get_ds_model()
 ped_model = get_orgPed_model(ds_name)
 
+ds_model.eval()
+ped_model.eval()
+
 test_dataset, test_loader = get_data(ds_name_list=[ds_name], path_key=path_key, txt_name=txt_name, batch_size=batch_size, shuffle=shuffle)
 
 dsR_pedR = []
