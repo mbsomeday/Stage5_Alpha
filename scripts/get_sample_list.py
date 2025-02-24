@@ -51,7 +51,7 @@ for idx, data_dict in enumerate(test_loader):
 
     # break
 
-print(f'{correct} / {len(test_loader)}')
+print(f'{correct} / {len(test_dataset)}')
 
 
 
