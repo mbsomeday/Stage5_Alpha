@@ -14,7 +14,7 @@ from utils.utils import get_ds_model, get_orgPed_model, DEVICE
 ds_name = 'D3'
 path_key ='org_dataset'
 txt_name ='test.txt'
-batch_size = 6
+batch_size = 32
 shuffle = False
 
 ds_model = get_ds_model()
@@ -43,7 +43,6 @@ for idx, data_dict in enumerate(test_loader):
     ped_pred = torch.argmax(ped_out, dim=1)
 
     correct += (ped_pred == ped_label).sum()
-
 
     # print('ds_label:', ds_label)
     # print('ds_pred:', ds_pred)
