@@ -14,6 +14,7 @@ from training.training import train_model, train_ds_model
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--ds_name', type=str, help='datasets that model is trained on')
+    parser.add_argument('--task', type=str, choices=('ped_cls', 'ds_cls'), help='used to define the num_classes of model')
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', default=50, type=int)
 
@@ -24,11 +25,16 @@ args = get_args()
 ds_name = args.ds_name
 batch_size = args.batch_size
 epochs = args.epochs
+task = args.task
 
 model_name = 'EfficientB0'
+if task == 'ped_cls':
+    num_classes = 2
+else:
+    num_classes = 4
 
 # model
-model = visionModels.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
+model = visionModels.efficientnet_b0(weights='IMAGENET1K_V1', progress=True, num_classes=num_classes)
 
 print('------- Fixing  -------')
 for name, param in model.named_parameters():
@@ -40,14 +46,18 @@ print('Checking model params grad fix')
 for name, param in model.named_parameters():
     print(f'name: {name} - {param.shape} - {param.requires_grad}')
 
-# # 行人分类
-# ds_name_list = [ds_name]
-# my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
-# my_model.train()
 
-# 数据集分类
-my_model = train_ds_model(model_name, model, batch_size, epochs)
-my_model.train()
+if task == 'ds_cls':
+    # 数据集分类
+    my_model = train_ds_model(model_name, model, batch_size, epochs)
+    my_model.train()
+
+else:
+    # 行人分类
+    ds_name_list = [ds_name]
+    my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
+    my_model.train()
+
 
 # # data
 # ds_name_list = list(['D1', 'D2', 'D3', 'D4'])

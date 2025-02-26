@@ -16,6 +16,7 @@ class train_model():
         self.model_name = model_name
         self.model = model
         self.model = self.model.to(DEVICE)
+        print(f'model is on {DEVICE}')
 
         self.epochs = epochs
         self.ds_name_list = ds_name_list
@@ -154,7 +155,7 @@ class train_ds_model():
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
         # callbacks
-        self.save_prefix = 'dsCls'
+        self.save_prefix = 'EfficientB0_dsCls'
         self.early_stopping = EarlyStopping(self.save_prefix, top_k=2)
 
         self.image_logger_dir = os.path.join(os.getcwd(), 'images')

@@ -31,7 +31,6 @@ class my_dataset(Dataset):
         images, ped_labels, ds_labels = [], [], []
 
         for ds_idx, ds_name in enumerate(self.ds_name_list):
-            # print('ds_name in dataset:', ds_name)
             ds_label = self.ds_label_list[ds_idx]
             ds_dir = PATHS[self.path_key][ds_name]
             txt_path = os.path.join(ds_dir, 'dataset_txt', self.txt_name)
