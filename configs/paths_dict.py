@@ -1,7 +1,7 @@
 import os
 
 LCA = {
-    'dataset_dict': {
+    'org_dataset': {
         'D1': r'/tormenta/s/ssesaai/data/Stage4_D1_ECPDaytime_7Augs',
         'D2': r'/tormenta/s/ssesaai/data/Stage4_D2_CityPersons_7Augs',
         'D3': r'/tormenta/s/ssesaai/data/Stage4_D3_ECPNight_7Augs',
@@ -79,8 +79,8 @@ KAGGLE = {
         'D4': r'/kaggle/input/stage4-baseline-weights/vgg16bn-D4-013-0.9502.pth'
     },
 
-    'autoencoder_ckpt_dict': {
-
+    'pedCls_efficient_ckpt': {
+        'D3': r'/kaggle/working/Stage5_Alpha/ckpt/EfficientB0D3-015-0.950292.pth'
     },
 
 }
