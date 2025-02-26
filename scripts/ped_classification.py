@@ -113,9 +113,9 @@ if __name__ == '__main__':
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt['model_state_dict'])
 
-    # test_dataset = my_dataset(ds_name_list=[ds_name], txt_name=txt_name, path_key=ds_key_name)
-    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    # ped_test(model, ds_name=ds_name, test_dataset=test_dataset, test_loader=test_loader)
+    test_dataset = my_dataset(ds_name_list=[ds_name], txt_name=txt_name, path_key=ds_key_name)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    ped_test(model, ds_name=ds_name, test_dataset=test_dataset, test_loader=test_loader)
 
 
     # # AE Reconstruction dataset classification
