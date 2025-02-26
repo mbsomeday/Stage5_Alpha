@@ -46,7 +46,7 @@ class train_model():
         for batch, data in enumerate(tqdm(self.train_loader)):
             # 将image和label放到GPU中
             images = data['image']
-            labels = data['label']
+            labels = data['ped_label']
 
             images = images.to(DEVICE)
             labels = labels.to(DEVICE)
@@ -76,7 +76,7 @@ class train_model():
         with torch.no_grad():
             for data in self.val_loader:
                 images = data['image']
-                labels = data['label']
+                labels = data['ped_label']
                 images = images.to(DEVICE)
                 labels = labels.to(DEVICE)
 
