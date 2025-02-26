@@ -31,7 +31,7 @@ def get_ds_model():
     model = vgg16_bn(num_class=4)
     weight_path = PATHS['ds_cls_ckpt']
     print(f'Loading model: {weight_path}')
-    checkpoints = torch.load(weight_path, map_location=DEVICE, weights_only=True)
+    checkpoints = torch.load(weight_path, map_location=DEVICE, weights_only=True if DEVICE=='cuda' else False)
     model.load_state_dict(checkpoints['model_state_dict'])
     model.to(DEVICE)
     return model
@@ -41,14 +41,16 @@ def get_orgPed_model(ds_name):
     model = vgg16_bn(num_class=2)
     weight_path = PATHS['ped_cls_ckpt'][ds_name]
     print(f'Loading model: {weight_path}')
-    checkpoints = torch.load(weight_path, map_location=DEVICE, weights_only=True)
+    checkpoints = torch.load(weight_path, map_location=DEVICE, weights_only=True if DEVICE=='cuda' else False)
     model.load_state_dict(checkpoints['model_state_dict'])
     model.to(DEVICE)
     return model
 
 
-
-
+def load_model(model, weights_path):
+    ckpts = torch.load(weights_path, map_location='cuda' if torch.cuda.is_available() else 'cpu')
+    model.load_state_dict(ckpts['model_state_dict'])
+    return model
 
 
 
