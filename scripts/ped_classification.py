@@ -103,7 +103,8 @@ if __name__ == '__main__':
 
     # pedestrian classification
     model = vgg16_bn(num_class=2).to(DEVICE)
-    weights_path = PATHS['ped_cls_ckpt'][train_on]
+    # weights_path = PATHS['ped_cls_ckpt'][train_on]
+    weights_path = r'/kaggle/working/Stage5_Alpha/ckpt/EfficientB0D3-015-0.950292.pth'
     print(f"Reload model {weights_path}")
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt['model_state_dict'])
