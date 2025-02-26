@@ -21,10 +21,10 @@ class train_model():
         self.loss_fn = torch.nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
-        self.train_dataset = my_dataset(ds_name_list, 'augmentation_train.txt')
+        self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
         self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
 
-        self.val_dataset = my_dataset(ds_name_list, 'val.txt')
+        self.val_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
         # callbacks
