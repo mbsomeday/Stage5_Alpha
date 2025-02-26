@@ -129,6 +129,10 @@ class train_model():
             # 这里放训练epoch的callbacks
             self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
 
+            if self.early_stopping.early_stop:
+                print(f'Early Stopping!')
+                break
+
 
 
 
