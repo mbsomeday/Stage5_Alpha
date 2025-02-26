@@ -30,10 +30,18 @@ model_name = 'EfficientB0'
 # model
 model = visionModels.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
 
+print('------- Fixing  -------')
+for name, param in model.named_parameters():
+    print(f'name: {name} - {param.shape} - {param.requires_grad}')
+    if name not in ['classifier.1.weight', 'classifier.1.bias']:
+        param.requires_grad = False
+
+# 行人分类
 # ds_name_list = [ds_name]
 # my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
 # my_model.train()
 
+# 数据集分类
 my_model = train_ds_model(model_name, model, batch_size, epochs)
 my_model.train()
 
@@ -59,11 +67,7 @@ my_model.train()
     # print(name)
     # print(f'Name: {name} \n{module}')
 
-# print('------- Below is named parameters -------')
-# for name, param in model.named_parameters():
-#     print(f'name: {name} - {param.shape} - {param.requires_grad}')
-#     if name == 'classifier.1.weight' or name == 'classifier.1.bias':
-#         param.requires_grad = False
+
 #
 # print('after setting:')
 # for name, param in model.named_parameters():
