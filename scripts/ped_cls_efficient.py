@@ -21,7 +21,7 @@ def get_args():
     return args
 
 args = get_args()
-# ds_name = args.ds_name
+ds_name = args.ds_name
 batch_size = args.batch_size
 epochs = args.epochs
 
@@ -37,13 +37,13 @@ for name, param in model.named_parameters():
         param.requires_grad = False
 
 # 行人分类
-# ds_name_list = [ds_name]
-# my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
-# my_model.train()
-
-# 数据集分类
-my_model = train_ds_model(model_name, model, batch_size, epochs)
+ds_name_list = [ds_name]
+my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
 my_model.train()
+
+# # 数据集分类
+# my_model = train_ds_model(model_name, model, batch_size, epochs)
+# my_model.train()
 
 # # data
 # ds_name_list = list(['D1', 'D2', 'D3', 'D4'])
