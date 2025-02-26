@@ -40,8 +40,8 @@ class train_model():
         if self.gen_img and batch_size >= 4:
             print(f'Image will be saved after each epoch.')
             self.image_logger_dir = os.path.join(os.getcwd(), 'images')
-            if not os.path.exists(self.image_logger_dir):
-                os.mkdir(self.image_logger_dir)
+        if not os.path.exists(self.image_logger_dir):
+            os.mkdir(self.image_logger_dir)
 
     def train_one_epoch(self):
 
