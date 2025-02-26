@@ -28,6 +28,10 @@ class train_model():
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
         # callbacks
+        if save_prefix is None:
+            save_prefix = model_name
+            for ds_name in ds_name_list:
+                save_prefix += ds_name
         self.early_stopping = EarlyStopping(save_prefix, top_k=2)
         self.gen_img = gen_img
         if self.gen_img and batch_size >= 4:
