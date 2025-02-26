@@ -15,6 +15,8 @@ class train_model():
     def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False):
         self.model_name = model_name
         self.model = model
+        self.model = self.model.to(DEVICE)
+
         self.epochs = epochs
         self.ds_name_list = ds_name_list
 
@@ -138,6 +140,7 @@ class train_ds_model():
     def __init__(self, model_name, model, batch_size=4, epochs=50):
         self.model_name = model_name
         self.model = model
+        self.model = self.model.to(DEVICE)
         self.epochs = epochs
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
