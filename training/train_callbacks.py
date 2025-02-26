@@ -23,7 +23,8 @@ class EarlyStopping():
             self.model_save_dir = model_save_dir
         else:
             self.model_save_dir = os.path.join(os.getcwd(), 'ckpt')
-            if not os.path.exists(self.model_save_dir):
+
+        if not os.path.exists(self.model_save_dir):
                 os.mkdir(self.model_save_dir)
 
         self.patience = patience
