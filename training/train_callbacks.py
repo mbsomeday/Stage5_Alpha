@@ -40,6 +40,7 @@ class EarlyStopping():
 
     def __call__(self, epoch, model, val_acc, optimizer):
 
+
         # 表现没有超过best
         if val_acc < self.best_val_acc + self.delta:
             self.counter += 1

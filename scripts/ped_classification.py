@@ -4,7 +4,8 @@ curPath = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
 
-import torch, os, argparse
+import torch, argparse
+import torchvision.models as visionModels
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 import numpy as np
@@ -102,9 +103,12 @@ if __name__ == '__main__':
     txt_name = args.txt_name
 
     # pedestrian classification
-    model = vgg16_bn(num_class=2).to(DEVICE)
+    # model = vgg16_bn(num_class=2).to(DEVICE)
     # weights_path = PATHS['ped_cls_ckpt'][train_on]
     weights_path = r'/kaggle/working/Stage5_Alpha/ckpt/EfficientB0D3-015-0.950292.pth'
+    model = visionModels.efficientnet_b0(weights=None, progress=True)
+    checkpoints = torch.load(weights_path, map_location=DEVICE)
+    model.load_state_dict(checkpoints['model_state_dict'])
     print(f"Reload model {weights_path}")
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt['model_state_dict'])
