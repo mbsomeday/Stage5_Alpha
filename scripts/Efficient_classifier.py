@@ -4,7 +4,7 @@ curPath = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
 
-import argparse
+import argparse, torch
 import torchvision.models as visionModels
 
 from data.dataset import get_data
@@ -34,15 +34,21 @@ else:
     num_classes = 4
 
 # model
-model = visionModels.efficientnet_b0(weights='IMAGENET1K_V1', progress=True, num_classes=num_classes)
+model = visionModels.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
 
-print('------- Fixing  -------')
+new_classifier = torch.nn.Sequential(
+    torch.nn.Dropout(p=0.2, inplace=True),
+    torch.nn.Linear(in_features=1280, out_features=num_classes)
+)
+model.classifier = new_classifier
+print('Replacing classifier layer successfully!')
+
 for name, param in model.named_parameters():
     # print(f'name: {name} - {param.shape} - {param.requires_grad}')
     if name not in ['classifier.1.weight', 'classifier.1.bias']:
         param.requires_grad = False
 
-print('Checking model params grad fix')
+print('Model class layer params grad fixed!')
 for name, param in model.named_parameters():
     print(f'name: {name} - {param.shape} - {param.requires_grad}')
 
