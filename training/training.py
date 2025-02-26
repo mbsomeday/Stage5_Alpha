@@ -12,7 +12,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class train_model():
-    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=10, save_prefix=None, gen_img=False):
+    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False):
         self.model_name = model_name
         self.model = model
         self.epochs = epochs
