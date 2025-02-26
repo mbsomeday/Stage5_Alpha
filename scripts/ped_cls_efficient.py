@@ -33,7 +33,7 @@ model = visionModels.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
 ds_name_list = [ds_name]
 my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
 
-
+my_model.train()
 
 # # data
 # ds_name_list = list(['D1', 'D2', 'D3', 'D4'])
