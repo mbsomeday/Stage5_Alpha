@@ -21,7 +21,7 @@ def get_args():
     return args
 
 args = get_args()
-ds_name = args.ds_name
+# ds_name = args.ds_name
 batch_size = args.batch_size
 epochs = args.epochs
 
