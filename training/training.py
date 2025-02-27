@@ -81,7 +81,7 @@ class train_model():
         val_correct_num = 0
 
         with torch.no_grad():
-            for data in self.val_loader:
+            for data in tqdm(self.val_loader):
                 images = data['image']
                 labels = data['ped_label']
                 images = images.to(DEVICE)
