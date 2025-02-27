@@ -8,6 +8,8 @@ LCA = {
         'D4': r'/tormenta/s/ssesaai/data/Stage4_D4_BDD100K_7Augs'
     },
 
+
+
     'autoencoder_ckpt_dict': {
         'D1': r'/tormenta/s/ssesaai/data/weights/Stage5_LDM/autoencoder/D1_epo26_00894.ckpt',
         'D2': r'/tormenta/s/ssesaai/data/weights/Stage5_LDM/autoencoder/D2_epo59_01239.ckpt',
@@ -31,6 +33,15 @@ LOCAL = {
         'D4': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D4-013-0.9502.pth',
     },
 
+    'EfficientNet_ped_cls': {
+        'D1': r'D:\my_phd\Model_Weights\Stage5\EfficientNet_Cls\EfficientB0D1-003-0.982471.pth',
+        'D2': r'D:\my_phd\Model_Weights\Stage5\EfficientNet_Cls\EfficientB0D2-011-0.975242.pth',
+        'D3': r'D:\my_phd\Model_Weights\Stage5\EfficientNet_Cls\EfficientB0D3-018-0.941520.pth',
+        'D4': r'D:\my_phd\Model_Weights\Stage5\EfficientNet_Cls\EfficientB0D4-023-0.963394.pth',
+    },
+
+    'EfficientNet_ds_cls': r'D:\my_phd\Model_Weights\Stage5\EfficientNet_Cls\EfficientB0_dsCls-015-0.880432.pth',
+    
     'ds_cls_ckpt': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-dsCls-029-0.9777.pth',
 
     'autoencoder_ckpt_dict': {
