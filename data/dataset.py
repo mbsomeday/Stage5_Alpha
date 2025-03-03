@@ -84,6 +84,41 @@ def get_data(ds_name_list, path_key, txt_name, batch_size, shuffle=True):
 
 
 
+class dataset_from_list(Dataset):
+    '''
+        从txt中读取image path，用于计算cam，不需要返回label
+    '''
+    def __init__(self, txt_path):
+        self.txt_path = txt_path
+        print(f'Data loaded from {txt_path}')
+        self.img_transforms = transforms.Compose([
+            transforms.ToTensor()
+        ])
+
+        self.images = self.init_Images()
+
+    def init_Images(self):
+        images = []
+        with open(self.txt_path, 'r') as f:
+            data = f.readlines()
+
+        for item in data:
+            image_path = item.strip()
+            images.append(image_path)
+
+        return images
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        image_path = self.images[idx]
+        image = Image.open(image_path)
+        image = self.img_transforms(image)
+        return image
+
+
+
+
 if __name__ == '__main__':
     ds_name_list = list(['D3', 'D4'])
     path_key = 'org_dataset'
