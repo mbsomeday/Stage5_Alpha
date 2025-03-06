@@ -81,6 +81,15 @@ KAGGLE = {
         'D4': r'/kaggle/input/stage5-dataset-ae4recons/AE4D4_test',
     },
 
+    'EfficientNet_ped_cls': {
+        'D1': r'/kaggle/input/stage5-weights-effb0baseline/EfficientB0D1-003-0.982471.pth',
+        'D2': r'/kaggle/input/stage5-weights-effb0baseline/EfficientB0D2-011-0.975242.pth',
+        'D3': r'/kaggle/input/stage5-weights-effb0baseline/EfficientB0D3-018-0.941520.pth',
+        'D4': r'/kaggle/input/stage5-weights-effb0baseline/EfficientB0D4-023-0.963394.pth'
+    },
+
+    'EfficientNet_ds_cls': r'/kaggle/input/stage5-weights-effb0baseline/EfficientB0_dsCls-015-0.880432.pth',
+
     'ds_cls_ckpt': r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth',
 
     'ped_cls_ckpt': {
