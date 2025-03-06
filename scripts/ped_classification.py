@@ -105,10 +105,11 @@ if __name__ == '__main__':
     # pedestrian classification
     # model = vgg16_bn(num_class=2).to(DEVICE)
     weights_path = PATHS['EfficientNet_ped_cls'][train_on]
+    print('weights_path:', weights_path)
 
     model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=4)
-    checkpoints = torch.load(weights_path, map_location=DEVICE)
-    model.load_state_dict(checkpoints['model_state_dict'])
+    # checkpoints = torch.load(weights_path, map_location=DEVICE)
+    # model.load_state_dict(checkpoints['model_state_dict'])
     print(f"Reload model {weights_path}")
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt['model_state_dict'])
