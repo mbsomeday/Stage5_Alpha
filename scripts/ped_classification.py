@@ -104,8 +104,8 @@ if __name__ == '__main__':
 
     # pedestrian classification
     # model = vgg16_bn(num_class=2).to(DEVICE)
-    # weights_path = PATHS['ped_cls_ckpt'][train_on]
-    weights_path = r'/kaggle/working/Stage5_Alpha/ckpt/EfficientB0D3-015-0.950292.pth'
+    weights_path = PATHS['EfficientNet_ped_cls'][train_on]
+
     model = visionModels.efficientnet_b0(weights=None, progress=True)
     checkpoints = torch.load(weights_path, map_location=DEVICE)
     model.load_state_dict(checkpoints['model_state_dict'])
