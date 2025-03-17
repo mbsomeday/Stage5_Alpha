@@ -13,7 +13,7 @@ from training.training import train_model, train_ds_model
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on')
+    parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
     parser.add_argument('--task', type=str, choices=('ped_cls', 'ds_cls'), help='used to define the num_classes of model')
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', default=50, type=int)
