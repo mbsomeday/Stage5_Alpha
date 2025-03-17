@@ -165,6 +165,7 @@ class train_ds_model():
 
         # 如果中断后重新训练
         if reload is not None:
+            print(f'Reloading weights from {reload}')
             ckpt = torch.load(reload, map_location=DEVICE, weights_only=False)
             model.state_dict(ckpt['model_state_dict'])
             self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
