@@ -167,13 +167,12 @@ class train_ds_model():
         if reload is not None:
             print(f'Reloading weights from {reload}')
             ckpt = torch.load(reload, map_location=DEVICE, weights_only=False)
-            model.state_dict(ckpt['model_state_dict'])
+            model.load_state_dict(ckpt['model_state_dict'])
             self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
             self.start_epoch = ckpt['epoch']
             self.early_stopping.best_val_acc = ckpt['best_val_acc']
 
     def train_one_epoch(self):
-
         self.model.train()
 
         training_loss = 0.0
