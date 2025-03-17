@@ -82,7 +82,7 @@ class EarlyStopping():
 
         self.del_redundant_weights()
         save_name = f"{self.save_prefix}-{epoch:03d}-{val_acc:.6f}.pth"
-
+        self.best_val_acc = val_acc
         checkpoint = {
             'epoch': epoch,
             'model_state_dict': model.state_dict(),
@@ -94,7 +94,6 @@ class EarlyStopping():
 
         # 存储权重
         torch.save(checkpoint, save_path)
-        self.best_val_acc = val_acc
 
 
 
