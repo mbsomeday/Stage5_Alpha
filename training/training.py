@@ -137,7 +137,7 @@ class train_model():
 
 
 class train_ds_model():
-    def __init__(self, model_name, model, batch_size=4, epochs=50, reload=False):
+    def __init__(self, model_name, model, batch_size=4, epochs=50, reload=None):
         self.model_name = model_name
         self.model = model
         self.model = self.model.to(DEVICE)
@@ -163,12 +163,13 @@ class train_ds_model():
         if not os.path.exists(self.image_logger_dir):
             os.mkdir(self.image_logger_dir)
 
-        # 如果是reload
-        ckpt = torch.load(reload, map_location='cuda', weights_only=False)
-        model.state_dict(ckpt['model_state_dict'])
-        self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
-        self.start_epoch = ckpt['epoch']
-        self.early_stopping.best_val_acc = ckpt['best_val_acc']
+        # 如果中断后重新训练
+        if reload is not None:
+            ckpt = torch.load(reload, map_location=DEVICE, weights_only=False)
+            model.state_dict(ckpt['model_state_dict'])
+            self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+            self.start_epoch = ckpt['epoch']
+            self.early_stopping.best_val_acc = ckpt['best_val_acc']
 
     def train_one_epoch(self):
 

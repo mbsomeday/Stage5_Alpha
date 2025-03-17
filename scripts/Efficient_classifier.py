@@ -17,10 +17,11 @@ def get_args():
     parser.add_argument('--task', type=str, choices=('ped_cls', 'ds_cls'), help='used to define the num_classes of model')
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', default=50, type=int)
-    parser.add_argument('--reload', type=str)
+    parser.add_argument('--reload', default=None, type=str)
 
     args = parser.parse_args()
     return args
+
 
 args = get_args()
 batch_size = args.batch_size
@@ -36,7 +37,7 @@ if task == 'ped_cls':
 else:
     num_classes = 4
 
-# model
+# 获取model，并替换最后的classifier层，目的是不同的任务有不同的num_classes
 model = visionModels.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
 
 new_classifier = torch.nn.Sequential(
@@ -45,11 +46,7 @@ new_classifier = torch.nn.Sequential(
 )
 model.classifier = new_classifier
 
-
-
 print('Replacing classifier layer successfully!')
-
-
 
 # # 若固定weights，则使用下面的代码，否则，注释掉
 # for name, param in model.named_parameters():
@@ -64,8 +61,6 @@ print('Replacing classifier layer successfully!')
 if task == 'ds_cls':
     # 数据集分类
     my_model = train_ds_model(model_name, model, batch_size, epochs, reload=reload)
-
-
     my_model.train()
 
 else:
