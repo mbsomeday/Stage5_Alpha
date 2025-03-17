@@ -17,6 +17,7 @@ def get_args():
     parser.add_argument('--task', type=str, choices=('ped_cls', 'ds_cls'), help='used to define the num_classes of model')
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', default=50, type=int)
+    parser.add_argument('--reload', type=str)
 
     args = parser.parse_args()
     return args
@@ -25,6 +26,7 @@ args = get_args()
 batch_size = args.batch_size
 epochs = args.epochs
 task = args.task
+reload = args.reload
 
 ds_name = args.ds_name if task == 'ped_cls' else None
 
@@ -42,7 +44,12 @@ new_classifier = torch.nn.Sequential(
     torch.nn.Linear(in_features=1280, out_features=num_classes)
 )
 model.classifier = new_classifier
+
+
+
 print('Replacing classifier layer successfully!')
+
+
 
 # # 若固定weights，则使用下面的代码，否则，注释掉
 # for name, param in model.named_parameters():
@@ -56,7 +63,7 @@ print('Replacing classifier layer successfully!')
 
 if task == 'ds_cls':
     # 数据集分类
-    my_model = train_ds_model(model_name, model, batch_size, epochs)
+    my_model = train_ds_model(model_name, model, batch_size, epochs, reload=reload)
     my_model.train()
 
 else:

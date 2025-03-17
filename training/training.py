@@ -1,5 +1,4 @@
 import os.path
-
 import torch, torchvision
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -138,7 +137,7 @@ class train_model():
 
 
 class train_ds_model():
-    def __init__(self, model_name, model, batch_size=4, epochs=50):
+    def __init__(self, model_name, model, batch_size=4, epochs=50, reload=False):
         self.model_name = model_name
         self.model = model
         self.model = self.model.to(DEVICE)
@@ -154,6 +153,8 @@ class train_ds_model():
         self.val_dataset = my_dataset(self.ds_name_list, path_key='org_dataset', txt_name='val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
+        self.start_epoch = 0
+
         # callbacks
         self.save_prefix = 'EfficientB0_dsCls'
         self.early_stopping = EarlyStopping(self.save_prefix, top_k=2)
@@ -161,6 +162,13 @@ class train_ds_model():
         self.image_logger_dir = os.path.join(os.getcwd(), 'images')
         if not os.path.exists(self.image_logger_dir):
             os.mkdir(self.image_logger_dir)
+
+        # 如果是reload
+        ckpt = torch.load(reload, map_location='cuda', weights_only=False)
+        model.state_dict(ckpt['model_state_dict'])
+        self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+        self.start_epoch = ckpt['epoch']
+        self.early_stopping.best_val_acc = ckpt['best_val_acc']
 
     def train_one_epoch(self):
 
@@ -235,7 +243,7 @@ class train_ds_model():
         print('-' * 20 + 'Validation Info' + '-' * 20)
         print('Total Val Samples:', len(self.val_dataset))
 
-        for epoch in range(self.epochs):
+        for epoch in range(self.start_epoch, self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             self.train_one_epoch()
             val_loss, val_accuracy = self.val_on_epoch_end(epoch)
