@@ -43,14 +43,14 @@ new_classifier = torch.nn.Sequential(
 model.classifier = new_classifier
 print('Replacing classifier layer successfully!')
 
-for name, param in model.named_parameters():
-    # print(f'name: {name} - {param.shape} - {param.requires_grad}')
-    if name not in ['classifier.1.weight', 'classifier.1.bias']:
-        param.requires_grad = False
-
-print('Model class layer params grad fixed!')
-for name, param in model.named_parameters():
-    print(f'name: {name} - {param.shape} - {param.requires_grad}')
+# # 若固定weights，则使用下面的代码，否则，注释掉
+# for name, param in model.named_parameters():
+#     # print(f'name: {name} - {param.shape} - {param.requires_grad}')
+#     if name not in ['classifier.1.weight', 'classifier.1.bias']:
+#         param.requires_grad = False
+# print('Model class layer params grad fixed!')
+# for name, param in model.named_parameters():
+#     print(f'name: {name} - {param.shape} - {param.requires_grad}')
 
 
 if task == 'ds_cls':
