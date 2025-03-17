@@ -13,7 +13,7 @@ from training.training import train_model, train_ds_model
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ds_name', type=str, help='datasets that model is trained on')
+    parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on')
     parser.add_argument('--task', type=str, choices=('ped_cls', 'ds_cls'), help='used to define the num_classes of model')
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', default=50, type=int)
@@ -22,10 +22,11 @@ def get_args():
     return args
 
 args = get_args()
-ds_name = args.ds_name
 batch_size = args.batch_size
 epochs = args.epochs
 task = args.task
+
+ds_name = args.ds_name if task == 'ped_cls' else None
 
 model_name = 'EfficientB0'
 if task == 'ped_cls':
