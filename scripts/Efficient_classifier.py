@@ -64,13 +64,17 @@ print('Replacing classifier layer successfully!')
 if task == 'ds_cls':
     # 数据集分类
     my_model = train_ds_model(model_name, model, batch_size, epochs, reload=reload)
+
+
     my_model.train()
 
 else:
     # 行人分类
     ds_name_list = [ds_name]
     my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
-    my_model.train()
+    # my_model.train()
+    # 用于检测恢复的模型
+    my_model.val_on_epoch_end(21)
 
 
 # # data
