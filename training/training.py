@@ -308,7 +308,7 @@ class TemporaryGrad(object):
 
 
 class train_pedmodel_camLoss():
-    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False):
+    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False, reload=None):
         torch.manual_seed(13)
         self.model_name = model_name
         self.model = model
@@ -359,6 +359,15 @@ class train_pedmodel_camLoss():
             self.image_logger_dir = os.path.join(os.getcwd(), 'images')
             if not os.path.exists(self.image_logger_dir):
                 os.mkdir(self.image_logger_dir)
+
+        # 如果中断后重新训练
+        if reload is not None:
+            print(f'Reloading weights from {reload}')
+            ckpt = torch.load(reload, map_location=DEVICE, weights_only=False)
+            model.load_state_dict(ckpt['model_state_dict'])
+            self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+            self.start_epoch = ckpt['epoch']
+            self.early_stopping.best_val_acc = ckpt['best_val_acc']
 
     def _register_hooks(self, model, grad_layer):
         '''
