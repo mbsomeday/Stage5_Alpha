@@ -381,7 +381,7 @@ class train_pedmodel_camLoss():
         model.zero_grad()
         grad_yc = logits[0, pred]
         grad_yc.backward()
-        print(f'反向传播之后：{self.backward_features.shape}')
+        # print(f'反向传播之后：{self.backward_features.shape}')
         model.zero_grad()
 
         w = F.adaptive_avg_pool2d(self.backward_features, 1)  # shape: (batch_size, 1280, 1, 1)
@@ -398,7 +398,7 @@ class train_pedmodel_camLoss():
         # 获取mask
         Ac_min = Ac.min()
         Ac_max = Ac.max()
-        print(f'Attention map diff: {Ac_max - Ac_min}')
+        # print(f'Attention map diff: {Ac_max - Ac_min}')
         # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
         # mask = torch.sigmoid(self.omega * (scaled_ac - self.sigma))
         # masked_image = images - images * mask
