@@ -6,7 +6,7 @@ import numpy as np
 
 from data.dataset import my_dataset
 from training.train_callbacks import EarlyStopping
-from grad_loss import GradCAM
+from training.grad_loss import GradCAM
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
