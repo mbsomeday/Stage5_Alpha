@@ -294,6 +294,15 @@ class train_ds_model():
                 break
 
 
+class TemporaryGrad(object):
+    def __enter__(self):
+        self.prev = torch.is_grad_enabled()
+        torch.set_grad_enabled(True)
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        torch.set_grad_enabled(self.prev)
+
+
 
 class train_pedmodel_camLoss():
     def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False):
@@ -376,37 +385,38 @@ class train_pedmodel_camLoss():
         '''
             输入的image为4D
         '''
-        logits = model(image)
-        pred = torch.argmax(logits, dim=1)
-        model.zero_grad()
-        grad_yc = logits[0, pred]
-        grad_yc.backward()
-        # print(f'反向传播之后：{self.backward_features.shape}')
-        model.zero_grad()
+        with TemporaryGrad():
+            logits = model(image)
+            pred = torch.argmax(logits, dim=1)
+            model.zero_grad()
+            grad_yc = logits[0, pred]
+            grad_yc.backward()
+            # print(f'反向传播之后：{self.backward_features.shape}')
+            model.zero_grad()
 
-        w = F.adaptive_avg_pool2d(self.backward_features, 1)  # shape: (batch_size, 1280, 1, 1)
-        # print(f'w: {w.shape}')
-        temp_w = w[0].unsqueeze(0)
-        temp_fl = self.feed_forward_features[0].unsqueeze(0)
-        ac = F.conv2d(temp_fl, temp_w)
-        ac = F.relu(ac)
+            w = F.adaptive_avg_pool2d(self.backward_features, 1)  # shape: (batch_size, 1280, 1, 1)
+            # print(f'w: {w.shape}')
+            temp_w = w[0].unsqueeze(0)
+            temp_fl = self.feed_forward_features[0].unsqueeze(0)
+            ac = F.conv2d(temp_fl, temp_w)
+            ac = F.relu(ac)
 
-        Ac = F.interpolate(ac, (224, 224))
+            Ac = F.interpolate(ac, (224, 224))
 
-        heatmap = Ac
+            heatmap = Ac
 
-        # 获取mask
-        Ac_min = Ac.min()
-        Ac_max = Ac.max()
-        # print(f'Attention map diff: {Ac_max - Ac_min}')
-        # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
-        # mask = torch.sigmoid(self.omega * (scaled_ac - self.sigma))
-        # masked_image = images - images * mask
+            # 获取mask
+            Ac_min = Ac.min()
+            Ac_max = Ac.max()
+            # print(f'Attention map diff: {Ac_max - Ac_min}')
+            # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
+            # mask = torch.sigmoid(self.omega * (scaled_ac - self.sigma))
+            # masked_image = images - images * mask
 
-        mask = heatmap.detach().clone()
-        mask.requires_grad = False
-        mask[mask < Ac_max] = 0
-        masked_image = image - image * mask
+            mask = heatmap.detach().clone()
+            mask.requires_grad = False
+            mask[mask < Ac_max] = 0
+            masked_image = image - image * mask
 
         return heatmap, mask, masked_image
 
@@ -503,41 +513,41 @@ class train_pedmodel_camLoss():
         val_loss = 0.0
         val_correct_num = 0
 
-        # with torch.no_grad():
-        for data in tqdm(self.val_loader):
-            images = data['image']
-            labels = data['ped_label']
-            images = images.to(DEVICE)
-            labels = labels.to(DEVICE)
+        with torch.no_grad():
+            for data in tqdm(self.val_loader):
+                images = data['image']
+                labels = data['ped_label']
+                images = images.to(DEVICE)
+                labels = labels.to(DEVICE)
 
-            out = self.model(images)
+                out = self.model(images)
 
-            # ------------  新增加代码 val，目的是融入 cam loss ------------
-            # 在val中也加入cam loss
-            masked_images = np.zeros(shape=images.shape)
-            # heatmap_list = []
-            for img_idx, image in enumerate(images):
-                image = torch.unsqueeze(image, dim=0)
-                heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
-                masked_images[img_idx] = masked_image.cpu().detach()
-                # heatmap_list.append(heatmap)
+                # ------------  新增加代码 val，目的是融入 cam loss ------------
+                # 在val中也加入cam loss
+                masked_images = np.zeros(shape=images.shape)
+                # heatmap_list = []
+                for img_idx, image in enumerate(images):
+                    image = torch.unsqueeze(image, dim=0)
+                    heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
+                    masked_images[img_idx] = masked_image.cpu().detach()
+                    # heatmap_list.append(heatmap)
 
-            masked_images = torch.tensor(masked_images)
-            masked_images = masked_images.to(DEVICE)
-            masked_images = masked_images.type(torch.float32)
-            masked_out = self.model(masked_images)
+                masked_images = torch.tensor(masked_images)
+                masked_images = masked_images.to(DEVICE)
+                masked_images = masked_images.type(torch.float32)
+                masked_out = self.model(masked_images)
 
-            masked_loss = self.loss_fn(masked_out, labels)
+                masked_loss = self.loss_fn(masked_out, labels)
 
-            # ------------  新代码结束 ------------
+                # ------------  新代码结束 ------------
 
-            loss_cls = self.loss_fn(out, labels)
+                loss_cls = self.loss_fn(out, labels)
 
-            loss = loss_cls + masked_loss
+                loss = loss_cls + masked_loss
 
-            _, pred = torch.max(out, 1)
-            val_correct_num += (pred == labels).sum()
-            val_loss += loss.item()
+                _, pred = torch.max(out, 1)
+                val_correct_num += (pred == labels).sum()
+                val_loss += loss.item()
 
             if self.gen_img:
                 grid_images = torch.cat(list(images[:4]), dim=2)
