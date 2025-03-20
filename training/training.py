@@ -438,9 +438,6 @@ class train_pedmodel_camLoss():
             loss = self.loss_cls(out, labels)
 
             # ------------ todo 新增加代码，目的是融入 cam loss ------------
-            # 打印必要信息
-            print(f"img_path: {data['img_path']}")
-            print(f"labels: {labels}")
 
             # 生成masked image
             masked_images = np.zeros(shape=images.shape)
@@ -448,7 +445,7 @@ class train_pedmodel_camLoss():
             for img_idx, image in enumerate(images):
                 image = torch.unsqueeze(image, dim=0)
                 heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
-                masked_images[img_idx] = masked_image
+                masked_images[img_idx] = masked_image.detatch.cpu()
                 # heatmap_list.append(heatmap)
 
             # masked_images = torch.tensor(masked_images)
