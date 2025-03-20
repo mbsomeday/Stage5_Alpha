@@ -435,7 +435,7 @@ class train_pedmodel_camLoss():
 
             out = self.model(images)
 
-            loss = self.loss_fn(out, labels)
+            loss_cls = self.loss_fn(out, labels)
 
             # ------------ todo 新增加代码，目的是融入 cam loss ------------
 
@@ -474,10 +474,10 @@ class train_pedmodel_camLoss():
 
             masked_loss = self.loss_fn(masked_out, labels)
 
-            total_loss = loss + masked_loss
+            loss = loss_cls + masked_loss
             # print(f'loss: {loss}, masked_loss: {masked_loss}')
 
-            training_loss += total_loss.item()
+            training_loss += loss.item()
 
             # 将masked image输入ped model计算loss
 
