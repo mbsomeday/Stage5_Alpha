@@ -10,6 +10,7 @@ import torchvision.models as visionModels
 from data.dataset import get_data
 from training.training import train_model, train_ds_model, train_pedmodel_camLoss
 
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -45,6 +46,11 @@ new_classifier = torch.nn.Sequential(
     torch.nn.Linear(in_features=1280, out_features=num_classes)
 )
 model.classifier = new_classifier
+
+if reload:
+    print(f'Reloading weights from {reload}')
+    ckpt = torch.load(reload, map_location=DEVICE, weights_only=False)
+    model.load_state_dict(ckpt['model_state_dict'])
 
 print('Replacing classifier layer successfully!')
 
