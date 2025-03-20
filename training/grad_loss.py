@@ -108,7 +108,7 @@ class GradCAM(nn.Module):
         model.zero_grad()
 
         grad_yc = logits[0, pred]
-        print(f'grad_yc: {grad_yc}')
+        # print(f'grad_yc: {grad_yc}')
         grad_yc.backward()
         model.zero_grad()
         # print(f'backward之后： {self.backward_features.shape}')
@@ -127,7 +127,7 @@ class GradCAM(nn.Module):
         # 获取mask
         Ac_min = Ac.min()
         Ac_max = Ac.max()
-        print(f'Attention map diff: {Ac_max - Ac_min}')
+        # print(f'Attention map diff: {Ac_max - Ac_min}')
         # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
         # mask = torch.sigmoid(self.omega * (scaled_ac - self.sigma))
         # masked_image = images - images * mask
@@ -145,12 +145,12 @@ class GradCAM(nn.Module):
         # 计算ds_model
         out = self.ds_model(x)
         pred = torch.argmax(out, dim=1)
-        print(f'ds pred: {pred} - {out} - {torch.softmax(out, dim=1)}')
+        # print(f'ds pred: {pred} - {out} - {torch.softmax(out, dim=1)}')
 
         ds_cam, ds_mask, ds_masked_image = self.calc_cam(self.ds_model, x)
 
         out = model(ds_masked_image)
-        print(f'ds pred after mask: {pred} - {out} - {torch.softmax(out, dim=1)}')
+        # print(f'ds pred after mask: {pred} - {out} - {torch.softmax(out, dim=1)}')
 
         loss = self.loss_fn(out, labels)
         return loss
