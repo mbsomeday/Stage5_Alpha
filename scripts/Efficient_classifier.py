@@ -8,7 +8,7 @@ import argparse, torch
 import torchvision.models as visionModels
 
 from data.dataset import get_data
-from training.training import train_model, train_ds_model
+from training.training import train_model, train_ds_model, train_pedmodel_camLoss
 
 
 def get_args():
@@ -67,7 +67,8 @@ if task == 'ds_cls':
 else:
     # 行人分类
     ds_name_list = [ds_name]
-    my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
+    # my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
+    my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
     my_model.train()
 
 
