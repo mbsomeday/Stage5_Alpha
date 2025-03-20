@@ -64,7 +64,7 @@ class train_model():
 
             out = self.model(images)
             print('测试代码')
-            out.backward()
+            out[0][0].backward()
             print('flag')
             print('测试结束')
 
