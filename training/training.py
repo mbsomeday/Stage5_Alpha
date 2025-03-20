@@ -307,7 +307,7 @@ class train_pedmodel_camLoss():
         self.ds_name_list = ds_name_list
 
         # 此处修改loss
-        self.loss_cls = torch.nn.CrossEntropyLoss()
+        self.loss_fn = torch.nn.CrossEntropyLoss()
 
         self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
@@ -435,7 +435,7 @@ class train_pedmodel_camLoss():
 
             out = self.model(images)
 
-            loss = self.loss_cls(out, labels)
+            loss = self.loss_fn(out, labels)
 
             # ------------ todo 新增加代码，目的是融入 cam loss ------------
 
@@ -472,7 +472,7 @@ class train_pedmodel_camLoss():
             masked_images = masked_images.type(torch.float32)
             masked_out = self.model(masked_images)
 
-            masked_loss = self.loss_cls(masked_out, labels)
+            masked_loss = self.loss_fn(masked_out, labels)
 
             total_loss = loss + masked_loss
             # print(f'loss: {loss}, masked_loss: {masked_loss}')
