@@ -23,12 +23,11 @@ def load_weights(model, weights):
     return model
 
 def get_models():
-    ds_weights = r'D:\chrom_download\EfficientB0_dsCls-028-0.991572.pth'
-
+    print(f'DEVICE:{DEVICE}')
     if DEVICE == 'cuda':
-        ped_weights = r'/kaggle/input/temp-effb0ds/EfficientB0_dsCls-028-0.991572.pth'
+        ds_weights = r'/kaggle/input/temp-effb0ds/EfficientB0_dsCls-028-0.991572.pth'
     else:
-        ped_weights = r'D:\chrom_download\EfficientB0_dsCls-028-0.991572.pth'
+        ds_weights = r'D:\chrom_download\EfficientB0_dsCls-028-0.991572.pth'
 
     # ped_model = models.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
     # new_classifier = torch.nn.Sequential(
