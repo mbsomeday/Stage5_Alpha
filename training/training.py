@@ -6,6 +6,7 @@ import numpy as np
 
 from data.dataset import my_dataset
 from training.train_callbacks import EarlyStopping
+from grad_loss import GradCAM
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -20,7 +21,11 @@ class train_model():
         self.epochs = epochs
         self.ds_name_list = ds_name_list
 
+        # 此处修改loss
+        # self.loss_fn = torch.nn.CrossEntropyLoss()
         self.loss_fn = torch.nn.CrossEntropyLoss()
+        self.loss_grad = GradCAM(grad_layer='features')
+
         self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
         self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
@@ -58,7 +63,7 @@ class train_model():
             labels = labels.to(DEVICE)
 
             out = self.model(images)
-            loss = self.loss_fn(out, labels)
+            loss = self.loss_fn(out, labels) + self.loss_grad(self.model, images, labels)
             training_loss += loss.item()
 
             self.optimizer.zero_grad()
