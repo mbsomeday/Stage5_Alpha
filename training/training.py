@@ -467,6 +467,7 @@ class train_pedmodel_camLoss():
             #     # plt.title(name_list[i - 1])
             #     plt.imshow(img_list[i - 1])
             # plt.show()
+            masked_images = masked_images.to(DEVICE)
             masked_images = torch.tensor(masked_images)
             masked_images = masked_images.type(torch.float32)
             masked_out = self.model(masked_images)
