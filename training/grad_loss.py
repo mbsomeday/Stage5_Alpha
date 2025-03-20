@@ -147,12 +147,23 @@ class GradCAM(nn.Module):
         pred = torch.argmax(out, dim=1)
         # print(f'ds pred: {pred} - {out} - {torch.softmax(out, dim=1)}')
 
-        ds_cam, ds_mask, ds_masked_image = self.calc_cam(self.ds_model, x)
+        masked_images = np.ones(shape=x.shape)
+        for img_idx, image in enumerate(x):
+            image = torch.unsqueeze(image, dim=0)
+            print(f'image: {image.shape}')
+            # heatmap, mask, masked_image = self.attloss(image)
+            temp = self.ds_grad_loss(image)
+            print('flag after mask computing')
+            # masked_images[img_idx] = masked_image
+            masked_images[img_idx] = temp
 
-        out = model(ds_masked_image)
-        # print(f'ds pred after mask: {pred} - {out} - {torch.softmax(out, dim=1)}')
+        masked_images = torch.tensor(masked_images)
 
+        out = model(masked_images)
         loss = self.loss_fn(out, labels)
+
+        # ds_cam, ds_mask, ds_masked_image = self.calc_cam(self.ds_model, x)
+
         return loss
 
 
