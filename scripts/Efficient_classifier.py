@@ -47,11 +47,6 @@ new_classifier = torch.nn.Sequential(
 )
 model.classifier = new_classifier
 
-if reload:
-    print(f'Reloading weights from {reload}')
-    ckpt = torch.load(reload, map_location=DEVICE, weights_only=False)
-    model.load_state_dict(ckpt['model_state_dict'])
-
 print('Replacing classifier layer successfully!')
 
 # # 若固定weights，则使用下面的代码，否则，注释掉
@@ -74,7 +69,7 @@ else:
     # 行人分类
     ds_name_list = [ds_name]
     # my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
-    my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
+    my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False, reload=reload)
     my_model.train()
 
 
