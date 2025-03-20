@@ -52,7 +52,7 @@ class GradCAM(nn.Module):
     def __init__(self, grad_layer):
         super(GradCAM, self).__init__()
         self.ds_model = get_models()
-        self.ds_model.eval()
+        # self.ds_model.eval()
         self.ds_model.to(DEVICE)
 
         self.grad_layer = grad_layer
@@ -127,10 +127,6 @@ class GradCAM(nn.Module):
         # 获取mask
         Ac_min = Ac.min()
         Ac_max = Ac.max()
-        # print(f'Attention map diff: {Ac_max - Ac_min}')
-        # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
-        # mask = torch.sigmoid(self.omega * (scaled_ac - self.sigma))
-        # masked_image = images - images * mask
 
         mask = heatmap.detach().clone()
         mask.requires_grad = False
