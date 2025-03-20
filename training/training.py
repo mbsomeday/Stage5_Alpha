@@ -503,41 +503,41 @@ class train_pedmodel_camLoss():
         val_loss = 0.0
         val_correct_num = 0
 
-        with torch.no_grad():
-            for data in tqdm(self.val_loader):
-                images = data['image']
-                labels = data['ped_label']
-                images = images.to(DEVICE)
-                labels = labels.to(DEVICE)
+        # with torch.no_grad():
+        for data in tqdm(self.val_loader):
+            images = data['image']
+            labels = data['ped_label']
+            images = images.to(DEVICE)
+            labels = labels.to(DEVICE)
 
-                out = self.model(images)
+            out = self.model(images)
 
-                # ------------  新增加代码 val，目的是融入 cam loss ------------
-                # 在val中也加入cam loss
-                masked_images = np.zeros(shape=images.shape)
-                # heatmap_list = []
-                for img_idx, image in enumerate(images):
-                    image = torch.unsqueeze(image, dim=0)
-                    heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
-                    masked_images[img_idx] = masked_image.cpu().detach()
-                    # heatmap_list.append(heatmap)
+            # ------------  新增加代码 val，目的是融入 cam loss ------------
+            # 在val中也加入cam loss
+            masked_images = np.zeros(shape=images.shape)
+            # heatmap_list = []
+            for img_idx, image in enumerate(images):
+                image = torch.unsqueeze(image, dim=0)
+                heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
+                masked_images[img_idx] = masked_image.cpu().detach()
+                # heatmap_list.append(heatmap)
 
-                masked_images = torch.tensor(masked_images)
-                masked_images = masked_images.to(DEVICE)
-                masked_images = masked_images.type(torch.float32)
-                masked_out = self.model(masked_images)
+            masked_images = torch.tensor(masked_images)
+            masked_images = masked_images.to(DEVICE)
+            masked_images = masked_images.type(torch.float32)
+            masked_out = self.model(masked_images)
 
-                masked_loss = self.loss_fn(masked_out, labels)
+            masked_loss = self.loss_fn(masked_out, labels)
 
-                # ------------  新代码结束 ------------
+            # ------------  新代码结束 ------------
 
-                loss_cls = self.loss_fn(out, labels)
+            loss_cls = self.loss_fn(out, labels)
 
-                loss = loss_cls + masked_loss
+            loss = loss_cls + masked_loss
 
-                _, pred = torch.max(out, 1)
-                val_correct_num += (pred == labels).sum()
-                val_loss += loss.item()
+            _, pred = torch.max(out, 1)
+            val_correct_num += (pred == labels).sum()
+            val_loss += loss.item()
 
             if self.gen_img:
                 grid_images = torch.cat(list(images[:4]), dim=2)
@@ -571,7 +571,7 @@ class train_pedmodel_camLoss():
 
         for epoch in range(self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
-            self.train_one_epoch()
+            # self.train_one_epoch()
             val_loss, val_accuracy = self.val_on_epoch_end(epoch)
 
             # 这里放训练epoch的callbacks
