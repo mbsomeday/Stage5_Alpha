@@ -445,7 +445,7 @@ class train_pedmodel_camLoss():
             for img_idx, image in enumerate(images):
                 image = torch.unsqueeze(image, dim=0)
                 heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
-                masked_images[img_idx] = masked_image.detatch.cpu()
+                masked_images[img_idx] = masked_image.cpu().detach()
                 # heatmap_list.append(heatmap)
 
             # masked_images = torch.tensor(masked_images)
