@@ -295,6 +295,9 @@ class train_ds_model():
 
 
 class TemporaryGrad(object):
+    '''
+    https://blog.csdn.net/qq_44980390/article/details/123672147
+    '''
     def __enter__(self):
         self.prev = torch.is_grad_enabled()
         torch.set_grad_enabled(True)
@@ -581,7 +584,7 @@ class train_pedmodel_camLoss():
 
         for epoch in range(self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
-            # self.train_one_epoch()
+            self.train_one_epoch()
             val_loss, val_accuracy = self.val_on_epoch_end(epoch)
 
             # 这里放训练epoch的callbacks
