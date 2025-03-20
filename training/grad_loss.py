@@ -152,10 +152,10 @@ class GradCAM(nn.Module):
             image = torch.unsqueeze(image, dim=0)
             print(f'image: {image.shape}')
             # heatmap, mask, masked_image = self.attloss(image)
-            temp = self.ds_grad_loss(image)
+            heatmap, mask, masked_image = self.calc_cam(model, image)
             print('flag after mask computing')
             # masked_images[img_idx] = masked_image
-            masked_images[img_idx] = temp
+            masked_images[img_idx] = masked_image
 
         masked_images = torch.tensor(masked_images)
 
