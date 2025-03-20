@@ -359,7 +359,7 @@ class train_pedmodel_camLoss():
             self.image_logger_dir = os.path.join(os.getcwd(), 'images')
             if not os.path.exists(self.image_logger_dir):
                 os.mkdir(self.image_logger_dir)
-
+        self.start_epoch = 0
         # 如果中断后重新训练
         if reload is not None:
             print(f'Reloading weights from {reload}')
@@ -591,7 +591,7 @@ class train_pedmodel_camLoss():
         print('-' * 20 + 'Validation Info' + '-' * 20)
         print('Total Val Samples:', len(self.val_dataset))
 
-        for epoch in range(self.epochs):
+        for epoch in range(self.start_epoch, self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             self.train_one_epoch()
             val_loss, val_accuracy = self.val_on_epoch_end(epoch)
