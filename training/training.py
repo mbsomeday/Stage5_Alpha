@@ -475,7 +475,7 @@ class train_pedmodel_camLoss():
             masked_loss = self.loss_cls(masked_out, labels)
 
             total_loss = loss + masked_loss
-            print(f'loss: {loss}, masked_loss: {masked_loss}')
+            # print(f'loss: {loss}, masked_loss: {masked_loss}')
 
             training_loss += total_loss.item()
 
