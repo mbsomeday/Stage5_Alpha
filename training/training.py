@@ -63,6 +63,11 @@ class train_model():
             labels = labels.to(DEVICE)
 
             out = self.model(images)
+            print('测试代码')
+            out.backward()
+            print('flag')
+            print('测试结束')
+
             loss = self.loss_fn(out, labels) + self.loss_grad(self.model, images, labels)
             training_loss += loss.item()
 

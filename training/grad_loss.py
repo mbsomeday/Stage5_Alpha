@@ -52,7 +52,7 @@ class GradCAM(nn.Module):
     def __init__(self, grad_layer):
         super(GradCAM, self).__init__()
         self.ds_model = get_models()
-        # self.ds_model.eval()
+        self.ds_model.eval()
         self.ds_model.to(DEVICE)
 
         self.grad_layer = grad_layer
