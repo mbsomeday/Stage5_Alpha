@@ -32,6 +32,7 @@ def get_args():
 
 
 def ped_test(model, ds_name, test_dataset, test_loader):
+    print(f'Running machine {DEVICE}')
     model = model.to(DEVICE)
     model.eval()
 
