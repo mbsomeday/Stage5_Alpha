@@ -25,6 +25,7 @@ def get_args():
     parser.add_argument('-b', '--batch_size', type=int, default=4)
     parser.add_argument('--ds_key_name', type=str)
     parser.add_argument('--txt_name', type=str)
+    parser.add_argument('-w', '--weights_path', type=str, help='weights of the model from arg, not use PATHS')
 
     args = parser.parse_args()
     return args
@@ -101,12 +102,13 @@ if __name__ == '__main__':
     batch_size = args.batch_size
     ds_key_name = args.ds_key_name
     txt_name = args.txt_name
+    if args.weights_path is not None:
+        weights_path = args.weights_path
+    else:
+        weights_path = PATHS['EfficientNet_ped_cls'][train_on]
 
     # pedestrian classification
     # model = vgg16_bn(num_class=2).to(DEVICE)
-    weights_path = PATHS['EfficientNet_ped_cls'][train_on]
-    print('weights_path:', weights_path)
-
     model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=2)
     # checkpoints = torch.load(weights_path, map_location=DEVICE)
     # model.load_state_dict(checkpoints['model_state_dict'])
