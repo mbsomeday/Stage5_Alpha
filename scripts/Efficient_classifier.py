@@ -39,15 +39,16 @@ else:
     num_classes = 4
 
 # 获取model，并替换最后的classifier层，目的是不同的任务有不同的num_classes
-model = visionModels.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
+model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=2)
 
-new_classifier = torch.nn.Sequential(
-    torch.nn.Dropout(p=0.2, inplace=True),
-    torch.nn.Linear(in_features=1280, out_features=num_classes)
-)
-model.classifier = new_classifier
+# new_classifier = torch.nn.Sequential(
+#     torch.nn.Dropout(p=0.2, inplace=True),
+#     torch.nn.Linear(in_features=1280, out_features=num_classes)
+# )
+# model.classifier = new_classifier
 
-print('Replacing classifier layer successfully!')
+# print('Replacing classifier layer successfully!')
+
 
 # # 若固定weights，则使用下面的代码，否则，注释掉
 # for name, param in model.named_parameters():
