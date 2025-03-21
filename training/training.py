@@ -6,6 +6,7 @@ import numpy as np
 from torchvision import models
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
+from sklearn.metrics import balanced_accuracy_score
 
 from data.dataset import my_dataset
 from training.train_callbacks import EarlyStopping
@@ -38,6 +39,9 @@ def get_models():
 
 
 class train_model():
+    '''
+        已将val monitor替换为balanced accuracy
+    '''
     def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False):
         self.model_name = model_name
         self.model = model
@@ -107,6 +111,8 @@ class train_model():
         self.model.eval()
         val_loss = 0.0
         val_correct_num = 0
+        y_true = []
+        y_pred = []
 
         with torch.no_grad():
             for data in tqdm(self.val_loader):
@@ -122,6 +128,9 @@ class train_model():
                 val_correct_num += (pred == labels).sum()
                 val_loss += loss.item()
 
+                y_true.extend(labels.cpu().numpy())
+                y_pred.extend(pred.cpu().numpy())
+
             if self.gen_img:
                 grid_images = torch.cat(list(images[:4]), dim=2)
                 grid_recons = torch.cat(list(out[:4]), dim=2)
@@ -132,10 +141,12 @@ class train_model():
 
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_acc_100 = val_accuracy * 100
-        print('Val Loss:{:.6f}, Val accuracy:{:.6f}% ({} / {})'.format(val_loss, val_acc_100, val_correct_num,
-                                                                       len(self.val_dataset)))
+        bc = balanced_accuracy_score(y_true, y_pred)
 
-        return val_loss, val_accuracy
+        print('Val Loss:{:.6f}, Val accuracy:{:.6f}% ({} / {}), balanced accuracy:{:.6f}%'.format(val_loss, val_acc_100, val_correct_num,
+                                                                                            len(self.val_dataset), bc))
+
+        return val_loss, val_accuracy, bc
 
 
     def train(self):
@@ -155,10 +166,10 @@ class train_model():
         for epoch in range(self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             self.train_one_epoch()
-            val_loss, val_accuracy = self.val_on_epoch_end(epoch)
+            val_loss, val_accuracy, balanced_acc = self.val_on_epoch_end(epoch)
 
             # 这里放训练epoch的callbacks
-            self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
+            self.early_stopping(epoch+1, self.model, balanced_acc, self.optimizer)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
@@ -236,6 +247,8 @@ class train_ds_model():
         self.model.eval()
         val_loss = 0.0
         val_correct_num = 0
+        y_true = []
+        y_pred = []
 
         with torch.no_grad():
             for data in tqdm(self.val_loader):
@@ -247,14 +260,19 @@ class train_ds_model():
                 out = self.model(images)
                 loss = self.loss_fn(out, labels)
 
+                y_true.extend(labels.cpu().numpy())
+                y_pred.extend(pred.cpu().numpy())
+
                 _, pred = torch.max(out, 1)
                 val_correct_num += (pred == labels).sum()
                 val_loss += loss.item()
 
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_acc_100 = val_accuracy * 100
-        print('Val Loss:{:.6f}, Val accuracy:{:.6f}% ({} / {})'.format(val_loss, val_acc_100, val_correct_num,
-                                                                       len(self.val_dataset)))
+        bc = balanced_accuracy_score(y_true, y_pred)
+
+        print('Val Loss:{:.6f}, Val accuracy:{:.6f}% ({} / {}), balanced accuracy:{:.6f}%'.format(val_loss, val_acc_100, val_correct_num,
+                                                                       len(self.val_dataset), bc))
 
         return val_loss, val_accuracy
 
@@ -516,6 +534,8 @@ class train_pedmodel_camLoss():
         self.model.eval()
         val_loss = 0.0
         val_correct_num = 0
+        y_true = []
+        y_pred = []
 
         with torch.no_grad():
             for data in tqdm(self.val_loader):
@@ -553,6 +573,9 @@ class train_pedmodel_camLoss():
                 val_correct_num += (pred == labels).sum()
                 val_loss += loss.item()
 
+                y_true.extend(labels.cpu().numpy())
+                y_pred.extend(pred.cpu().numpy())
+
             if self.gen_img:
                 grid_images = torch.cat(list(images[:4]), dim=2)
                 grid_recons = torch.cat(list(out[:4]), dim=2)
@@ -563,8 +586,10 @@ class train_pedmodel_camLoss():
 
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_acc_100 = val_accuracy * 100
-        print('Val Loss:{:.6f}, Val accuracy:{:.6f}% ({} / {})'.format(val_loss, val_acc_100, val_correct_num,
-                                                                       len(self.val_dataset)))
+        bc = balanced_accuracy_score(y_true, y_pred)
+
+        print('Val Loss:{:.6f}, Val accuracy:{:.6f}% ({} / {}), balanced accuracy:{:.6f}%'.format(val_loss, val_acc_100, val_correct_num,
+                                                                       len(self.val_dataset), bc))
 
         return val_loss, val_accuracy
 
