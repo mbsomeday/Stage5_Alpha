@@ -146,7 +146,7 @@ class train_model():
         print('Total training Samples:', len(self.train_dataset))
         print(f'From dataset: {self.ds_name_list}')
         print('Total Batch:', len(self.train_loader))
-        print('Total EPOCH:', self.epochs)
+        print('Maximum EPOCH:', self.epochs)
         print('Runing device:', DEVICE)
 
         print('-' * 20 + 'Validation Info' + '-' * 20)
