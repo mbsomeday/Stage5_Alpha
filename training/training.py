@@ -47,10 +47,7 @@ class train_model():
         self.epochs = epochs
         self.ds_name_list = ds_name_list
 
-        # 此处修改loss
-        # self.loss_fn = torch.nn.CrossEntropyLoss()
         self.loss_fn = torch.nn.CrossEntropyLoss()
-        self.loss_grad = GradCAM(grad_layer='features')
 
         self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
@@ -89,13 +86,8 @@ class train_model():
             labels = labels.to(DEVICE)
 
             out = self.model(images)
-            print('测试代码')
-            out[0][0].backward()
 
-            print('flag')
-            print('测试结束')
-
-            loss = self.loss_fn(out, labels) + self.loss_grad(self.model, images, labels)
+            loss = self.loss_fn(out, labels)
             training_loss += loss.item()
 
             self.optimizer.zero_grad()
