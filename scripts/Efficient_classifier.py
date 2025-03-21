@@ -69,8 +69,8 @@ if task == 'ds_cls':
 else:
     # 行人分类
     ds_name_list = [ds_name]
-    # my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
-    my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False, reload=reload)
+    my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
+    # my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False, reload=reload)
     my_model.train()
 
 
