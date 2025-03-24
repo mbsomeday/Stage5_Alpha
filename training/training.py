@@ -18,22 +18,27 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 def load_weights(model, weights):
     ckpt = torch.load(weights, weights_only=False, map_location=DEVICE)
     model.load_state_dict(ckpt['model_state_dict'])
+    print(f'Loading weights from {weights}')
     return model
 
 def get_models():
     print(f'DEVICE:{DEVICE}')
     if DEVICE == 'cuda':
-        ds_weights = r'/kaggle/input/temp-effb0ds/EfficientB0_dsCls-028-0.991572.pth'
+        # ds_weights = r'/kaggle/input/temp-effb0ds/EfficientB0_dsCls-028-0.991572.pth'
+        ds_weights = r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth'
     else:
         ds_weights = r'D:\chrom_download\EfficientB0_dsCls-028-0.991572.pth'
 
-    ds_model = models.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
-    new_classifier = torch.nn.Sequential(
-        torch.nn.Dropout(p=0.2, inplace=True),
-        torch.nn.Linear(in_features=1280, out_features=4)
-    )
-    ds_model.classifier = new_classifier
-    load_weights(ds_model, ds_weights)
+    from models.VGG import vgg16_bn
+    ds_model = vgg16_bn(num_class=2)
+
+    # ds_model = models.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
+    # new_classifier = torch.nn.Sequential(
+    #     torch.nn.Dropout(p=0.2, inplace=True),
+    #     torch.nn.Linear(in_features=1280, out_features=4)
+    # )
+    # ds_model.classifier = new_classifier
+    ds_model = load_weights(ds_model, ds_weights)
 
     return ds_model
 
