@@ -30,7 +30,7 @@ def get_models():
         ds_weights = r'D:\chrom_download\EfficientB0_dsCls-028-0.991572.pth'
 
     from models.VGG import vgg16_bn
-    ds_model = vgg16_bn(num_class=2)
+    ds_model = vgg16_bn(num_class=4)
 
     # ds_model = models.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
     # new_classifier = torch.nn.Sequential(
