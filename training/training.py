@@ -21,6 +21,7 @@ def load_weights(model, weights):
     print(f'Loading weights from {weights}')
     return model
 
+
 def get_models():
     print(f'DEVICE:{DEVICE}')
     if DEVICE == 'cuda':
@@ -154,7 +155,7 @@ class train_model():
         return val_loss, val_accuracy, bc
 
 
-    def train(self):
+    def train_model(self):
 
         self.model.to(DEVICE)
 
@@ -282,7 +283,7 @@ class train_ds_model():
         return val_loss, val_accuracy
 
 
-    def train(self):
+    def train_model(self):
 
         self.model.to(DEVICE)
 
@@ -599,7 +600,7 @@ class train_pedmodel_camLoss():
         return val_loss, val_accuracy
 
 
-    def train(self):
+    def train_model(self):
 
         self.model.to(DEVICE)
 

@@ -22,10 +22,10 @@ class EarlyStopping():
         if model_save_dir is not None:
             self.model_save_dir = model_save_dir
         else:
-            self.model_save_dir = os.path.join(os.getcwd(), 'ckpt')
+            self.model_save_dir = os.path.join(os.getcwd(), save_prefix+'_ckpt')
 
         if not os.path.exists(self.model_save_dir):
-                os.mkdir(self.model_save_dir)
+            os.mkdir(self.model_save_dir)
 
         self.patience = patience
         self.counter = 0  # 记录loss不变的epoch数目
@@ -90,9 +90,8 @@ class EarlyStopping():
             'best_val_acc': self.best_val_acc
         }
 
-        save_path = os.path.join(self.model_save_dir, save_name)
-
         # 存储权重
+        save_path = os.path.join(self.model_save_dir, save_name)
         torch.save(checkpoint, save_path)
 
 
