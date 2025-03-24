@@ -102,6 +102,7 @@ if __name__ == '__main__':
     batch_size = args.batch_size
     ds_key_name = args.ds_key_name
     txt_name = args.txt_name
+
     if args.weights_path is not None:
         weights_path = args.weights_path
     else:
@@ -109,10 +110,8 @@ if __name__ == '__main__':
         weights_path = PATHS['EfficientNet_ped_cls'][train_on]
 
     # pedestrian classification
-    # model = vgg16_bn(num_class=2).to(DEVICE)
-    model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=2)
-    # checkpoints = torch.load(weights_path, map_location=DEVICE)
-    # model.load_state_dict(checkpoints['model_state_dict'])
+    model = vgg16_bn(num_class=2).to(DEVICE)
+    # model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=2)
     print(f"Reload model {weights_path}")
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
     model.load_state_dict(ckpt['model_state_dict'])
