@@ -7,7 +7,7 @@ sys.path.append(root_path)
 import torch, argparse
 
 from models.VGG import vgg16_bn
-from training.training import train_model, train_ds_model, train_pedmodel_camLoss
+from training.training import train_ped_model, train_ds_model, train_pedmodel_camLoss
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
