@@ -27,10 +27,15 @@ batch_size = args.batch_size
 epochs = args.epochs
 if args.gid is not None:
     gid = args.gid
-    os.environ['CUDA_VISIBLE_DEVICES'] = gid
+    # os.environ['CUDA_VISIBLE_DEVICES'] = gid
+    device_msg = 'cuda:' + str(gid)
+else:
+    device_msg = 'cuda'
 
 import torch
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+device = torch.device(device_msg if torch.cuda.is_available() else "cpu")
 
 num_classes = 2
 model_name = 'vgg16bn'
