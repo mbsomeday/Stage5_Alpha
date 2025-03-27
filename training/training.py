@@ -44,7 +44,7 @@ def get_models():
     return ds_model
 
 
-class train_model():
+class train_ped_model():
     '''
         已将val monitor替换为balanced accuracy
     '''
@@ -54,12 +54,15 @@ class train_model():
         self.model = self.model.to(DEVICE)
         print(f'model is on {DEVICE}')
 
+        # -------------------- 训练参数设置开始 --------------------
+        self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+
+        # -------------------- 训练参数设置结束 --------------------
+
         self.epochs = epochs
         self.ds_name_list = ds_name_list
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
-
-        self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
         self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
         self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
@@ -154,7 +157,6 @@ class train_model():
 
         return val_loss, val_accuracy, bc
 
-
     def train_model(self):
 
         self.model.to(DEVICE)
@@ -175,7 +177,7 @@ class train_model():
             val_loss, val_accuracy, balanced_acc = self.val_on_epoch_end(epoch)
 
             # 这里放训练epoch的callbacks
-            self.early_stopping(epoch+1, self.model, balanced_acc, self.optimizer)
+            self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
@@ -597,7 +599,7 @@ class train_pedmodel_camLoss():
         print('Val Loss:{:.6f}, Val accuracy:{:.6f}% ({} / {}), balanced accuracy:{:.6f}%'.format(val_loss, val_acc_100, val_correct_num,
                                                                        len(self.val_dataset), bc))
 
-        return val_loss, val_accuracy
+        return val_loss, val_accuracy, bc
 
 
     def train_model(self):
@@ -617,10 +619,10 @@ class train_pedmodel_camLoss():
         for epoch in range(self.start_epoch, self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             self.train_one_epoch()
-            val_loss, val_accuracy = self.val_on_epoch_end(epoch)
+            val_loss, val_accuracy, balanced_acc = self.val_on_epoch_end(epoch)
 
             # 这里放训练epoch的callbacks
-            self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
+            self.early_stopping(epoch+1, self.model, balanced_acc, self.optimizer)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
