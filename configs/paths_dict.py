@@ -140,10 +140,10 @@ else:
 
 def get_device(gid=None):
     if gid is None:
-        return torch.device('cuda' if torch.cuda.is_available() else "cpu")
+        return 'cuda' if torch.cuda.is_available() else "cpu"
     else:
         device_msg = 'cuda:' + str(gid)
-        return torch.device(device_msg if torch.cuda.is_available() else "cpu")
+        return device_msg if torch.cuda.is_available() else "cpu"
 
 
 
