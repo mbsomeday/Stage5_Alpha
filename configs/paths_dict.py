@@ -133,7 +133,7 @@ elif 'veracruz' in cwd:
     PATHS = LCA
 elif 'jiawei_data' in cwd:
     print(f'Run on Nexus Server -- working dir: {cwd}')
-    PATHS = LCA
+    PATHS = NEXUS
 else:
     raise Exception('运行平台未知，需配置路径!')
 
