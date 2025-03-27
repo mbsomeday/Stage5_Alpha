@@ -4,7 +4,6 @@ curPath = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
 
-
 import argparse
 
 from models.VGG import vgg16_bn
@@ -21,6 +20,7 @@ def get_args():
     args = parser.parse_args()
     return args
 
+
 args = get_args()
 ds_name = args.ds_name
 batch_size = args.batch_size
@@ -32,17 +32,13 @@ if args.gid is not None:
 else:
     device_msg = 'cuda'
 
-import torch
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-device = torch.device(device_msg if torch.cuda.is_available() else "cpu")
 
 num_classes = 2
 model_name = 'vgg16bn'
 model = vgg16_bn(num_class=2)
 ds_name_list = [ds_name]
 
-my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
+my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False, gid=gid)
 my_model.train_model()
 
 
