@@ -330,12 +330,12 @@ class train_pedmodel_camLoss():
     def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False, reload=None, gid=None):
         torch.manual_seed(13)
 
-        DEVICE = get_device(gid)
-        print(f'model is on {DEVICE}')
+        self.device = get_device(gid)
+        print(f'model is on {self.device}')
 
         self.model_name = model_name
         self.model = model
-        self.model = self.model.to(DEVICE)
+        self.model = self.model.to(self.device)
 
         self.epochs = epochs
         self.ds_name_list = ds_name_list
@@ -357,7 +357,7 @@ class train_pedmodel_camLoss():
         # ------------ 新增加代码，目的是融入 cam loss ------------
         self.ds_model = get_vgg_DSmodel()
         self.ds_model.eval()
-        self.ds_model.to(DEVICE)
+        self.ds_model.to(self.device)
 
         self.feed_forward_features = None
         self.backward_features = None
@@ -388,7 +388,7 @@ class train_pedmodel_camLoss():
         # 如果中断后重新训练
         if reload is not None:
             print(f'Reloading weights from {reload}')
-            ckpt = torch.load(reload, map_location=DEVICE, weights_only=False)
+            ckpt = torch.load(reload, map_location=self.device, weights_only=False)
             model.load_state_dict(ckpt['model_state_dict'])
             self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
             self.start_epoch = ckpt['epoch']
@@ -476,8 +476,8 @@ class train_pedmodel_camLoss():
             images = data['image']
             labels = data['ped_label']
 
-            images = images.to(DEVICE)
-            labels = labels.to(DEVICE)
+            images = images.to(self.device)
+            labels = labels.to(self.device)
 
             out = self.model(images)
 
@@ -514,7 +514,7 @@ class train_pedmodel_camLoss():
             #     plt.imshow(img_list[i - 1])
             # plt.show()
             masked_images = torch.tensor(masked_images)
-            masked_images = masked_images.to(DEVICE)
+            masked_images = masked_images.to(self.device)
             masked_images = masked_images.type(torch.float32)
             masked_out = self.model(masked_images)
 
@@ -555,8 +555,8 @@ class train_pedmodel_camLoss():
             for data in tqdm(self.val_loader):
                 images = data['image']
                 labels = data['ped_label']
-                images = images.to(DEVICE)
-                labels = labels.to(DEVICE)
+                images = images.to(self.device)
+                labels = labels.to(self.device)
 
                 out = self.model(images)
 
@@ -571,7 +571,7 @@ class train_pedmodel_camLoss():
                     # heatmap_list.append(heatmap)
 
                 masked_images = torch.tensor(masked_images)
-                masked_images = masked_images.to(DEVICE)
+                masked_images = masked_images.to(self.device)
                 masked_images = masked_images.type(torch.float32)
                 masked_out = self.model(masked_images)
 
@@ -610,14 +610,14 @@ class train_pedmodel_camLoss():
 
     def train_model(self):
 
-        self.model.to(DEVICE)
+        self.model.to(self.device)
 
         print('-' * 20 + 'Training Info' + '-' * 20)
         print('Total training Samples:', len(self.train_dataset))
         print(f'From dataset: {self.ds_name_list}')
         print('Total Batch:', len(self.train_loader))
         print('Total EPOCH:', self.epochs)
-        print('Runing device:', DEVICE)
+        print('Runing device:', self.device)
 
         print('-' * 20 + 'Validation Info' + '-' * 20)
         print('Total Val Samples:', len(self.val_dataset))
