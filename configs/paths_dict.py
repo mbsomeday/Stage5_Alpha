@@ -105,6 +105,18 @@ KAGGLE = {
 
 }
 
+NEXUS = {
+    'org_dataset': {
+        'D1': r'/data/jcampos/jiawei_data/datasets/D1',
+        'D2': r'/data/jcampos/jiawei_data/datasets/D2',
+        'D3': r'/data/jcampos/jiawei_data/datasets/D3',
+        'D4': r'/data/jcampos/jiawei_data/datasets/D4'
+    },
+
+    'ds_cls_ckpt': r'/data/jcampos/jiawei_data/model_weights/Stage4/vgg16bn-dsCls-029-0.9777.pth'
+
+}
+
 
 cwd = os.getcwd()
 
@@ -119,10 +131,12 @@ elif 'kaggle' in cwd:
 elif 'veracruz' in cwd:
     print(f'Run on lca -- working dir: {cwd}')
     PATHS = LCA
+elif 'jiawei_data' in cwd:
+    print(f'Run on Nexus Server -- working dir: {cwd}')
+    PATHS = LCA
 else:
     raise Exception('运行平台未知，需配置路径!')
 
-print()
 
 
 
