@@ -35,7 +35,7 @@ model_name = 'vgg16bn'
 model = vgg16_bn(num_class=2)
 ds_name_list = [ds_name]
 
-my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False, gid=gid)
+my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
 my_model.train_model()
 
 
