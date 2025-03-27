@@ -331,11 +331,11 @@ class train_pedmodel_camLoss():
         torch.manual_seed(13)
 
         DEVICE = get_device(gid)
+        print(f'model is on {DEVICE}')
 
         self.model_name = model_name
         self.model = model
         self.model = self.model.to(DEVICE)
-        print(f'model is on {DEVICE}')
 
         self.epochs = epochs
         self.ds_name_list = ds_name_list
