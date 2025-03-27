@@ -27,11 +27,8 @@ batch_size = args.batch_size
 epochs = args.epochs
 if args.gid is not None:
     gid = args.gid
-    # os.environ['CUDA_VISIBLE_DEVICES'] = gid
-    device_msg = 'cuda:' + str(gid)
 else:
-    device_msg = 'cuda'
-
+    gid = None
 
 num_classes = 2
 model_name = 'vgg16bn'
