@@ -28,7 +28,7 @@ ds_name = args.ds_name
 batch_size = args.batch_size
 epochs = args.epochs
 if args.gid is not None:
-    gid = args.gidg
+    gid = args.gid
     os.environ['CUDA_VISIBLE_DEVICES'] = gid
     ng = torch.cuda.device_count()
     print(f'对程序可见的gpu数量：{ng}, gid: {gid}')
