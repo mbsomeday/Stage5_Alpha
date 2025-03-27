@@ -4,12 +4,11 @@ curPath = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
 
-import torch, argparse
+
+import argparse
 
 from models.VGG import vgg16_bn
 from training.training import train_ped_model, train_ds_model, train_pedmodel_camLoss
-
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def get_args():
@@ -22,7 +21,6 @@ def get_args():
     args = parser.parse_args()
     return args
 
-
 args = get_args()
 ds_name = args.ds_name
 batch_size = args.batch_size
@@ -30,9 +28,9 @@ epochs = args.epochs
 if args.gid is not None:
     gid = args.gid
     os.environ['CUDA_VISIBLE_DEVICES'] = gid
-    ng = torch.cuda.device_count()
-    print(f'对程序可见的gpu数量：{ng}, gid: {gid}')
 
+import torch
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 num_classes = 2
 model_name = 'vgg16bn'
