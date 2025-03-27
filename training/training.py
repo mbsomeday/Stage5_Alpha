@@ -15,7 +15,8 @@ from configs.paths_dict import PATHS
 from models.VGG import vgg16_bn
 from utils.utils import get_vgg_DSmodel
 
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+from configs.paths_dict import get_device
+# DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 # def load_weights(model, weights):
@@ -326,8 +327,10 @@ class TemporaryGrad(object):
 
 
 class train_pedmodel_camLoss():
-    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False, reload=None):
+    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False, reload=None, gid=None):
         torch.manual_seed(13)
+
+        DEVICE = get_device(gid)
 
         self.model_name = model_name
         self.model = model
