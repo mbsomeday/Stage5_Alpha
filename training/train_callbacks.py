@@ -30,7 +30,7 @@ class EarlyStopping():
         self.patience = patience
         self.counter = 0  # 记录loss不变的epoch数目
         self.early_stop = False # 是否停止训练
-        self.best_val_acc = -np.Inf
+        self.best_val_acc = -np.inf
         self.delta = delta
 
         print('-' * 20 + 'Early Stopping Info' + '-' * 20)
