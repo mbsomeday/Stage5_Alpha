@@ -35,6 +35,7 @@ class VGG(nn.Module):
     def __init__(self, features, num_class=2):
         super(VGG, self).__init__()
         self.features = features
+        # Stage4所用
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(512*7*7, 512),
@@ -44,6 +45,17 @@ class VGG(nn.Module):
             nn.ReLU(True),
             nn.Linear(512, num_class),
         )
+
+        # # 原始vgg网络
+        # self.classifier = nn.Sequential(
+        #     nn.Dropout(),
+        #     nn.Linear(512*7*7, 4096),
+        #     nn.ReLU(True),
+        #     nn.Dropout(),
+        #     nn.Linear(4096, 4096),
+        #     nn.ReLU(True),
+        #     nn.Linear(4096, num_class),
+        # )
          # Initialize weights
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
