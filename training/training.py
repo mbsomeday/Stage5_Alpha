@@ -11,37 +11,38 @@ from sklearn.metrics import balanced_accuracy_score
 from data.dataset import my_dataset
 from training.train_callbacks import EarlyStopping
 from training.grad_loss import GradCAM
+from configs.paths_dict import PATHS
+from models.VGG import vgg16_bn
+from utils.utils import get_vgg_DSmodel
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
-def load_weights(model, weights):
-    ckpt = torch.load(weights, weights_only=False, map_location=DEVICE)
-    model.load_state_dict(ckpt['model_state_dict'])
-    print(f'Loading weights from {weights}')
-    return model
-
-
-def get_models():
-    print(f'DEVICE:{DEVICE}')
-    if DEVICE == 'cuda':
-        # ds_weights = r'/kaggle/input/temp-effb0ds/EfficientB0_dsCls-028-0.991572.pth'
-        ds_weights = r'/kaggle/input/stage4-dscls-weights/vgg16bn-dsCls-029-0.9777.pth'
-    else:
-        ds_weights = r'D:\chrom_download\EfficientB0_dsCls-028-0.991572.pth'
-
-    from models.VGG import vgg16_bn
-    ds_model = vgg16_bn(num_class=4)
-
-    # ds_model = models.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
-    # new_classifier = torch.nn.Sequential(
-    #     torch.nn.Dropout(p=0.2, inplace=True),
-    #     torch.nn.Linear(in_features=1280, out_features=4)
-    # )
-    # ds_model.classifier = new_classifier
-    ds_model = load_weights(ds_model, ds_weights)
-
-    return ds_model
+# def load_weights(model, weights):
+#     ckpt = torch.load(weights, weights_only=False, map_location=DEVICE)
+#     model.load_state_dict(ckpt['model_state_dict'])
+#     print(f'Loading weights from {weights}')
+#     return model
+#
+#
+# def get_ds_models():
+#     '''
+#         加载vgg ds model
+#     :return:
+#     '''
+#     print(f'DEVICE:{DEVICE}')
+#     ds_model = vgg16_bn(num_class=4)
+#     ds_weights = PATHS['ds_cls_ckpt']
+#     ds_model = load_weights(ds_model, ds_weights)
+#
+#     # ds_model = models.efficientnet_b0(weights='IMAGENET1K_V1', progress=True)
+#     # new_classifier = torch.nn.Sequential(
+#     #     torch.nn.Dropout(p=0.2, inplace=True),
+#     #     torch.nn.Linear(in_features=1280, out_features=4)
+#     # )
+#     # ds_model.classifier = new_classifier
+#
+#     return ds_model
 
 
 class train_ped_model():
@@ -324,10 +325,10 @@ class TemporaryGrad(object):
         torch.set_grad_enabled(self.prev)
 
 
-
 class train_pedmodel_camLoss():
     def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False, reload=None):
         torch.manual_seed(13)
+
         self.model_name = model_name
         self.model = model
         self.model = self.model.to(DEVICE)
@@ -336,10 +337,13 @@ class train_pedmodel_camLoss():
         self.epochs = epochs
         self.ds_name_list = ds_name_list
 
+        # -------------------- 训练参数设置开始 --------------------
+        self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+
+        # -------------------- 训练参数设置结束 --------------------
+
         # 此处修改loss
         self.loss_fn = torch.nn.CrossEntropyLoss()
-
-        self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
         self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
         self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
@@ -348,7 +352,7 @@ class train_pedmodel_camLoss():
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
         # ------------ 新增加代码，目的是融入 cam loss ------------
-        self.ds_model = get_models()
+        self.ds_model = get_vgg_DSmodel()
         self.ds_model.eval()
         self.ds_model.to(DEVICE)
 
@@ -409,7 +413,6 @@ class train_pedmodel_camLoss():
         # for our own sanity, confirm its existence
         if not gradient_layer_found:
             raise AttributeError('Gradient layer %s not found in the internal model' % grad_layer)
-
 
     def calc_cam(self, model, image):
         '''
@@ -622,7 +625,7 @@ class train_pedmodel_camLoss():
             val_loss, val_accuracy, balanced_acc = self.val_on_epoch_end(epoch)
 
             # 这里放训练epoch的callbacks
-            self.early_stopping(epoch+1, self.model, balanced_acc, self.optimizer)
+            self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
