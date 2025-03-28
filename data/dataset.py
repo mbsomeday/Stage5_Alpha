@@ -25,10 +25,13 @@ class my_dataset(Dataset):
             transforms.ToTensor()
         ])
         self.images, self.ped_labels, self.ds_labels = self.init_ImagesLabels()
+        self.nonPed_num, self.ped_num = self.init_ped_cls_num()
         print(f'Get dataset: {ds_name_list}, txt_name: {txt_name}, total {len(self.images)} images')
+
 
     def init_ImagesLabels(self):
         images, ped_labels, ds_labels = [], [], []
+
 
         for ds_idx, ds_name in enumerate(self.ds_name_list):
             ds_label = self.ds_label_list[ds_idx]
@@ -51,6 +54,18 @@ class my_dataset(Dataset):
 
         return images, ped_labels, ds_labels
 
+
+    def init_ped_cls_num(self):
+        '''
+            初始化之后，获取行人和非行人类别的数量
+        '''
+        nonPed_num, ped_num = 0, 0
+        for item in self.ped_labels:
+            if item == '0':
+                nonPed_num += 1
+            elif item == '1':
+                ped_num += 1
+        return nonPed_num, ped_num
     def __len__(self):
         return len(self.images)
 
@@ -120,23 +135,21 @@ class dataset_from_list(Dataset):
 
 
 if __name__ == '__main__':
-    ds_name_list = list(['D3', 'D4'])
+    ds_name_list = list(['D3'])
     path_key = 'org_dataset'
     txt_name = 'val.txt'
     batch_size = 8
     shuffle = True
 
-    val_dataset, val_loader = get_data(ds_name_list, path_key, txt_name, batch_size, shuffle)
+    ds = my_dataset(ds_name_list, path_key, txt_name)
 
-    for idx, data_dict in enumerate(val_loader):
-        images = data_dict['image']
-        ds_label = data_dict['ds_label']
-        img_paths = data_dict['img_path']
-        ped_label = data_dict['ped_label']
-
-
-
-        break
+    # val_dataset, val_loader = get_data(ds_name_list, path_key, txt_name, batch_size, shuffle)
+    # for idx, data_dict in enumerate(val_loader):
+    #     images = data_dict['image']
+    #     ds_label = data_dict['ds_label']
+    #     img_paths = data_dict['img_path']
+    #     ped_label = data_dict['ped_label']
+    #     break
 
 
 
