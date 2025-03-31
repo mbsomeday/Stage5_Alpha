@@ -131,8 +131,8 @@ class Epoch_logger():
         self.txt_path = os.path.join(self.save_dir, 'train_info.txt')
 
         # todo 训练时取消下列注释
-        # __stderr__ = sys.stderr  # 将当前默认的错误输出结果保存为__stderr__
-        # sys.stderr = open(os.path.join(self.save_dir, 'ErrorLog.txt'), 'a')  # 将后续的报错信息写入对应的文件中
+        __stderr__ = sys.stderr  # 将当前默认的错误输出结果保存为__stderr__
+        sys.stderr = open(os.path.join(self.save_dir, 'ErrorLog.txt'), 'a')  # 将后续的报错信息写入对应的文件中
         # assert not os.path.exists(self.txt_path), f'The {self.txt_path} already exists, please chcek!'
 
         # 在文件的开头写入训练的信息
