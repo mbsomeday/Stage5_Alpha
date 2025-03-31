@@ -41,7 +41,7 @@ class EarlyStopping():
         print(f'File saving format: {save_prefix}_epoch_acc.pth')
         print(f'Early Stop with patience: {self.patience} ')
 
-        msg = f'The best {self.top_k} models will be saved to {self.model_save_dir}'
+        msg = f'The best {self.top_k} models will be saved to {self.model_save_dir}\n'
         with open(os.path.join(self.model_save_dir, 'EarlyStop.txt'), 'a') as f:
             f.write(msg)
 
@@ -58,7 +58,7 @@ class EarlyStopping():
             self.counter = 0
 
         if epoch > self.warmup_epochs:
-            self.lr_schedule.step(val_acc)
+            lr_schedule.step(val_acc)
 
         current_lr = optimizer.param_groups[0]['lr']
 
