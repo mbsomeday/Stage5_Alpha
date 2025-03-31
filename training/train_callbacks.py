@@ -1,5 +1,7 @@
-import os, torch
+import os, torch, sys, math
+import logging
 import numpy as np
+import torch.optim as optim
 
 
 class EarlyStopping():
@@ -8,9 +10,8 @@ class EarlyStopping():
         当loss稳定不变patience个epoch时，结束训练
     '''
 
-    def __init__(self, save_prefix, top_k=3,
-                 patience=10, delta=0.000001,
-                 model_save_dir=None):
+    def __init__(self, save_prefix, top_k=3, patience=10, delta=0.000001,
+                 model_save_dir=None, warmup_epochs=0):
         '''
             这个 early stopping关注的是 accuracy
             model save name: prefix_{epoch}_{acc}.pth
@@ -18,6 +19,7 @@ class EarlyStopping():
 
         self.top_k = top_k
         self.save_prefix = save_prefix
+        self.warmup_epochs = warmup_epochs
 
         if model_save_dir is not None:
             self.model_save_dir = model_save_dir
@@ -39,18 +41,20 @@ class EarlyStopping():
         print(f'File saving format: {save_prefix}_epoch_acc.pth')
         print(f'Early Stop with patience: {self.patience} ')
 
-    def __call__(self, epoch, model, val_acc, optimizer):
+    def __call__(self, epoch, model, val_acc, optimizer, lr_schedule=None):
         # 表现没有超过best
         if val_acc < self.best_val_acc + self.delta:
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} / {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
-
         # 比best表现好
         else:
             self.save_checkpoint(val_acc, model, optimizer, epoch)
             self.counter = 0
+
+        if epoch > self.warmup_epochs:
+            self.lr_schedule.step(val_acc)
 
     # 删除多余的权重文件
     def del_redundant_weights(self):
@@ -95,10 +99,55 @@ class EarlyStopping():
         torch.save(checkpoint, save_path)
 
 
-
 class ImageLogger():
     def __init__(self):
         pass
+
+
+class Epoch_logger():
+    '''
+        用于记录训练过程中的loss，accuracy变化情况
+    '''
+    def __init__(self, save_dir, model_name, ds_name_list, train_num_info, val_num_info):
+        super().__init__()
+        self.save_dir = save_dir
+        self.model_name = model_name
+        self.ds_name_list = ds_name_list
+
+        # 获取数据集的总量，各个类别的量
+        self.train_num, self.train_nonPed_num, self.train_ped_num = train_num_info
+        self.val_num, self.val_nonPed_num, self.val_ped_num = val_num_info
+
+        self.txt_path = os.path.join(self.save_dir, 'train_info.txt')
+
+        # todo 训练时取消下列注释
+        # __stderr__ = sys.stderr  # 将当前默认的错误输出结果保存为__stderr__
+        # sys.stderr = open(os.path.join(self.save_dir, 'ErrorLog.txt'), 'a')  # 将后续的报错信息写入对应的文件中
+        # assert not os.path.exists(self.txt_path), f'The {self.txt_path} already exists, please chcek!'
+
+        # 在文件的开头写入训练的信息
+        with open(self.txt_path, 'a') as f:
+            msg = f'Model: {model_name}, Training on datasets: {self.ds_name_list}\n'
+            f.write(msg)
+
+
+    def __call__(self, epoch, training_info, val_info):
+
+        train_msg = f'Training Loss:{training_info.training_loss:.6f}, Balanced accuracy: {training_info.training_bc:.6f}, accuracy: {training_info.train_accuracy:.6f}, [({training_info.nonPed_acc_num}/{self.train_nonPed_num}), ({training_info.ped_acc_num}/{self.train_ped_num}), ({training_info.training_correct_num}/{self.train_num})]\n'
+
+        val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}, [({val_info.nonPed_acc_num}/{self.val_nonPed_num}), ({val_info.ped_acc_num}/{self.val_ped_num}), ({val_info.val_correct_num}/{self.val_num})]\n'
+
+        with open(self.txt_path, 'a') as f:
+            f.write(f'Epoch: {epoch}\n')
+            f.write(train_msg)
+            f.write(val_msg)
+
+
+
+
+
+
+
 
 
 
