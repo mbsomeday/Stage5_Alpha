@@ -1,8 +1,8 @@
-# 将上级目录加入 sys.path， 防止命令行运行时找不到包
-import os, sys
-curPath = os.path.abspath(os.path.dirname(__file__))
-root_path = os.path.split(curPath)[0]
-sys.path.append(root_path)
+# # 将上级目录加入 sys.path， 防止命令行运行时找不到包
+# import os, sys
+# curPath = os.path.abspath(os.path.dirname(__file__))
+# root_path = os.path.split(curPath)[0]
+# sys.path.append(root_path)
 
 import os.path
 import torch, torchvision
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import balanced_accuracy_score
 
 from data.dataset import my_dataset
-from train_callbacks import EarlyStopping, Epoch_logger
+from training.train_callbacks import EarlyStopping, Epoch_logger
 from utils.utils import get_vgg_DSmodel, DotDict
 
 from configs.paths_dict import get_device
