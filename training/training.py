@@ -831,7 +831,7 @@ class train_ped_model_alpha():
                 masked_images = masked_images.type(torch.float32)
                 masked_out = self.model(masked_images)
 
-                masked_loss = self.loss_fn(masked_out, labels)
+                masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
             else:
                 masked_loss = 0
 
@@ -912,7 +912,7 @@ class train_ped_model_alpha():
                     masked_images = masked_images.type(torch.float32)
                     masked_out = self.model(masked_images)
 
-                    masked_loss = self.loss_fn(masked_out, labels)
+                    masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
                 else:
                     masked_loss = 0
 
