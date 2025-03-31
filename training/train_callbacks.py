@@ -42,14 +42,14 @@ class EarlyStopping():
         print(f'Early Stop with patience: {self.patience} ')
 
         msg = f'The best {self.top_k} models will be saved to {self.model_save_dir}\n'
-        with open(os.path.join(self.model_save_dir, 'EarlyStop.txt'), 'a') as f:
+        with open(os.path.join(self.model_save_dir, 'cb_EarlyStop.txt'), 'a') as f:
             f.write(msg)
 
     def __call__(self, epoch, model, val_acc, optimizer, lr_schedule=None):
         # 表现没有超过best
         if val_acc < self.best_val_acc + self.delta:
             self.counter += 1
-            print(f'cb_EarlyStopping counter: {self.counter} / {self.patience}')
+            print(f'EarlyStopping counter: {self.counter} / {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
         # 比best表现好
