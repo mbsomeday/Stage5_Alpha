@@ -153,7 +153,7 @@ class Epoch_logger():
         val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({val_info.nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.4f}({val_info.ped_acc_num}/{self.val_ped_num}), all: ({val_info.val_correct_num}/{self.val_num})]\n'
 
         with open(self.txt_path, 'a') as f:
-            f.write(f'Epoch: {epoch}\n')
+            f.write(f'Epoch: {epoch + 1}\n')
             f.write(train_msg)
             f.write(val_msg)
 
