@@ -701,7 +701,7 @@ class train_ped_model_alpha():
         # -------------------- 获取ds model，目的是融入 cam loss --------------------
         self.ds_model = get_vgg_DSmodel()
         self.ds_model.eval()
-        self.ds_model.to(DEVICE)
+        self.ds_model = self.ds_model.to(DEVICE)
 
         self.feed_forward_features = None
         self.backward_features = None
