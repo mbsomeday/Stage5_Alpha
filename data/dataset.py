@@ -25,9 +25,7 @@ class my_dataset(Dataset):
             transforms.ToTensor()
         ])
         self.images, self.ped_labels, self.ds_labels = self.init_ImagesLabels()
-        self.nonPed_num, self.ped_num = self.init_ped_cls_num()
         print(f'Get dataset: {ds_name_list}, txt_name: {txt_name}, total {len(self.images)} images')
-
 
     def init_ImagesLabels(self):
         images, ped_labels, ds_labels = [], [], []
@@ -54,10 +52,9 @@ class my_dataset(Dataset):
 
         return images, ped_labels, ds_labels
 
-
-    def init_ped_cls_num(self):
+    def get_ped_cls_num(self):
         '''
-            初始化之后，获取行人和非行人类别的数量
+            获取行人和非行人类别的数量
         '''
         nonPed_num, ped_num = 0, 0
         for item in self.ped_labels:
@@ -66,6 +63,7 @@ class my_dataset(Dataset):
             elif item == '1':
                 ped_num += 1
         return nonPed_num, ped_num
+
     def __len__(self):
         return len(self.images)
 
@@ -141,7 +139,7 @@ if __name__ == '__main__':
     batch_size = 8
     shuffle = True
 
-    ds = my_dataset(ds_name_list, path_key, txt_name)
+    # ds = my_dataset(ds_name_list, path_key, txt_name)
 
     # val_dataset, val_loader = get_data(ds_name_list, path_key, txt_name, batch_size, shuffle)
     # for idx, data_dict in enumerate(val_loader):
