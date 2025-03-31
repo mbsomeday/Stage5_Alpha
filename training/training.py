@@ -634,8 +634,7 @@ class train_pedmodel_camLoss():
 
 class train_ped_model_alpha():
     def __init__(self, model_obj: str, ds_name_list, batch_size, reload=None, save_prefix=None, epochs=50,
-                 base_lr=0.01,
-                 warmup_epochs=0, lr_patience=4, camLoss_coefficient=None,
+                 base_lr=0.01, warmup_epochs=0, lr_patience=4, camLoss_coefficient=None,
                  gen_img=False):
         '''
         :param model_obj: 传入的例子: models.VGG.vgg16_bn
@@ -854,7 +853,7 @@ class train_ped_model_alpha():
         train_accuracy = training_correct_num / len(self.train_dataset)
         training_bc = balanced_accuracy_score(y_true, y_pred)
 
-        print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [({nonPed_acc_num}/{self.train_nonPed_num}), ({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
+        # print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [({nonPed_acc_num}/{self.train_nonPed_num}), ({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
 
         train_epoch_info = {
             'train_accuracy': train_accuracy,
@@ -928,7 +927,7 @@ class train_ped_model_alpha():
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_bc = balanced_accuracy_score(y_true, y_pred)
 
-        print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [({nonPed_acc_num}/{self.val_nonPed_num}), ({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
+        # print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [({nonPed_acc_num}/{self.val_nonPed_num}), ({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
 
         val_epoch_info = {
             'epoch': epoch,

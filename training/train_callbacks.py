@@ -56,6 +56,12 @@ class EarlyStopping():
         if epoch > self.warmup_epochs:
             self.lr_schedule.step(val_acc)
 
+        current_lr = optimizer.param_groups[0]['lr']
+
+        msg = f'Epoch:{epoch}, lr:{current_lr}, counter:{self.counter}/{self.patience}\n'
+        with open(os.path.join(self.model_save_dir, 'EarlyStop.txt'), 'a') as f:
+            f.write(msg)
+
     # 删除多余的权重文件
     def del_redundant_weights(self):
         # 删除已经有的文件,只保留n+1个模型
