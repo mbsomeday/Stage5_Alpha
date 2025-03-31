@@ -35,11 +35,15 @@ class EarlyStopping():
         self.best_val_acc = -np.inf
         self.delta = delta
 
-        print('-' * 20 + 'Early Stopping Info' + '-' * 20)
-        print('Create early stopping, monitoring [validation accuracy] changes')
-        print(f'The best {self.top_k} models will be saved to {self.model_save_dir}')
-        print(f'File saving format: {save_prefix}_epoch_acc.pth')
-        print(f'Early Stop with patience: {self.patience} ')
+        # print('-' * 20 + 'Early Stopping Info' + '-' * 20)
+        # print('Create early stopping, monitoring [validation accuracy] changes')
+        # print(f'The best {self.top_k} models will be saved to {self.model_save_dir}')
+        # print(f'File saving format: {save_prefix}_epoch_acc.pth')
+        # print(f'Early Stop with patience: {self.patience} ')
+
+        msg = f'The best {self.top_k} models will be saved to {self.model_save_dir}'
+        with open(os.path.join(self.model_save_dir, 'EarlyStop.txt'), 'a') as f:
+            f.write(msg)
 
     def __call__(self, epoch, model, val_acc, optimizer, lr_schedule=None):
         # 表现没有超过best
