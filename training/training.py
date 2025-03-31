@@ -16,6 +16,7 @@ from sklearn.metrics import balanced_accuracy_score
 
 from data.dataset import my_dataset
 from training.train_callbacks import EarlyStopping, Epoch_logger
+from utils.utils import get_obj_from_str
 from utils.utils import get_vgg_DSmodel, DotDict
 
 from configs.paths_dict import get_device
@@ -980,15 +981,15 @@ class train_ped_model_alpha():
 
 
 
-if __name__ == '__main__':
-    # print('a')
-    from models.VGG import vgg16_bn
-    from utils.utils import get_obj_from_str
-    import math
-
-    test_alpha = train_ped_model_alpha(model_obj='models.VGG.vgg16_bn', ds_name_list=['D3'], batch_size=4, reload=None,
-                                       save_prefix=None,
-                                       )
+# if __name__ == '__main__':
+#     # print('a')
+#     from models.VGG import vgg16_bn
+#     from utils.utils import get_obj_from_str
+#     import math
+#
+#     test_alpha = train_ped_model_alpha(model_obj='models.VGG.vgg16_bn', ds_name_list=['D3'], batch_size=4, reload=None,
+#                                        save_prefix=None,
+#                                        )
 
 
 
