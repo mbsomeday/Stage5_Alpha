@@ -13,7 +13,7 @@ from training.training import train_ped_model_alpha
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--model_obj', type=str)
+    parser.add_argument('-m', '--model_obj', default='models.VGG.vgg16_bn', type=str)
     parser.add_argument('--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', default=50, type=int)
@@ -22,7 +22,6 @@ def get_args():
 
     args = parser.parse_args()
     return args
-
 
 args = get_args()
 model_obj = args.model_obj
