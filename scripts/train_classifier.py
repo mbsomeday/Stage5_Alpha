@@ -18,7 +18,7 @@ def get_args():
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('-r', '--reload', default=None)
-    parser.add_argument('--cam_loss', type=int)
+    parser.add_argument('--cam_loss', type=float)
 
     args = parser.parse_args()
     return args
