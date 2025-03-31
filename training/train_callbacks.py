@@ -63,7 +63,7 @@ class EarlyStopping():
         current_lr = optimizer.param_groups[0]['lr']
 
         msg = f'Epoch:{epoch}, lr:{current_lr}, counter:{self.counter}/{self.patience}\n'
-        with open(os.path.join(self.model_save_dir, 'EarlyStop.txt'), 'a') as f:
+        with open(os.path.join(self.model_save_dir, 'cb_EarlyStop.txt'), 'a') as f:
             f.write(msg)
 
     # 删除多余的权重文件
