@@ -720,6 +720,8 @@ class train_ped_model_alpha():
             self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
             self.start_epoch = ckpt['epoch']
             self.early_stopping.best_val_acc = ckpt['best_val_acc']
+        else:
+            self.start_epoch = 0
 
         # -------------------- 关于参数 gen --------------------
         self.gen_img = gen_img
