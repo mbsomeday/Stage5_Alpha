@@ -49,7 +49,7 @@ class EarlyStopping():
         # 表现没有超过best
         if val_acc < self.best_val_acc + self.delta:
             self.counter += 1
-            print(f'EarlyStopping counter: {self.counter} / {self.patience}')
+            print(f'cb_EarlyStopping counter: {self.counter} / {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
         # 比best表现好
@@ -132,7 +132,7 @@ class Epoch_logger():
 
         # todo 训练时取消下列注释
         __stderr__ = sys.stderr  # 将当前默认的错误输出结果保存为__stderr__
-        sys.stderr = open(os.path.join(self.save_dir, 'ErrorLog.txt'), 'a')  # 将后续的报错信息写入对应的文件中
+        sys.stderr = open(os.path.join(self.save_dir, 'errorLog.txt'), 'a')  # 将后续的报错信息写入对应的文件中
         # assert not os.path.exists(self.txt_path), f'The {self.txt_path} already exists, please chcek!'
 
         # 在文件的开头写入训练的信息
@@ -143,9 +143,14 @@ class Epoch_logger():
 
     def __call__(self, epoch, training_info, val_info):
 
-        train_msg = f'Training Loss:{training_info.training_loss:.6f}, Balanced accuracy: {training_info.training_bc:.6f}, accuracy: {training_info.train_accuracy:.6f}, [({training_info.nonPed_acc_num}/{self.train_nonPed_num}), ({training_info.ped_acc_num}/{self.train_ped_num}), ({training_info.training_correct_num}/{self.train_num})]\n'
+        train_nonPed_acc = training_info.nonPed_acc_num / self.train_nonPed_num
+        train_ped_acc = training_info.ped_acc_num / self.train_ped_num
+        val_nonPed_acc = val_info.nonPed_acc_num / self.val_nonPed_num
+        val_ped_acc = val_info.ped_acc_num / self.val_ped_num
 
-        val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}, [({val_info.nonPed_acc_num}/{self.val_nonPed_num}), ({val_info.ped_acc_num}/{self.val_ped_num}), ({val_info.val_correct_num}/{self.val_num})]\n'
+        train_msg = f'Training Loss:{training_info.training_loss:.6f}, Balanced accuracy: {training_info.training_bc:.6f}, accuracy: {training_info.train_accuracy:.6f}, [0: {train_nonPed_acc:.4f}({training_info.nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.4f}({training_info.ped_acc_num}/{self.train_ped_num}), all: ({training_info.training_correct_num}/{self.train_num})]\n'
+
+        val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({val_info.nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.4f}({val_info.ped_acc_num}/{self.val_ped_num}), all: ({val_info.val_correct_num}/{self.val_num})]\n'
 
         with open(self.txt_path, 'a') as f:
             f.write(f'Epoch: {epoch}\n')
