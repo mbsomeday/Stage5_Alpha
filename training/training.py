@@ -13,6 +13,7 @@ from torchvision import models
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import confusion_matrix
 
 from data.dataset import my_dataset
 from training.train_callbacks import EarlyStopping, Epoch_logger
@@ -1099,6 +1100,8 @@ class train_ds_model_alpha():
         train_accuracy = training_correct_num / len(self.train_dataset)
         training_bc = balanced_accuracy_score(y_true, y_pred)
 
+        cm = confusion_matrix(y_true, y_pred)
+        print(f'training cm:\n {cm}')
 
         print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}')
 
@@ -1136,6 +1139,9 @@ class train_ds_model_alpha():
 
                 y_true.extend(labels.cpu().numpy())
                 y_pred.extend(pred.cpu().numpy())
+
+        cm = confusion_matrix(y_true, y_pred)
+        print(f'val cm:\n {cm}')
 
 
         val_accuracy = val_correct_num / len(self.val_dataset)

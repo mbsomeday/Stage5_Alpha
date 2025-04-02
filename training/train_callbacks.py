@@ -169,7 +169,6 @@ class EarlyStopping():
             checkpoint['best_nonPed_acc'] = self.save_nonPed_info.best_acc
             checkpoint['best_ped_acc'] = self.save_ped_info.best_acc
 
-
         save_path = os.path.join(ckpt_dir, save_name)
         torch.save(checkpoint, save_path)
 

@@ -10,6 +10,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 import numpy as np
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import confusion_matrix
 
 from data.dataset import my_dataset
 from models.VGG import vgg16_bn
