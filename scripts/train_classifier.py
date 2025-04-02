@@ -29,7 +29,7 @@ ds_name = args.ds_name
 batch_size = args.batch_size
 reload = args.reload
 epochs = args.epochs
-camLoss_coefficient = args.cam_loss
+camLoss_coefficient = args.cam_loss if args.cam_loss > 0 else None
 
 # num_classes = 2
 # model_name = 'vgg16bn'
