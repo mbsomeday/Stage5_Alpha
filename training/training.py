@@ -1022,7 +1022,7 @@ class train_ds_model_alpha():
 
         # -------------------- 获取 ped model for train --------------------
         print(f'model_obj:{model_obj}')
-        self.model = get_obj_from_str(model_obj)(num_class=2)
+        self.model = get_obj_from_str(model_obj)(num_class=4)
         self.model = self.model.to(DEVICE)
 
         # -------------------- 获取数据 --------------------
