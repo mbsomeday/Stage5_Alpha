@@ -51,11 +51,11 @@ class my_dataset(Dataset):
                 ped_labels.append(contents[-1])
                 ds_labels.append(ds_label)
 
-        random.shuffle(images)
-        random.shuffle(ped_labels)
-        random.shuffle(ds_labels)
+        # random.shuffle(images)
+        # random.shuffle(ped_labels)
+        # random.shuffle(ds_labels)
 
-        return images[:500], ped_labels[:500], ds_labels[:500]
+        return images, ped_labels, ds_labels
 
     def get_ped_cls_num(self):
         '''
