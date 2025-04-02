@@ -108,9 +108,10 @@ class EarlyStopping():
 
         # 根据counter判断是否设置停止flag
         # save_best_cls_model=True
-        if self.counter >= self.patience and self.save_nonPed_info.counter >= self.patience and self.save_ped_info.counter >= self.patience:
-            self.early_stop = True
-        if not self.save_best_cls_model:
+        if self.save_best_cls_model:
+            if self.counter >= self.patience and self.save_nonPed_info.counter >= self.patience and self.save_ped_info.counter >= self.patience:
+                self.early_stop = True
+        else:
             if self.counter >= self.patience:
                 self.early_stop = True
 
