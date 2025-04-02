@@ -50,7 +50,7 @@ class my_dataset(Dataset):
                 ped_labels.append(contents[-1])
                 ds_labels.append(ds_label)
 
-        return images, ped_labels, ds_labels
+        return images[:50], ped_labels[:50], ds_labels[:50]
 
     def get_ped_cls_num(self):
         '''

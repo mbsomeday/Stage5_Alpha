@@ -106,10 +106,14 @@ class EarlyStopping():
                 metrics = [self.save_ped_info.best_acc, val_epoch_info.val_ped_acc]
                 self.new_save_checkpoint(model=model, metrics=metrics, optimizer=optimizer, ckpt_dir=self.save_ped_info.save_dir, save_prefix='Ped ')
 
-        # 根据三个counter判断是否设置停止flag
+
+        # 根据counter判断是否设置停止flag
+        # save_best_cls_model=True
         if self.counter >= self.patience and self.save_nonPed_info.counter >= self.patience and self.save_ped_info.counter >= self.patience:
             self.early_stop = True
-
+        if not self.save_best_cls_model:
+            if self.counter >= self.patience:
+                self.early_stop = True
 
         current_lr = optimizer.param_groups[0]['lr']
         msg = f'Epoch:{epoch}, lr:{current_lr}, overall counter:{self.counter}/{self.patience}, nonPed counter: {self.save_nonPed_info.counter}/{self.patience}, ped counter: {self.save_ped_info.counter}/{self.patience}\n'
