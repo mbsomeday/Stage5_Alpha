@@ -1,5 +1,7 @@
 # 将上级目录加入 sys.path， 防止命令行运行时找不到包
 import os, sys
+import random
+
 curPath = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
@@ -30,7 +32,6 @@ class my_dataset(Dataset):
     def init_ImagesLabels(self):
         images, ped_labels, ds_labels = [], [], []
 
-
         for ds_idx, ds_name in enumerate(self.ds_name_list):
             ds_label = self.ds_label_list[ds_idx]
             ds_dir = PATHS[self.path_key][ds_name]
@@ -50,7 +51,11 @@ class my_dataset(Dataset):
                 ped_labels.append(contents[-1])
                 ds_labels.append(ds_label)
 
-        return images[:50], ped_labels[:50], ds_labels[:50]
+        random.shuffle(images)
+        random.shuffle(ped_labels)
+        random.shuffle(ds_labels)
+
+        return images[:500], ped_labels[:500], ds_labels[:500]
 
     def get_ped_cls_num(self):
         '''
