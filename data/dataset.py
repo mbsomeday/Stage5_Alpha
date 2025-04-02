@@ -105,7 +105,8 @@ class dataset_from_list(Dataset):
         self.txt_path = txt_path
         print(f'Data loaded from {txt_path}')
         self.img_transforms = transforms.Compose([
-            transforms.ToTensor()
+            transforms.ToTensor(),
+            transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))     # 这是根据ImageNet计算的，可以作为通用的均值和方差
         ])
 
         self.images = self.init_Images()

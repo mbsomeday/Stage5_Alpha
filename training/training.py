@@ -641,7 +641,7 @@ class train_pedmodel_camLoss():
 
 class train_ped_model_alpha():
     def __init__(self, model_obj: str, ds_name_list, batch_size, reload=None, save_prefix=None, epochs=50,
-                 base_lr=0.01, warmup_epochs=0, lr_patience=5, camLoss_coefficient=None,
+                 base_lr=0.01, warmup_epochs=0, lr_patience=5, camLoss_coefficient=None, save_best_cls=False,
                  gen_img=False):
         '''
         :param model_obj: 传入的例子: models.VGG.vgg16_bn
@@ -654,9 +654,10 @@ class train_ped_model_alpha():
         self.epochs = epochs
         self.base_lr = base_lr
         self.lr_patience = lr_patience
+        self.save_best_cls = save_best_cls
+        self.camLoss_coefficient = camLoss_coefficient
 
         # -------------------- 获取 ped model for train --------------------
-        print(f'model_obj:{model_obj}')
         self.model = get_obj_from_str(model_obj)(num_class=2)
         self.model = self.model.to(DEVICE)
 
@@ -673,10 +674,9 @@ class train_ped_model_alpha():
 
         # -------------------- 训练配置 --------------------
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
-        self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
+        # self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
-        self.camLoss_coefficient = camLoss_coefficient
 
         # -------------------- Callbacks --------------------
         if save_prefix is None:
@@ -690,9 +690,7 @@ class train_ped_model_alpha():
 
         callback_savd_dir = save_prefix
 
-        self.early_stopping = EarlyStopping(save_prefix, top_k=3, model_save_dir=callback_savd_dir,
-                                            warmup_epochs=self.warmup_epochs
-                                            )
+        self.early_stopping = EarlyStopping(save_prefix, top_k=3, model_save_dir=callback_savd_dir, save_best_cls=save_best_cls)
 
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
@@ -724,6 +722,9 @@ class train_ped_model_alpha():
             self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
             self.start_epoch = ckpt['epoch']
             self.early_stopping.best_val_acc = ckpt['best_val_acc']
+            if self.save_best_cls:
+                self.early_stopping.save_nonPed_info.best_acc = ckpt['best_nonPed_acc']
+                self.early_stopping.save_ped_info.best_acc = ckpt['best_ped_acc']
         else:
             self.start_epoch = 0
 
@@ -1006,6 +1007,189 @@ class train_ped_model_alpha():
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
                 break
+
+
+
+class train_ds_model_alpha():
+    def __init__(self, model_obj: str, ds_name_list, batch_size, epochs=50, reload=None, base_lr=0.01, warmup_epochs=0, lr_patience=5,):
+        super().__init__()
+
+        # -------------------- 成员变量 --------------------
+        self.warmup_epochs = warmup_epochs
+        self.epochs = epochs
+        self.base_lr = base_lr
+        self.lr_patience = lr_patience
+
+        # -------------------- 获取 ped model for train --------------------
+        print(f'model_obj:{model_obj}')
+        self.model = get_obj_from_str(model_obj)(num_class=2)
+        self.model = self.model.to(DEVICE)
+
+        # -------------------- 获取数据 --------------------
+        self.ds_name_list = ds_name_list
+
+        self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
+        self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
+
+        self.val_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='val.txt')
+        self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
+
+        # -------------------- 训练配置 --------------------
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
+        self.loss_fn = torch.nn.CrossEntropyLoss()
+
+        # -------------------- Callbacks --------------------
+        save_prefix = model_obj.split('.')[-1] + '_dsCls'
+        callback_savd_dir = save_prefix
+
+        self.early_stopping = EarlyStopping(save_prefix, top_k=3, model_save_dir=callback_savd_dir, save_best_cls=False)
+        train_num_info = [len(self.train_dataset), -1, -1]
+        val_num_info = [len(self.val_dataset), -1, -1]
+
+        self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
+                                         ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info
+                                         )
+
+        # -------------------- 如果reload，optmizer，start_epoch等也要重新设置 --------------------
+        if reload is not None:
+            print(f'Reloading weights from {reload}')
+            ckpt = torch.load(reload, map_location=DEVICE, weights_only=False)
+            self.model.load_state_dict(ckpt['model_state_dict'])
+            self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+            self.start_epoch = ckpt['epoch']
+            self.early_stopping.best_val_acc = ckpt['best_val_acc']
+            self.early_stopping.save_nonPed_info.best_acc = ckpt['best_nonPed_acc']
+            self.early_stopping.save_ped_info.best_acc = ckpt['best_ped_acc']
+
+        else:
+            self.start_epoch = 0
+
+    def train_one_epoch(self):
+        self.model.train()
+
+        training_loss = 0.0
+        training_correct_num = 0
+        y_true = []
+        y_pred = []
+
+        for batch, data in enumerate(tqdm(self.train_loader)):
+            images = data['image']
+            labels = data['ds_label']
+            images = images.to(DEVICE)
+            labels = labels.to(DEVICE)
+
+            out = self.model(images)
+            _, pred = torch.max(out, 1)
+
+            loss = self.loss_fn(out, labels)
+
+            y_true.extend(labels.cpu().numpy())
+            y_pred.extend(pred.cpu().numpy())
+
+            training_loss += loss.item()
+
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+
+            _, pred = torch.max(out, 1)
+            training_correct_num += (pred == labels).sum()
+
+        train_accuracy = training_correct_num / len(self.train_dataset)
+        training_bc = balanced_accuracy_score(y_true, y_pred)
+
+
+        print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}')
+
+        train_epoch_info = {
+            'train_accuracy': train_accuracy,
+            'training_loss': training_loss,
+            'training_correct_num': training_correct_num,
+            'training_bc': training_bc,
+        }
+
+        train_epoch_info = DotDict(train_epoch_info)
+
+        return train_epoch_info
+    def val_on_epoch_end(self, epoch):
+        self.model.eval()
+        val_loss = 0.0
+        val_correct_num = 0
+        y_true = []
+        y_pred = []
+
+        with torch.no_grad():
+            for data in tqdm(self.val_loader):
+                images = data['image']
+                labels = data['ds_label']
+                images = images.to(DEVICE)
+                labels = labels.to(DEVICE)
+
+                out = self.model(images)
+                _, pred = torch.max(out, 1)
+
+                loss = self.loss_fn(out, labels)
+
+                val_correct_num += (pred == labels).sum()
+                val_loss += loss.item()
+
+                y_true.extend(labels.cpu().numpy())
+                y_pred.extend(pred.cpu().numpy())
+
+
+        val_accuracy = val_correct_num / len(self.val_dataset)
+        val_bc = balanced_accuracy_score(y_true, y_pred)
+
+        print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}')
+
+        val_epoch_info = {
+            'epoch': epoch,
+            'val_accuracy': val_accuracy,
+            'val_loss': val_loss,
+            'val_correct_num': val_correct_num,
+            'val_bc': val_bc,
+        }
+
+        val_epoch_info = DotDict(val_epoch_info)
+
+        return val_epoch_info
+
+    def lr_decay(self, epoch):
+        if (epoch + 1) <= self.warmup_epochs:        # warm-up阶段
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * (epoch + 1) / self.warmup_epochs
+        else:       # monitored metric持续几个epoch不变，lr decay阶段
+            if self.early_stopping.counter > self.lr_patience:
+                self.optimizer.param_groups[0]['lr'] *= 0.5
+
+    def train_model(self):
+
+        print('-' * 20 + 'Training Info' + '-' * 20)
+        print('Total training Samples:', len(self.train_dataset))
+        print(f'From dataset: {self.ds_name_list}')
+        print('Total Batch:', len(self.train_loader))
+        print('Total EPOCH:', self.epochs)
+        print('Runing device:', DEVICE)
+
+        print('-' * 20 + 'Validation Info' + '-' * 20)
+        print('Total Val Samples:', len(self.val_dataset))
+
+        for epoch in range(self.start_epoch, self.epochs):
+            print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
+            train_epoch_info = self.train_one_epoch()
+            val_epoch_info = self.val_on_epoch_end(epoch)
+
+            # ------------------------ 训练epoch的callbacks ------------------------
+            self.early_stopping(epoch+1, self.model, self.optimizer, val_epoch_info)
+            self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
+
+            # ------------------------ 学习率调整 ------------------------
+            self.lr_decay(epoch+1)
+
+            if self.early_stopping.early_stop:
+                print(f'Early Stopping!')
+                break
+
+
 
 
 
