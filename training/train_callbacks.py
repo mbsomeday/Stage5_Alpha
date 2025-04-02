@@ -154,10 +154,15 @@ class EarlyStopping():
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'best_val_bc': self.best_val_acc,
-            'best_nonPed_acc': self.save_nonPed_info.best_acc,
-            'best_ped_acc': self.save_ped_info.best_acc,
+            # 'best_nonPed_acc': self.save_nonPed_info.best_acc,
+            # 'best_ped_acc': self.save_ped_info.best_acc,
             'save_info': save_prefix
         }
+        if self.save_best_cls_model:
+            checkpoint['best_nonPed_acc'] = self.save_nonPed_info.best_acc
+            checkpoint['best_ped_acc'] = self.save_ped_info.best_acc
+
+
         save_path = os.path.join(ckpt_dir, save_name)
         torch.save(checkpoint, save_path)
 
