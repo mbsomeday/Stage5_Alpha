@@ -151,6 +151,7 @@ class EarlyStopping():
         # save_prefix的目的是说明当前是overall_bc, nonPed_bc还是ped_bc最好的情况
         msg = '' if save_prefix is None else save_prefix
         msg += f'Performance increases ({metrics[0]} --> {metrics[1]}). Saving Model.'
+        print(msg)
 
         self.new_del_redundant_weights(ckpt_dir)
         save_name = f"{self.save_prefix}-{self.cur_epoch:03d}-{metrics[1]:.5f}.pth"
