@@ -1060,9 +1060,6 @@ class train_ds_model_alpha():
             self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
             self.start_epoch = ckpt['epoch']
             self.early_stopping.best_val_acc = ckpt['best_val_bc']
-            self.early_stopping.save_nonPed_info.best_acc = ckpt['best_nonPed_acc']
-            self.early_stopping.save_ped_info.best_acc = ckpt['best_ped_acc']
-
         else:
             self.start_epoch = 0
 
