@@ -1012,7 +1012,7 @@ class train_ped_model_alpha():
 
 
 class train_ds_model_alpha():
-    def __init__(self, model_obj: str, ds_name_list, batch_size, epochs=50, reload=None, base_lr=0.01, warmup_epochs=0, lr_patience=5,):
+    def __init__(self, model_obj: str, ds_name_list, batch_size, epochs=50, reload=None, base_lr=0.01, warmup_epochs=0, lr_patience=5):
         super().__init__()
 
         # -------------------- 成员变量 --------------------
@@ -1162,9 +1162,11 @@ class train_ds_model_alpha():
         return val_epoch_info
 
     def lr_decay(self, epoch):
-        if (epoch + 1) <= self.warmup_epochs:        # warm-up阶段
+        # warm-up阶段
+        if (epoch + 1) <= self.warmup_epochs:
             self.optimizer.param_groups[0]['lr'] = self.base_lr * (epoch + 1) / self.warmup_epochs
-        else:       # monitored metric持续几个epoch不变，lr decay阶段
+        # monitored metric持续几个epoch不变，lr decay阶段
+        else:
             if self.early_stopping.counter > self.lr_patience:
                 self.optimizer.param_groups[0]['lr'] *= 0.5
 
