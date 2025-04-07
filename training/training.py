@@ -20,8 +20,7 @@ from training.train_callbacks import EarlyStopping, Epoch_logger
 from utils.utils import get_obj_from_str
 from utils.utils import get_vgg_DSmodel, DotDict
 
-from configs.paths_dict import get_device
-
+from torch.optim import SGD
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
@@ -1012,7 +1011,7 @@ class train_ped_model_alpha():
 
 
 class train_ds_model_alpha():
-    def __init__(self, model_obj: str, ds_name_list, batch_size, epochs=50, reload=None, base_lr=0.01, warmup_epochs=0, lr_patience=5):
+    def __init__(self, model_obj: str, ds_name_list, batch_size, epochs=50, reload=None, base_lr=0.256, warmup_epochs=0, lr_patience=5):
         super().__init__()
 
         # -------------------- 成员变量 --------------------
@@ -1036,7 +1035,13 @@ class train_ds_model_alpha():
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
         # -------------------- 训练配置 --------------------
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
+        # # vgg16
+        # self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
+        # self.loss_fn = torch.nn.CrossEntropyLoss()
+
+        # efficientNet
+        self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=0.9, momentum=0.9)
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, self.lr_lambda)  # 学习率衰减策略
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
         # -------------------- Callbacks --------------------
@@ -1062,6 +1067,12 @@ class train_ds_model_alpha():
             self.early_stopping.best_val_acc = ckpt['best_val_bc']
         else:
             self.start_epoch = 0
+
+    # 自定义衰减函数
+    def lr_lambda(self, epoch):
+        decay_rate = 0.97
+        decay_epochs = 2.4
+        return decay_rate ** (epoch / decay_epochs)
 
     def train_one_epoch(self):
         self.model.train()
@@ -1164,8 +1175,11 @@ class train_ds_model_alpha():
             self.optimizer.param_groups[0]['lr'] = self.base_lr * (epoch + 1) / self.warmup_epochs
         # monitored metric持续几个epoch不变，lr decay阶段
         else:
-            if self.early_stopping.counter > self.lr_patience:
-                self.optimizer.param_groups[0]['lr'] *= 0.5
+            # EfficientNet
+            self.scheduler.step()
+            # # VGG16
+            # if self.early_stopping.counter > self.lr_patience:
+            #     self.optimizer.param_groups[0]['lr'] *= 0.5
 
     def train_model(self):
 
@@ -1197,17 +1211,30 @@ class train_ds_model_alpha():
 
 
 
+class train_efficient_classifier():
+    '''
+        因为efficientNet比较大，需要调节超参数，所以单独写一个类
+    '''
+    def __init__(self):
+        super().__init__()
+        pass
 
 
-# if __name__ == '__main__':
-#     # print('a')
-#     from models.VGG import vgg16_bn
-#     from utils.utils import get_obj_from_str
-#     import math
-#
-#     test_alpha = train_ped_model_alpha(model_obj='models.VGG.vgg16_bn', ds_name_list=['D3'], batch_size=4, reload=None,
-#                                        save_prefix=None,
-#                                        )
+
+
+
+
+if __name__ == '__main__':
+    # print('a')
+    from models.VGG import vgg16_bn
+    from utils.utils import get_obj_from_str
+    import math
+
+    test_alpha = train_ped_model_alpha(model_obj='models.VGG.vgg16_bn', ds_name_list=['D3'], batch_size=4, reload=None,
+                                       save_prefix=None,
+                                       )
+
+
 
 
 
