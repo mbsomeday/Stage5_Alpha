@@ -839,10 +839,9 @@ class train_ped_model_alpha():
                 masked_out = self.model(masked_images)
 
                 masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
+                loss = loss_cls + self.camLoss_coefficient * masked_loss
             else:
-                masked_loss = 0
-
-            loss = loss_cls + self.camLoss_coefficient * masked_loss
+                loss = loss_cls
 
             y_true.extend(labels.cpu().numpy())
             y_pred.extend(pred.cpu().numpy())
