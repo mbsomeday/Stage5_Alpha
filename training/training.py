@@ -827,7 +827,7 @@ class train_ped_model_alpha():
             # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
             nonPed_idx = labels == 0
             nonPed_images = images[nonPed_idx]
-            if nonPed_images.shape[0] > 0:
+            if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
                 masked_images = np.zeros(shape=nonPed_images.shape)
                 for img_idx, image in enumerate(nonPed_images):
                     image = torch.unsqueeze(image, dim=0)
