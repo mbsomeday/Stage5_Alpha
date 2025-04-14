@@ -111,7 +111,11 @@ if __name__ == '__main__':
         weights_path = PATHS['EfficientNet_ped_cls'][train_on]
 
     # pedestrian classification
-    model = vgg16_bn(num_class=2).to(DEVICE)
+    # model = vgg16_bn(num_class=2).to(DEVICE)
+
+    from torchvision import models
+    model = models.efficientnet_b0(num_classes=4)
+
     # model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=2)
     print(f"Reload model {weights_path}")
     ckpt = torch.load(weights_path, map_location=DEVICE, weights_only=False)
