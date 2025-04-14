@@ -46,9 +46,10 @@ save_best_cls = args.save_best_cls
 #                                     camLoss_coefficient=camLoss_coefficient, save_best_cls=save_best_cls, gen_img=False)
 # my_training.train_model()
 
-ds_training = train_ds_model_alpha(model_obj=model_obj, ds_name_list=['D1', 'D2', 'D3', 'D4'], batch_size=batch_size, reload=reload,
-                                   epochs=epochs, base_lr=0.256, warmup_epochs=2, lr_patience=5,
+ds_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=['D3'], batch_size=batch_size, reload=reload,
+                                   epochs=epochs, base_lr=0.256, warmup_epochs=5, lr_patience=5,
                                    )
+
 ds_training.train_model()
 
 
