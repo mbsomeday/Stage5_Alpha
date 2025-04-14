@@ -872,7 +872,7 @@ class train_ped_model_alpha():
         train_nonPed_acc = nonPed_acc_num / self.train_nonPed_num
         train_ped_acc = ped_acc_num / self.train_ped_num
 
-        print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [0: {train_nonPed_acc}({nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc}({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
+        print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [0: {train_nonPed_acc:.6f}({nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.6f}({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
 
         train_epoch_info = {
             'train_accuracy': train_accuracy,
@@ -908,11 +908,13 @@ class train_ped_model_alpha():
                 out = self.model(images)
                 _, pred = torch.max(out, 1)
 
+                loss_cls = self.loss_fn(out, labels)
+
                 # ------------ 计算 cam loss ------------
                 # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
                 nonPed_idx = labels == 0
                 nonPed_images = images[nonPed_idx]
-                if nonPed_images.shape[0] > 0:
+                if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
                     masked_images = np.zeros(shape=nonPed_images.shape)
                     for img_idx, image in enumerate(nonPed_images):
                         image = torch.unsqueeze(image, dim=0)
@@ -924,11 +926,10 @@ class train_ped_model_alpha():
                     masked_out = self.model(masked_images)
 
                     masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
-                else:
-                    masked_loss = 0
 
-                loss_cls = self.loss_fn(out, labels)
-                loss = loss_cls + self.camLoss_coefficient * masked_loss
+                    loss = loss_cls + self.camLoss_coefficient * masked_loss
+                else:
+                    loss = loss_cls
 
                 val_correct_num += (pred == labels).sum()
                 val_loss += loss.item()
@@ -951,7 +952,7 @@ class train_ped_model_alpha():
         val_nonPed_acc = nonPed_acc_num / self.val_nonPed_num
         val_ped_acc = ped_acc_num / self.val_ped_num
 
-        print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc}({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
+        print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.6f}({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
 
         val_epoch_info = {
             'epoch': epoch,
