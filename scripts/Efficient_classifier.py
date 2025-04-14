@@ -5,10 +5,9 @@ root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
 
 import argparse, torch
-import torchvision.models as visionModels
 
 from data.dataset import get_data
-from training.training import train_model, train_ds_model, train_pedmodel_camLoss
+from training.training import train_ds_model_alpha, train_pedmodel_camLoss
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -38,8 +37,15 @@ if task == 'ped_cls':
 else:
     num_classes = 4
 
-# 获取model，并替换最后的classifier层，目的是不同的任务有不同的num_classes
-model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=2)
+
+# 最新开始
+from training.training import train_ped_model_alpha
+
+model_obj = 'models.EfficientNet.efficientNetB0'
+ds_name_list = ['D4']
+
+my_train = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=4)
+
 
 # new_classifier = torch.nn.Sequential(
 #     torch.nn.Dropout(p=0.2, inplace=True),
@@ -60,18 +66,20 @@ model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=2)
 #     print(f'name: {name} - {param.shape} - {param.requires_grad}')
 
 
-if task == 'ds_cls':
-    # 数据集分类
-    my_model = train_ds_model(model_name, model, batch_size, epochs, reload=reload)
-    my_model.train()
-
-
-else:
-    # 行人分类
-    ds_name_list = [ds_name]
-    my_model = train_model(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
-    # my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False, reload=reload)
-    my_model.train()
+# if task == 'ds_cls':
+#     # 数据集分类
+#     # my_model = train_ds_model(model_name, model, batch_size, epochs, reload=reload)
+#     # my_model.train_model()
+#     pass
+#
+#
+# else:
+#     # 行人分类
+#     ds_name_list = [ds_name]
+#     #  model_obj: str, ds_name_list, batch_size, epochs=50, reload=None, base_lr=0.01, warmup_epochs=0, lr_patience=5
+#     my_model = train_ds_model_alpha(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
+#     # my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False, reload=reload)
+#     my_model.train_model()
 
 
 
