@@ -34,7 +34,7 @@ model_obj = args.model_obj
 ds_name_list = [ds_name]
 
 my_train = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size)
-
+my_train.train_model()
 
 # new_classifier = torch.nn.Sequential(
 #     torch.nn.Dropout(p=0.2, inplace=True),
