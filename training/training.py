@@ -673,8 +673,10 @@ class train_ped_model_alpha():
         self.val_nonPed_num, self.val_ped_num = self.val_dataset.get_ped_cls_num()
 
         # -------------------- 训练配置 --------------------
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
+        # self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
+        self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=1e-5, eps=0.001)
         # self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
+        self.lr_schedule = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=3, gamma=0.963)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
@@ -700,19 +702,20 @@ class train_ped_model_alpha():
                                          )
 
         # -------------------- 获取ds model，目的是融入 cam loss --------------------
-        self.ds_model = get_vgg_DSmodel()
-        self.ds_model.eval()
-        self.ds_model = self.ds_model.to(DEVICE)
+        if self.camLoss_coefficient is not None:
+            self.ds_model = get_vgg_DSmodel()
+            self.ds_model.eval()
+            self.ds_model = self.ds_model.to(DEVICE)
 
-        self.feed_forward_features = None
-        self.backward_features = None
+            self.feed_forward_features = None
+            self.backward_features = None
 
-        self.grad_layer = 'features'
-        self._register_hooks(self.ds_model, self.grad_layer)
+            self.grad_layer = 'features'
+            self._register_hooks(self.ds_model, self.grad_layer)
 
-        # sigma, omega for making the soft-mask
-        self.sigma = 0.25
-        self.omega = 100
+            # sigma, omega for making the soft-mask
+            self.sigma = 0.25
+            self.omega = 100
 
         # -------------------- 如果reload，optmizer，start_epoch等也要重新设置 --------------------
         if reload is not None:
@@ -971,13 +974,19 @@ class train_ped_model_alpha():
     def lr_decay(self, epoch):
         if (epoch + 1) <= self.warmup_epochs:        # warm-up阶段
             self.optimizer.param_groups[0]['lr'] = self.base_lr * (epoch + 1) / self.warmup_epochs
-        else:       # monitored metric持续几个epoch不变，lr decay阶段
-            if self.early_stopping.counter > self.lr_patience:
-                self.optimizer.param_groups[0]['lr'] *= 0.5
-            elif self.early_stopping.save_best_cls_model and self.early_stopping.save_nonPed_info.counter > self.lr_patience:
-                self.optimizer.param_groups[0]['lr'] *= 0.5
-            elif self.early_stopping.save_best_cls_model and self.early_stopping.save_ped_info.counter > self.lr_patience:
-                self.optimizer.param_groups[0]['lr'] *= 0.5
+        else:
+            epoch = (epoch + 1) - self.warmup_epochs
+            self.lr_schedule.step(epoch)
+
+
+
+        # else:       # monitored metric持续几个epoch不变，lr decay阶段,加入了ped和nonPed的count
+        #     if self.early_stopping.counter > self.lr_patience:
+        #         self.optimizer.param_groups[0]['lr'] *= 0.5
+        #     elif self.early_stopping.save_best_cls_model and self.early_stopping.save_nonPed_info.counter > self.lr_patience:
+        #         self.optimizer.param_groups[0]['lr'] *= 0.5
+        #     elif self.early_stopping.save_best_cls_model and self.early_stopping.save_ped_info.counter > self.lr_patience:
+        #         self.optimizer.param_groups[0]['lr'] *= 0.5
 
 
     def train_model(self):
@@ -1151,7 +1160,6 @@ class train_ds_model_alpha():
         cm = confusion_matrix(y_true, y_pred)
         print(f'val cm:\n {cm}')
 
-
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_bc = balanced_accuracy_score(y_true, y_pred)
 
@@ -1205,8 +1213,6 @@ class train_ds_model_alpha():
             # ------------------------ 训练epoch的callbacks ------------------------
             self.early_stopping(epoch+1, self.model, self.optimizer, val_epoch_info)
             self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
-
-
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
