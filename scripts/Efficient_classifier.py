@@ -6,45 +6,34 @@ sys.path.append(root_path)
 
 import argparse, torch
 
-from data.dataset import get_data
-# from training.training import train_ds_model_alpha, train_pedmodel_camLoss
+from training.training import train_ped_model_alpha
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# def get_args():
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
-#     parser.add_argument('--task', type=str, choices=('ped_cls', 'ds_cls'), help='used to define the num_classes of model')
-#     parser.add_argument('--batch_size', type=int)
-#     parser.add_argument('--epochs', default=50, type=int)
-#     parser.add_argument('--reload', default=None, type=str)
-#
-#     args = parser.parse_args()
-#     return args
-#
-#
-# args = get_args()
-# batch_size = args.batch_size
-# epochs = args.epochs
-# task = args.task
-# reload = args.reload
-#
-# ds_name = args.ds_name if task == 'ped_cls' else None
-#
-# model_name = 'EfficientB0'
-# if task == 'ped_cls':
-#     num_classes = 2
-# else:
-#     num_classes = 4
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
+    parser.add_argument('--task', type=str, choices=('ped_cls', 'ds_cls'), help='used to define the num_classes of model')
+    parser.add_argument('--batch_size', type=int)
+    parser.add_argument('--epochs', default=50, type=int)
+    parser.add_argument('--reload', default=None, type=str)
+    parser.add_argument('--model_obj', type=str)
+
+    args = parser.parse_args()
+    return args
 
 
-# 最新开始
-from training.training import train_ped_model_alpha
+args = get_args()
+batch_size = args.batch_size
+ds_name = args.ds_name
+epochs = args.epochs
+task = args.task
+reload = args.reload
+model_obj = args.model_obj
 
-model_obj = 'models.EfficientNet.efficientNetB0'
-ds_name_list = ['D3']
+ds_name_list = [ds_name]
 
-my_train = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=4)
+my_train = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size)
 
 
 # new_classifier = torch.nn.Sequential(
