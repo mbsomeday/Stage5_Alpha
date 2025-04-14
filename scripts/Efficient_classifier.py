@@ -28,7 +28,7 @@ args = get_args()
 batch_size = args.batch_size
 ds_name = args.ds_name
 epochs = args.epochs
-reload = args.reload
+# reload = args.reload
 model_obj = args.model_obj
 
 ds_name_list = [ds_name]
