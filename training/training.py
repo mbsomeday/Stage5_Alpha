@@ -989,11 +989,11 @@ class train_ped_model_alpha():
 
 
     def lr_decay(self, epoch):
+        # warm-up阶段
         if (epoch + 1) <= self.warmup_epochs:        # warm-up阶段
             self.optimizer.param_groups[0]['lr'] = self.base_lr * (epoch + 1) / self.warmup_epochs
         else:
-            self.lr_schedule.step()
-
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * 0.1 ** ((epoch + 1) / 5)
 
         # else:       # monitored metric持续几个epoch不变，lr decay阶段,加入了ped和nonPed的count
         #     if self.early_stopping.counter > self.lr_patience:
@@ -1026,7 +1026,7 @@ class train_ped_model_alpha():
             # self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
 
             # ------------------------ 学习率调整 ------------------------
-            # self.lr_decay(epoch+1)
+            self.lr_decay(epoch)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
