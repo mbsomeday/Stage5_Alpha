@@ -676,7 +676,7 @@ class train_ped_model_alpha():
         # self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
         self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=1e-5, eps=0.001)
         # self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
-        self.lr_schedule = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=3, gamma=0.963)
+        self.lr_schedule = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=warmup_epochs, gamma=0.963, last_epoch=self.warmup_epochs)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
@@ -803,6 +803,10 @@ class train_ped_model_alpha():
         return heatmap, mask, masked_image
 
     def train_one_epoch(self):
+        '''
+            train one batch
+            返回 train_epoch_info 字典
+        '''
         self.model.train()
 
         training_loss = 0.0
@@ -975,9 +979,7 @@ class train_ped_model_alpha():
         if (epoch + 1) <= self.warmup_epochs:        # warm-up阶段
             self.optimizer.param_groups[0]['lr'] = self.base_lr * (epoch + 1) / self.warmup_epochs
         else:
-            epoch = (epoch + 1) - self.warmup_epochs
-            self.lr_schedule.step(epoch)
-
+            self.lr_schedule.step()
 
 
         # else:       # monitored metric持续几个epoch不变，lr decay阶段,加入了ped和nonPed的count
@@ -1219,14 +1221,6 @@ class train_ds_model_alpha():
                 break
 
 
-
-class train_efficient_classifier():
-    '''
-        因为efficientNet比较大，需要调节超参数，所以单独写一个类
-    '''
-    def __init__(self):
-        super().__init__()
-        pass
 
 
 
