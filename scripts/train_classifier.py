@@ -7,7 +7,7 @@ sys.path.append(root_path)
 import argparse
 
 from models.VGG import vgg16_bn
-from training.training import train_ped_model_alpha, train_ds_model_alpha
+from training.training import train_ped_model_alpha
 
 
 def get_args():
@@ -26,7 +26,7 @@ def get_args():
 
 args = get_args()
 model_obj = args.model_obj
-# ds_name = args.ds_name
+ds_name = args.ds_name
 batch_size = args.batch_size
 reload = args.reload
 epochs = args.epochs
@@ -36,7 +36,6 @@ save_best_cls = args.save_best_cls
 # num_classes = 2
 # model_name = 'vgg16bn'
 # model = vgg16_bn(num_class=2)
-# ds_name_list = [ds_name]
 
 # my_model = train_pedmodel_camLoss(model_name, model, ds_name_list, camLoss_coefficient=0.1,
 #                                   batch_size=batch_size, epochs=epochs, save_prefix=None, gen_img=False)
@@ -46,11 +45,13 @@ save_best_cls = args.save_best_cls
 #                                     camLoss_coefficient=camLoss_coefficient, save_best_cls=save_best_cls, gen_img=False)
 # my_training.train_model()
 
-ds_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=['D3'], batch_size=batch_size, reload=reload,
-                                   epochs=epochs, base_lr=0.128, warmup_epochs=5, lr_patience=5,
+ds_name_list = [ds_name]
+
+ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size, reload=reload,
+                                    epochs=epochs, base_lr=0.128, warmup_epochs=5, lr_patience=5,
                                    )
 
-ds_training.train_model()
+ped_training.train_model()
 
 
 

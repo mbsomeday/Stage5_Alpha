@@ -649,6 +649,13 @@ class train_ped_model_alpha():
         :param warmup_epoch: 若为0，则不用warm up策略
         :param camLoss_coefficient: 若为None，则不用cam loss训练
         '''
+        # -------------------- 打印训练信息 --------------------
+        print('-' * 20, 'Training Info', '-' * 20)
+        print(f'batch_size: {batch_size}')
+        print(f'Reload: {reload}')
+        print('-' * 20)
+
+
         # -------------------- 成员变量 --------------------
         self.warmup_epochs = warmup_epochs
         self.epochs = epochs
