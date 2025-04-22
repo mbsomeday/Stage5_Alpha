@@ -834,25 +834,27 @@ class train_ped_model_alpha():
 
             loss_cls = self.loss_fn(out, labels)
 
-            # ------------ 计算 cam loss ------------
-            # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
-            nonPed_idx = labels == 0
-            nonPed_images = images[nonPed_idx]
-            if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
-                masked_images = np.zeros(shape=nonPed_images.shape)
-                for img_idx, image in enumerate(nonPed_images):
-                    image = torch.unsqueeze(image, dim=0)
-                    heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
-                    masked_images[img_idx] = masked_image.cpu().detach()
-                masked_images = torch.tensor(masked_images)
-                masked_images = masked_images.to(DEVICE)
-                masked_images = masked_images.type(torch.float32)
-                masked_out = self.model(masked_images)
+            # # ------------ 计算 cam loss ------------
+            # # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
+            # nonPed_idx = labels == 0    # todo 这是啥？
+            # nonPed_images = images[nonPed_idx]
+            # if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
+            #     masked_images = np.zeros(shape=nonPed_images.shape)
+            #     for img_idx, image in enumerate(nonPed_images):
+            #         image = torch.unsqueeze(image, dim=0)
+            #         heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
+            #         masked_images[img_idx] = masked_image.cpu().detach()
+            #     masked_images = torch.tensor(masked_images)
+            #     masked_images = masked_images.to(DEVICE)
+            #     masked_images = masked_images.type(torch.float32)
+            #     masked_out = self.model(masked_images)
+            #
+            #     masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
+            #     loss = loss_cls + self.camLoss_coefficient * masked_loss
+            # else:
+            #     loss = loss_cls
 
-                masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
-                loss = loss_cls + self.camLoss_coefficient * masked_loss
-            else:
-                loss = loss_cls
+            loss = loss_cls         # baseline时不计算camloss
 
             y_true.extend(labels.cpu().numpy())
             y_pred.extend(pred.cpu().numpy())
@@ -866,14 +868,14 @@ class train_ped_model_alpha():
             _, pred = torch.max(out, 1)
             training_correct_num += (pred == labels).sum()
 
-            # ------------ 计算各个类别的正确个数 ------------
-            nonPed_idx = labels == 0
-            nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
-            nonPed_acc_num += nonPed_acc.sum()
-
-            ped_idx = labels == 1
-            ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
-            ped_acc_num += ped_acc.sum()
+            # # ------------ 计算各个类别的正确个数 ------------
+            # nonPed_idx = labels == 0
+            # nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
+            # nonPed_acc_num += nonPed_acc.sum()
+            #
+            # ped_idx = labels == 1
+            # ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
+            # ped_acc_num += ped_acc.sum()
 
             # break
 
@@ -883,7 +885,9 @@ class train_ped_model_alpha():
         train_nonPed_acc = nonPed_acc_num / self.train_nonPed_num
         train_ped_acc = ped_acc_num / self.train_ped_num
 
-        print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [0: {train_nonPed_acc:.6f}({nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.6f}({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
+        print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}')
+
+        # print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [0: {train_nonPed_acc:.6f}({nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.6f}({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
 
         train_epoch_info = {
             'train_accuracy': train_accuracy,
@@ -902,6 +906,7 @@ class train_ped_model_alpha():
 
     def val_on_epoch_end(self, epoch):
         self.model.eval()
+
         val_loss = 0.0
         val_correct_num = 0
         y_true = []
@@ -948,14 +953,14 @@ class train_ped_model_alpha():
                 y_true.extend(labels.cpu().numpy())
                 y_pred.extend(pred.cpu().numpy())
 
-                # ------------ 计算各个类别的正确个数 ------------
-                nonPed_idx = labels == 0
-                nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
-                nonPed_acc_num += nonPed_acc.sum()
-
-                ped_idx = labels == 1
-                ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
-                ped_acc_num += ped_acc.sum()
+                # # ------------ 计算各个类别的正确个数 ------------
+                # nonPed_idx = labels == 0
+                # nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
+                # nonPed_acc_num += nonPed_acc.sum()
+                #
+                # ped_idx = labels == 1
+                # ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
+                # ped_acc_num += ped_acc.sum()
 
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_bc = balanced_accuracy_score(y_true, y_pred)
@@ -963,7 +968,9 @@ class train_ped_model_alpha():
         val_nonPed_acc = nonPed_acc_num / self.val_nonPed_num
         val_ped_acc = ped_acc_num / self.val_ped_num
 
-        print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.6f}({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
+        print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}')
+
+        # print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.6f}({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
 
         val_epoch_info = {
             'epoch': epoch,
@@ -1017,7 +1024,7 @@ class train_ped_model_alpha():
 
             # ------------------------ 训练epoch的callbacks ------------------------
             self.early_stopping(epoch+1, self.model, self.optimizer, val_epoch_info)
-            self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
+            # self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
 
             # ------------------------ 学习率调整 ------------------------
             self.lr_decay(epoch+1)
@@ -1234,15 +1241,15 @@ class train_ds_model_alpha():
 
 
 
-if __name__ == '__main__':
-    # print('a')
-    from models.VGG import vgg16_bn
-    from utils.utils import get_obj_from_str
-    import math
-
-    test_alpha = train_ped_model_alpha(model_obj='models.VGG.vgg16_bn', ds_name_list=['D3'], batch_size=4, reload=None,
-                                       save_prefix=None,
-                                       )
+# if __name__ == '__main__':
+#     # print('a')
+#     from models.VGG import vgg16_bn
+#     from utils.utils import get_obj_from_str
+#     import math
+#
+#     test_alpha = train_ped_model_alpha(model_obj='models.VGG.vgg16_bn', ds_name_list=['D3'], batch_size=4, reload=None,
+#                                        save_prefix=None,
+#                                        )
 
 
 
