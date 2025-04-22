@@ -51,9 +51,13 @@ class my_dataset(Dataset):
                 ped_labels.append(contents[-1])
                 ds_labels.append(ds_label)
 
-        # random.shuffle(images)
-        # random.shuffle(ped_labels)
-        # random.shuffle(ds_labels)
+        random.shuffle(images)
+        random.shuffle(ped_labels)
+        random.shuffle(ds_labels)
+
+        images = images[:3000]
+        ped_labels = images[:3000]
+        ds_labels = ds_labels[:3000]
 
         return images, ped_labels, ds_labels
 
@@ -138,14 +142,14 @@ class dataset_from_list(Dataset):
 
 
 
-if __name__ == '__main__':
-    ds_name_list = list(['D3'])
-    path_key = 'org_dataset'
-    txt_name = 'val.txt'
-    batch_size = 8
-    shuffle = True
-
-    # ds = my_dataset(ds_name_list, path_key, txt_name)
+# if __name__ == '__main__':
+#     ds_name_list = list(['D3'])
+#     path_key = 'org_dataset'
+#     txt_name = 'val.txt'
+#     batch_size = 8
+#     shuffle = True
+#
+#     # ds = my_dataset(ds_name_list, path_key, txt_name)
 
     # val_dataset, val_loader = get_data(ds_name_list, path_key, txt_name, batch_size, shuffle)
     # for idx, data_dict in enumerate(val_loader):
