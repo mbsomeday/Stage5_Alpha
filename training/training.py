@@ -717,7 +717,8 @@ class train_ped_model_alpha():
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
         self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
-                                         ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info
+                                         ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info,
+                                         task='ped_cls'
                                          )
 
         # -------------------- 获取ds model，目的是融入 cam loss --------------------
@@ -1023,7 +1024,7 @@ class train_ped_model_alpha():
 
             # ------------------------ 训练epoch的callbacks ------------------------
             self.early_stopping(epoch+1, self.model, self.optimizer, val_epoch_info)
-            # self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
+            self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
 
             # ------------------------ 学习率调整 ------------------------
             self.lr_decay(epoch)
