@@ -36,8 +36,8 @@ class train_ped_model():
 
         # -------------------- 训练参数设置开始 --------------------
         # self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 1e-2}], weight_decay=1e-2, eps=0.001)
-
+        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 0.01}], weight_decay=1e-2, eps=0.001)
+        self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=3)   # 是分类任务，所以监控accuracy
 
         # -------------------- 训练参数设置结束 --------------------
 
@@ -157,6 +157,7 @@ class train_ped_model():
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             self.train_one_epoch()
             val_loss, val_accuracy, balanced_acc = self.val_on_epoch_end(epoch)
+            self.lr_schedule.step()
 
             # # 这里放训练epoch的callbacks
             # self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
