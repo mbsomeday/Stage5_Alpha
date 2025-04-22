@@ -12,26 +12,26 @@ from training.training import train_ped_model_alpha, train_ped_model
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--batch_size', type=int)
+    parser.add_argument('--epochs', default=50, type=int)
+    parser.add_argument('--save_best_cls', default=False, type=bool, help='to decide whether to save the best models for each class')
 
     parser.add_argument('-m', '--model_obj', default='models.VGG.vgg16_bn', type=str)
     parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
-    parser.add_argument('--batch_size', type=int)
-    parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('-r', '--reload', default=None)
     parser.add_argument('-c', '--cam_loss', type=float, default=0.0)
-    parser.add_argument('--save_best_cls', default=False, type=bool, help='to decide whether to save the best models for each class')
 
     args = parser.parse_args()
     return args
 
-# args = get_args()
-# model_obj = args.model_obj
-# ds_name = args.ds_name
-# batch_size = args.batch_size
-# reload = args.reload
-# epochs = args.epochs
-# camLoss_coefficient = args.cam_loss if args.cam_loss > 0 else None
-# save_best_cls = args.save_best_cls
+args = get_args()
+model_obj = args.model_obj
+ds_name = args.ds_name
+batch_size = args.batch_size
+reload = args.reload
+epochs = args.epochs
+camLoss_coefficient = args.cam_loss if args.cam_loss > 0 else None
+save_best_cls = args.save_best_cls
 
 # num_classes = 2
 # model_name = 'vgg16bn'
@@ -45,15 +45,11 @@ def get_args():
 #                                     camLoss_coefficient=camLoss_coefficient, save_best_cls=save_best_cls, gen_img=False)
 # my_training.train_model()
 
-# ds_name_list = [ds_name]
+ds_name_list = [ds_name]
 
-# ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size, reload=reload,
-#                                     epochs=epochs, base_lr=0.128, warmup_epochs=5, lr_patience=5,
-#                                    )
-from models.VGG import vgg16_bn
-model = vgg16_bn(num_class=2)
-model_name = 'test'
-ped_training = train_ped_model(model_name, model, ds_name_list=['D3'])
+ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size, reload=reload,
+                                    epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5,
+                                   )
 
 ped_training.train_model()
 

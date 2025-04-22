@@ -54,8 +54,8 @@ class EarlyStopping():
         self.delta = delta
 
         print('-' * 20 + 'Early Stopping Info' + '-' * 20)
-        print('Create early stopping, monitoring [validation accuracy] changes')
-        print(f'The best {self.top_k} models will be saved to {self.model_save_dir}\n')
+        print('Create early stopping, monitoring [validation balanced accuracy] changes')
+        print(f'The best {self.top_k} models will be saved to {self.model_save_dir}')
         print(f'File saving format: {save_prefix}_epoch_acc.pth')
         print(f'Early Stop with patience: {self.patience}')
 
