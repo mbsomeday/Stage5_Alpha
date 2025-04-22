@@ -157,7 +157,7 @@ class train_ped_model():
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             self.train_one_epoch()
             val_loss, val_accuracy, balanced_acc = self.val_on_epoch_end(epoch)
-            self.lr_schedule.step()
+            self.lr_schedule.step(metrics=val_loss)
 
             # # 这里放训练epoch的callbacks
             # self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
