@@ -36,7 +36,7 @@ class train_ped_model():
 
         # -------------------- 训练参数设置开始 --------------------
         # self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 0.01}], weight_decay=1e-2, eps=0.001)
+        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 0.1}], weight_decay=1e-1, eps=0.001)
         self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=3)   # 是分类任务，所以监控accuracy
 
         # -------------------- 训练参数设置结束 --------------------
@@ -57,6 +57,7 @@ class train_ped_model():
             save_prefix = model_name
             for ds_name in ds_name_list:
                 save_prefix += ds_name
+
         self.early_stopping = EarlyStopping(save_prefix, top_k=2)
         self.gen_img = gen_img
         if self.gen_img and batch_size >= 4:
