@@ -35,9 +35,9 @@ class train_ped_model():
         print(f'model is on {DEVICE}')
 
         # -------------------- 训练参数设置开始 --------------------
-        # self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 0.1}], weight_decay=1e-1, eps=0.001)
-        self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=3)   # 是分类任务，所以监控accuracy
+        self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+        # self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 0.1}], weight_decay=1e-1, eps=0.001)
+        # self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=3)   # 是分类任务，所以监控accuracy
 
         # -------------------- 训练参数设置结束 --------------------
 
@@ -166,8 +166,6 @@ class train_ped_model():
             # if self.early_stopping.early_stop:
             #     print(f'Early Stopping!')
             #     break
-
-
 
 
 
@@ -645,12 +643,19 @@ class train_pedmodel_camLoss():
                 break
 
 
-
 class train_ped_model_alpha():
-    def __init__(self, model_obj: str, ds_name_list, batch_size, reload=None, save_prefix=None, epochs=50,
-                 base_lr=0.01, warmup_epochs=0, lr_patience=5, camLoss_coefficient=None, save_best_cls=False,
-                 gen_img=False):
+    def __init__(self, model_obj: str,
+                 ds_name_list,
+                 batch_size,
+                 reload=None,
+                 epochs=50,
+                 base_lr=0.01,
+                 warmup_epochs=0,
+                 lr_patience=5,
+                 camLoss_coefficient=None,
+                 save_best_cls=False):
         '''
+        todo: 为什么 camLoss_coefficient 不设置为0？
         :param model_obj: 传入的例子: models.VGG.vgg16_bn
         :param ds_name_list:
         :param warmup_epoch: 若为0，则不用warm up策略
@@ -687,26 +692,26 @@ class train_ped_model_alpha():
         self.val_nonPed_num, self.val_ped_num = self.val_dataset.get_ped_cls_num()
 
         # -------------------- 训练配置 --------------------
-        # self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
         # self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=1e-5, )
-        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 1e-5}], weight_decay=1e-5, eps=0.001)
-        self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
+        # self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 1e-5}], weight_decay=1e-5, eps=0.001)
+        # self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
         # self.lr_schedule = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=warmup_epochs, gamma=0.963, last_epoch=self.warmup_epochs)
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
         # -------------------- Callbacks --------------------
-        if save_prefix is None:
-            save_prefix = model_obj.rsplit('.')[-1]
-            for ds_name in ds_name_list:
-                save_prefix += ds_name
-        else:
-            save_prefix = ''
+        # 设置保存训练信息的文件夹的名字
+        save_prefix = model_obj.rsplit('.')[-1]
+        for ds_name in ds_name_list:
+            info = '_' + ds_name
+            save_prefix += info
+
         if self.camLoss_coefficient is not None:
             save_prefix += '_CAMLoss'
 
         callback_savd_dir = save_prefix
 
-        self.early_stopping = EarlyStopping(save_prefix, top_k=3, model_save_dir=callback_savd_dir, save_best_cls=save_best_cls)
+        self.early_stopping = EarlyStopping(save_prefix, top_k=2)
 
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
@@ -739,19 +744,8 @@ class train_ped_model_alpha():
             self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
             self.start_epoch = ckpt['epoch']
             self.early_stopping.best_val_acc = ckpt['best_val_acc']
-            if self.save_best_cls:
-                self.early_stopping.save_nonPed_info.best_acc = ckpt['best_nonPed_acc']
-                self.early_stopping.save_ped_info.best_acc = ckpt['best_ped_acc']
         else:
             self.start_epoch = 0
-
-        # -------------------- 关于参数 gen --------------------
-        self.gen_img = gen_img
-        if self.gen_img and batch_size >= 4:
-            print(f'Image will be saved after each epoch.')
-            self.image_logger_dir = os.path.join(os.getcwd(), 'images')
-            if not os.path.exists(self.image_logger_dir):
-                os.mkdir(self.image_logger_dir)
 
 
     def _register_hooks(self, model, grad_layer):
@@ -827,6 +821,7 @@ class train_ped_model_alpha():
         training_correct_num = 0
         y_true = []
         y_pred = []
+
         nonPed_acc_num = 0
         ped_acc_num = 0
 
@@ -843,7 +838,7 @@ class train_ped_model_alpha():
 
             # # ------------ 计算 cam loss ------------
             # # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
-            # nonPed_idx = labels == 0    # todo 这是啥？
+            # nonPed_idx = labels == 0
             # nonPed_images = images[nonPed_idx]
             # if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
             #     masked_images = np.zeros(shape=nonPed_images.shape)
@@ -876,14 +871,14 @@ class train_ped_model_alpha():
             _, pred = torch.max(out, 1)
             training_correct_num += (pred == labels).sum()
 
-            # # ------------ 计算各个类别的正确个数 ------------
-            # nonPed_idx = labels == 0
-            # nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
-            # nonPed_acc_num += nonPed_acc.sum()
-            #
-            # ped_idx = labels == 1
-            # ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
-            # ped_acc_num += ped_acc.sum()
+            # ------------ 计算各个类别的正确个数 ------------
+            nonPed_idx = labels == 0
+            nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
+            nonPed_acc_num += nonPed_acc.sum()
+
+            ped_idx = labels == 1
+            ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
+            ped_acc_num += ped_acc.sum()
 
             # break
 
@@ -893,9 +888,7 @@ class train_ped_model_alpha():
         train_nonPed_acc = nonPed_acc_num / self.train_nonPed_num
         train_ped_acc = ped_acc_num / self.train_ped_num
 
-        print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}')
-
-        # print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [0: {train_nonPed_acc:.6f}({nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.6f}({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
+        print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [0: {train_nonPed_acc:.6f}({nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.6f}({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
 
         train_epoch_info = {
             'train_accuracy': train_accuracy,
@@ -961,14 +954,14 @@ class train_ped_model_alpha():
                 y_true.extend(labels.cpu().numpy())
                 y_pred.extend(pred.cpu().numpy())
 
-                # # ------------ 计算各个类别的正确个数 ------------
-                # nonPed_idx = labels == 0
-                # nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
-                # nonPed_acc_num += nonPed_acc.sum()
-                #
-                # ped_idx = labels == 1
-                # ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
-                # ped_acc_num += ped_acc.sum()
+                # ------------ 计算各个类别的正确个数 ------------
+                nonPed_idx = labels == 0
+                nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
+                nonPed_acc_num += nonPed_acc.sum()
+
+                ped_idx = labels == 1
+                ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
+                ped_acc_num += ped_acc.sum()
 
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_bc = balanced_accuracy_score(y_true, y_pred)
@@ -976,9 +969,7 @@ class train_ped_model_alpha():
         val_nonPed_acc = nonPed_acc_num / self.val_nonPed_num
         val_ped_acc = ped_acc_num / self.val_ped_num
 
-        print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}')
-
-        # print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.6f}({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
+        print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.6f}({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
 
         val_epoch_info = {
             'epoch': epoch,
