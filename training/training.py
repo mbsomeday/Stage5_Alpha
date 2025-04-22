@@ -156,12 +156,12 @@ class train_ped_model():
             self.train_one_epoch()
             val_loss, val_accuracy, balanced_acc = self.val_on_epoch_end(epoch)
 
-            # 这里放训练epoch的callbacks
-            self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
+            # # 这里放训练epoch的callbacks
+            # self.early_stopping(epoch+1, self.model, val_accuracy, self.optimizer)
 
-            if self.early_stopping.early_stop:
-                print(f'Early Stopping!')
-                break
+            # if self.early_stopping.early_stop:
+            #     print(f'Early Stopping!')
+            #     break
 
 
 class train_ds_model():
