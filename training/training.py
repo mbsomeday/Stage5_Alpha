@@ -651,6 +651,7 @@ class train_ped_model_alpha():
         '''
         # -------------------- 打印训练信息 --------------------
         print('-' * 20, 'Training Info', '-' * 20)
+        print(f'warmup_epochs: {warmup_epochs}')
         print(f'batch_size: {batch_size}')
         print(f'Reload: {reload}')
         print('-' * 20)
@@ -682,7 +683,7 @@ class train_ped_model_alpha():
         # self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
         self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=1e-5, eps=0.001)
         # self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
-        self.lr_schedule = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=warmup_epochs, gamma=0.963, last_epoch=-1)
+        self.lr_schedule = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=warmup_epochs, gamma=0.963, last_epoch=self.warmup_epochs)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
