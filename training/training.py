@@ -28,7 +28,7 @@ class train_ped_model():
     '''
         已将val monitor替换为balanced accuracy
     '''
-    def __init__(self, model_name, model, ds_name_list, batch_size=4, epochs=100, save_prefix=None, gen_img=False):
+    def __init__(self, model_name, model, ds_name_list, batch_size=64, epochs=100, save_prefix=None, gen_img=False):
         self.model_name = model_name
         self.model = model
         self.model = self.model.to(DEVICE)
