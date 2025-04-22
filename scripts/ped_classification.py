@@ -59,7 +59,6 @@ def ped_test(model, ds_name, test_dataset, test_loader):
 
         print(f'test_accuracy: {test_accuracy} - balanced accuracy: {bc}  \n{correct_num}/{len(test_dataset)}')
 
-
         # 绘制混淆矩阵
         label_names = ['ped', 'nonPed']
         title = f'Ped Cls CM on AE4 Recons {ds_name}'
