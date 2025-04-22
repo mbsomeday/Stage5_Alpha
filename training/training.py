@@ -36,7 +36,7 @@ class train_ped_model():
 
         # -------------------- 训练参数设置开始 --------------------
         # self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 1e-5}], weight_decay=1e-5, eps=0.001)
+        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 1e-3}], weight_decay=1e-5, eps=0.001)
 
 
         # -------------------- 训练参数设置结束 --------------------
