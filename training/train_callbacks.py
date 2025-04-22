@@ -7,65 +7,55 @@ from utils.utils import DotDict
 
 
 class EarlyStopping():
-    '''
-        保存当前为止最好的模型, balanced accuracy
-        当loss稳定不变patience个epoch时，结束训练
-    '''
-
-    def __init__(self, save_prefix, top_k=3, patience=10, delta=0.000001,
-                 model_save_dir=None, save_best_cls=False):
+    def __init__(self, save_prefix,
+                 top_k=2,
+                 patience=10,
+                 delta=0.00001):
         '''
-            这个 early stopping关注的是 accuracy
-            model save name: prefix_{epoch}_{acc}.pth
-            save_best_cls: 针对每一个类别，监控并保存在那个类上表现最好的模型
+        :param save_prefix: 存储前缀，例子：EfficientB0_D1，也用于创建save dir
+        :param top_k: 保存几个最好模型
+        :param patience: 当监控的 metric 连续 patience 个 epoch 不增加，则触发early stopping
+        :param delta: 监控metric增加的最小值，当超过该值的时候表示模型有进步
         '''
 
         self.top_k = top_k
         self.save_prefix = save_prefix
-        self.save_best_cls_model = save_best_cls
         self.cur_epoch = 0
 
-        if model_save_dir is not None:
-            self.model_save_dir = model_save_dir
-        else:
-            self.model_save_dir = os.path.join(os.getcwd(), save_prefix+'_ckpt')
+        self.model_save_dir = os.path.join(os.getcwd(), save_prefix)
 
         if not os.path.exists(self.model_save_dir):
             os.mkdir(self.model_save_dir)
 
-        if self.save_best_cls_model:
-            self.save_nonPed_info = DotDict({
-                'patience': patience,
-                'counter': 0,
-                'best_acc': -np.inf,
-                'save_dir': os.path.join(self.model_save_dir, 'nonPed')
-            })
-            self.save_ped_info = DotDict({
-                'patience': patience,
-                'counter': 0,
-                'best_acc': -np.inf,
-                'save_dir': os.path.join(self.model_save_dir, 'ped')
-            })
-
-            # 创建每个类保存ckpt的文件夹
-            if not os.path.exists(self.save_nonPed_info.save_dir):
-                os.mkdir(self.save_nonPed_info.save_dir)
-            if not os.path.exists(self.save_ped_info.save_dir):
-                os.mkdir(self.save_ped_info.save_dir)
+        # if self.save_best_cls_model:
+        #     self.save_nonPed_info = DotDict({
+        #         'patience': patience,
+        #         'counter': 0,
+        #         'best_acc': -np.inf,
+        #         'save_dir': os.path.join(self.model_save_dir, 'nonPed')
+        #     })
+        #     self.save_ped_info = DotDict({
+        #         'patience': patience,
+        #         'counter': 0,
+        #         'best_acc': -np.inf,
+        #         'save_dir': os.path.join(self.model_save_dir, 'ped')
+        #     })
+        #
+        #     # 创建每个类保存ckpt的文件夹
+        #     if not os.path.exists(self.save_nonPed_info.save_dir):
+        #         os.mkdir(self.save_nonPed_info.save_dir)
+        #     if not os.path.exists(self.save_ped_info.save_dir):
+        #         os.mkdir(self.save_ped_info.save_dir)
 
         self.patience = patience
-        self.counter = 0  # 记录loss不变的epoch数目
-        self.early_stop = False # 是否停止训练
+        self.counter = 0            # 记录loss不变的epoch数目
+        self.early_stop = False     # 是否停止训练
         self.best_val_acc = -np.inf
         self.delta = delta
 
         print('-' * 20 + 'Early Stopping Info' + '-' * 20)
         print('Create early stopping, monitoring [validation accuracy] changes')
-        save_msg = f'The best {self.top_k} models will be saved to {self.model_save_dir}\n'
-        if self.save_best_cls_model:
-            save_msg += f'The best {self.top_k} nonPed models will be saved to {self.save_nonPed_info.save_dir}\n'
-            save_msg += f'The best {self.top_k} ped models will be saved to {self.save_ped_info.save_dir}\n'
-        print(save_msg)
+        print(f'The best {self.top_k} models will be saved to {self.model_save_dir}\n')
         print(f'File saving format: {save_prefix}_epoch_acc.pth')
         print(f'Early Stop with patience: {self.patience}')
 
@@ -79,60 +69,32 @@ class EarlyStopping():
         '''
         self.cur_epoch = epoch
 
-        # 先判断整体表现
-        if val_epoch_info.val_bc < self.best_val_acc + self.delta:
+        if val_epoch_info.val_bc < self.best_val_acc + self.delta:       # 表现没有提升的情况
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} / {self.patience}')
-        else:
+        else:       # 表现提升
             metrics = [self.best_val_acc, val_epoch_info.val_bc]
-            self.new_save_checkpoint(model=model, metrics=metrics, optimizer=optimizer, ckpt_dir=self.model_save_dir, save_prefix='Overall ')
+            self.save_checkpoint(model=model, metrics=metrics, optimizer=optimizer, ckpt_dir=self.model_save_dir)
             self.counter = 0
 
-        # 再分类别判断其表现
-        if self.save_best_cls_model:
-            # 保存nonPed
-            if val_epoch_info.val_nonPed_acc < self.save_nonPed_info.best_acc + self.delta:
-                self.save_nonPed_info.counter += 1
-                print(f'NonPed EarlyStopping counter: {self.save_nonPed_info.counter} / {self.patience}')
-            else:
-                metrics = [self.save_nonPed_info.best_acc, val_epoch_info.val_nonPed_acc]
-                self.new_save_checkpoint(model=model, metrics=metrics, optimizer=optimizer, ckpt_dir=self.save_nonPed_info.save_dir, save_prefix='NonPed ')
-
-            # 保存 ped
-            if val_epoch_info.val_ped_acc < self.save_ped_info.best_acc + self.delta:
-                self.save_ped_info.counter += 1
-                print(f'NonPed EarlyStopping counter: {self.save_ped_info.counter} / {self.patience}')
-            else:
-                metrics = [self.save_ped_info.best_acc, val_epoch_info.val_ped_acc]
-                self.new_save_checkpoint(model=model, metrics=metrics, optimizer=optimizer, ckpt_dir=self.save_ped_info.save_dir, save_prefix='Ped ')
-
         # 根据counter判断是否设置停止flag
-        # save_best_cls_model=True
-        if self.save_best_cls_model:
-            if self.counter >= self.patience and self.save_nonPed_info.counter >= self.patience and self.save_ped_info.counter >= self.patience:
-                self.early_stop = True
-        else:
-            if self.counter >= self.patience:
-                self.early_stop = True
+        if self.counter >= self.patience:
+            self.early_stop = True
 
-        current_lr = optimizer.param_groups[0]['lr']
-        if self.save_best_cls_model:
-            msg = f'Epoch:{epoch}, lr:{current_lr}, overall counter:{self.counter}/{self.patience}, nonPed counter: {self.save_nonPed_info.counter}/{self.patience}, ped counter: {self.save_ped_info.counter}/{self.patience}\n'
-        else:
-            msg = f'Epoch:{epoch}, lr:{current_lr}, overall counter:{self.counter}/{self.patience}\n'
-
+        # 记录earlystop信息
+        msg = f'Epoch:{epoch}, overall counter:{self.counter}/{self.patience}\n'
         with open(os.path.join(self.model_save_dir, 'cb_EarlyStop.txt'), 'a') as f:
             f.write(msg)
 
 
-    def new_del_redundant_weights(self, ckpt_dir):
+    def del_redundant_weights(self, ckpt_dir):
         all_weights_temp = os.listdir(ckpt_dir)
         all_weights = []
         for weights in all_weights_temp:
             if weights.endswith('.pth'):
                 all_weights.append(weights)
 
-        # 按存储格式来： save_name = prefix_{epoch}_{acc}.pth
+        # 按存储格式来： save_name = prefix_{epoch}_{balanced_acc}.pth
         if len(all_weights) > self.top_k:
             sorted = []
             for weight in all_weights:
@@ -147,14 +109,12 @@ class EarlyStopping():
             print('Del file:', del_path)
 
 
-    def new_save_checkpoint(self, model, metrics, optimizer, ckpt_dir, save_prefix=None):
-        # save_prefix的目的是说明当前是overall_bc, nonPed_bc还是ped_bc最好的情况
-        msg = '' if save_prefix is None else save_prefix
-        msg += f'Performance increases ({metrics[0]} --> {metrics[1]}). Saving Model.'
-        print(msg)
+    def save_checkpoint(self, model, metrics, optimizer, ckpt_dir):
 
-        self.new_del_redundant_weights(ckpt_dir)
-        save_name = f"{self.save_prefix}-{self.cur_epoch:03d}-{metrics[1]:.5f}.pth"
+        print(f'Performance increases ({metrics[0]} --> {metrics[1]}). Saving Model.')
+
+        self.del_redundant_weights(ckpt_dir)
+        save_name = f"{self.save_prefix}-{self.cur_epoch:02d}-{metrics[1]:.5f}.pth"     # 格式：prefix_{epoch}_{balanced_acc}.pth
         self.best_val_acc = metrics[1]
 
         checkpoint = {
@@ -162,94 +122,11 @@ class EarlyStopping():
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'best_val_bc': self.best_val_acc,
-            # 'best_nonPed_acc': self.save_nonPed_info.best_acc,
-            # 'best_ped_acc': self.save_ped_info.best_acc,
-            'save_info': save_prefix
         }
-        if self.save_best_cls_model:
-            checkpoint['best_nonPed_acc'] = self.save_nonPed_info.best_acc
-            checkpoint['best_ped_acc'] = self.save_ped_info.best_acc
 
         save_path = os.path.join(ckpt_dir, save_name)
         torch.save(checkpoint, save_path)
 
-
-    # def __call__(self, epoch, model, val_acc, optimizer, lr_schedule=None, val_epoch_info=None):
-    #     # 表现没有超过best
-    #     if val_acc < self.best_val_acc + self.delta:
-    #         self.counter += 1
-    #         print(f'EarlyStopping counter: {self.counter} / {self.patience}')
-    #         # 加入了nonped和ped的counter
-    #         # if self.counter >= self.patience:
-    #         #     self.early_stop = True
-    #     # 比best表现好
-    #     else:
-    #         self.save_checkpoint(val_acc, model, optimizer, epoch)
-    #         self.counter = 0
-    #
-    #     # 按类别保存
-    #     if self.save_best_cls:
-    #         # 先处理nonPed
-    #         cur_nonPed_acc = val_epoch_info.val_nonPed_acc
-    #         if self.save_cls_info.nonPed_best_acc < cur_nonPed_acc + self.delta:
-    #             self.save_cls_info.nonPed_counter += 1
-    #             print(f'NonPed EarlyStopping counter: {self.save_cls_info.nonPed_counter} / {self.patience}')
-    #         else:
-    #             self.save_checkpoint()
-    #
-    #     if self.counter >= self.patience and self.save_cls_info.nonPed_counter >= self.patience and self.save_cls_info.ped_counter >= self.patience:
-    #         self.early_stop = True
-    #
-    #     if epoch > self.warmup_epochs:
-    #         lr_schedule.step(val_acc)
-    #
-    #     current_lr = optimizer.param_groups[0]['lr']
-    #
-    #     msg = f'Epoch:{epoch}, lr:{current_lr}, early stop counter:{self.counter}/{self.patience}\n'
-    #     with open(os.path.join(self.model_save_dir, 'cb_EarlyStop.txt'), 'a') as f:
-    #         f.write(msg)
-
-    # 删除多余的权重文件
-    # def del_redundant_weights(self):
-    #     # 删除已经有的文件,只保留n+1个模型
-    #     all_weights_temp = os.listdir(self.model_save_dir)
-    #     all_weights = []
-    #     for weights in all_weights_temp:
-    #         if weights.endswith('.pth'):
-    #             all_weights.append(weights)
-    #
-    #     # 按存储格式来： save_name = prefix_{epoch}_{acc}.pth
-    #     if len(all_weights) > self.top_k:
-    #         sorted = []
-    #         for weight in all_weights:
-    #             val_acc = weight.split('-')[-1]
-    #             sorted.append((weight, val_acc))
-    #
-    #         sorted.sort(key=lambda w: w[1], reverse=False)
-    #         print('After sorting:', sorted)
-    #
-    #         del_path = os.path.join(self.model_save_dir, sorted[0][0])
-    #         os.remove(del_path)
-    #         print('Del file:', del_path)
-    #
-    # def save_checkpoint(self, val_acc, model, optimizer, epoch):
-    #     '''Saves model when validation loss decrease.'''
-    #
-    #     print(f'Validation accuracy increased ({self.best_val_acc:.6f} --> {val_acc:.6f}).  Saving model.')
-    #
-    #     self.del_redundant_weights()
-    #     save_name = f"{self.save_prefix}-{epoch:03d}-{val_acc:.6f}.pth"
-    #     self.best_val_acc = val_acc
-    #     checkpoint = {
-    #         'epoch': epoch,
-    #         'model_state_dict': model.state_dict(),
-    #         'optimizer_state_dict': optimizer.state_dict(),
-    #         'best_val_acc': self.best_val_acc
-    #     }
-    #
-    #     # 存储权重
-    #     save_path = os.path.join(self.model_save_dir, save_name)
-    #     torch.save(checkpoint, save_path)
 
 
 class ImageLogger():
