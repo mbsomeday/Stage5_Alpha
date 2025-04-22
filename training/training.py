@@ -680,11 +680,11 @@ class train_ped_model_alpha():
         self.val_nonPed_num, self.val_ped_num = self.val_dataset.get_ped_cls_num()
 
         # -------------------- 训练配置 --------------------
-        # self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
         # self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=1e-5, )
-        self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 1e-5}], weight_decay=1e-5, eps=0.001)
+        # self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 1e-5}], weight_decay=1e-5, eps=0.001)
         # self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
-        self.lr_schedule = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=warmup_epochs, gamma=0.963, last_epoch=self.warmup_epochs)
+        # self.lr_schedule = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=warmup_epochs, gamma=0.963, last_epoch=self.warmup_epochs)
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
         # -------------------- Callbacks --------------------
@@ -859,6 +859,7 @@ class train_ped_model_alpha():
             y_true.extend(labels.cpu().numpy())
             y_pred.extend(pred.cpu().numpy())
 
+            # 用于loss记录
             training_loss += loss.item()
 
             self.optimizer.zero_grad()
@@ -1027,7 +1028,7 @@ class train_ped_model_alpha():
             # self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
 
             # ------------------------ 学习率调整 ------------------------
-            self.lr_decay(epoch+1)
+            # self.lr_decay(epoch+1)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
