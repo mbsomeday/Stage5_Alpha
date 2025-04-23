@@ -68,6 +68,8 @@ class EarlyStopping():
             目的是monitor总体及各类别的accuracy
         '''
         self.cur_epoch = epoch
+        cur_lr = optimizer.param_groups[0]['lr']
+        print(f'Current lr: {cur_lr}')
 
         if val_epoch_info.val_bc < self.best_val_acc + self.delta:       # 表现没有提升的情况
             self.counter += 1
@@ -82,7 +84,7 @@ class EarlyStopping():
             self.early_stop = True
 
         # 记录earlystop信息
-        msg = f'Epoch:{epoch}, overall counter:{self.counter}/{self.patience}\n'
+        msg = f"Epoch:{epoch}, overall counter:{self.counter}/{self.patience}, current lr: {cur_lr}\n"
         with open(os.path.join(self.model_save_dir, 'cb_EarlyStop.txt'), 'a') as f:
             f.write(msg)
 
