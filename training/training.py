@@ -991,10 +991,10 @@ class train_ped_model_alpha():
 
     def lr_decay(self, epoch):
         # warm-up阶段
-        if (epoch + 1) <= self.warmup_epochs:        # warm-up阶段
-            self.optimizer.param_groups[0]['lr'] = self.base_lr * (epoch + 1) / self.warmup_epochs
+        if epoch <= self.warmup_epochs:        # warm-up阶段
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * epoch / self.warmup_epochs
         else:
-            self.optimizer.param_groups[0]['lr'] = self.base_lr * 0.963 ** ((epoch + 1) / 3)        # gamma=0.963, lr decay epochs=3
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * 0.963 ** (epoch / 3)        # gamma=0.963, lr decay epochs=3
 
         # else:       # monitored metric持续几个epoch不变，lr decay阶段,加入了ped和nonPed的count
         #     if self.early_stopping.counter > self.lr_patience:
@@ -1018,6 +1018,7 @@ class train_ped_model_alpha():
         print('Total Val Samples:', len(self.val_dataset))
 
         for epoch in range(self.start_epoch, self.epochs):
+            # ------------------------ 开始训练 ------------------------
             print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             train_epoch_info = self.train_one_epoch()
             val_epoch_info = self.val_on_epoch_end(epoch)
@@ -1027,7 +1028,7 @@ class train_ped_model_alpha():
             self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
 
             # ------------------------ 学习率调整 ------------------------
-            self.lr_decay(epoch)
+            self.lr_decay(epoch + 1)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
@@ -1036,8 +1037,22 @@ class train_ped_model_alpha():
 
 
 class train_ds_model_alpha():
-    def __init__(self, model_obj: str, ds_name_list, batch_size, epochs=50, reload=None, base_lr=0.256, warmup_epochs=0, lr_patience=5):
+    def __init__(self, model_obj: str,
+                 batch_size,
+                 ds_name_list,
+                 epochs=50,
+                 reload=None,
+                 base_lr=0.01,
+                 warmup_epochs=0,
+                 lr_patience=5):
         super().__init__()
+        # -------------------- 打印训练信息 --------------------
+        print('-' * 20, 'Training Info', '-' * 20)
+        print(f'Task: dataset classification')
+        print(f'warmup_epochs: {warmup_epochs}')
+        print(f'batch_size: {batch_size}')
+        print(f'Reload: {reload}')
+        print('-' * 20)
 
         # -------------------- 成员变量 --------------------
         self.warmup_epochs = warmup_epochs
@@ -1065,15 +1080,17 @@ class train_ds_model_alpha():
         # self.loss_fn = torch.nn.CrossEntropyLoss()
 
         # efficientNet
-        self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=0.9, momentum=0.9)
-        self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, self.lr_lambda)  # 学习率衰减策略
+        # self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=0.9, momentum=0.9)
+        # self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, self.lr_lambda)  # 学习率衰减策略
+        self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=1e-5, eps=0.001)
+
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
         # -------------------- Callbacks --------------------
         save_prefix = model_obj.split('.')[-1] + '_dsCls'
         callback_savd_dir = save_prefix
 
-        self.early_stopping = EarlyStopping(save_prefix, top_k=3, model_save_dir=callback_savd_dir, save_best_cls=False)
+        self.early_stopping = EarlyStopping(save_prefix, top_k=2)
         train_num_info = [len(self.train_dataset), -1, -1]
         val_num_info = [len(self.val_dataset), -1, -1]
 
@@ -1195,15 +1212,10 @@ class train_ds_model_alpha():
 
     def lr_decay(self, epoch):
         # warm-up阶段
-        if (epoch + 1) <= self.warmup_epochs:
-            self.optimizer.param_groups[0]['lr'] = self.base_lr * (epoch + 1) / self.warmup_epochs
-        # monitored metric持续几个epoch不变，lr decay阶段
+        if epoch <= self.warmup_epochs:        # warm-up阶段
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * epoch / self.warmup_epochs
         else:
-            # EfficientNet
-            self.scheduler.step()
-            # # VGG16
-            # if self.early_stopping.counter > self.lr_patience:
-            #     self.optimizer.param_groups[0]['lr'] *= 0.5
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * 0.963 ** (epoch / 3)        # gamma=0.963, lr decay epochs=3
 
     def train_model(self):
 
@@ -1218,17 +1230,17 @@ class train_ds_model_alpha():
         print('Total Val Samples:', len(self.val_dataset))
 
         for epoch in range(self.start_epoch, self.epochs):
-            print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
-            # ------------------------ 学习率调整 ------------------------
-            self.lr_decay(epoch + 1)
-
             # ------------------------ 开始训练 ------------------------
+            print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
             train_epoch_info = self.train_one_epoch()
             val_epoch_info = self.val_on_epoch_end(epoch)
 
             # ------------------------ 训练epoch的callbacks ------------------------
             self.early_stopping(epoch+1, self.model, self.optimizer, val_epoch_info)
             self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
+
+            # ------------------------ 学习率调整 ------------------------
+            self.lr_decay(epoch + 1)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
