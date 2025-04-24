@@ -14,6 +14,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import confusion_matrix
+from utils.utils import load_model
 
 from data.dataset import my_dataset
 from training.train_callbacks import EarlyStopping, Epoch_logger
@@ -724,7 +725,10 @@ class train_ped_model_alpha():
 
         # -------------------- 获取ds model，目的是融入 cam loss --------------------
         if self.camLoss_coefficient is not None:
+            print('现在是XAI-guided')
             self.ds_model = get_obj_from_str(self.ds_model_obj)(num_class=4)
+            ds_weights = r'/kaggle/input/stage5-weights-effidscls/efficientNetB0_dsCls-10-0.97636.pth'
+            self.ds_model = load_model(self.ds_model, ds_weights)
             self.ds_model.eval()
             self.ds_model = self.ds_model.to(DEVICE)
 
