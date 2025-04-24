@@ -49,7 +49,7 @@ def get_orgPed_model(ds_name):
 
 def load_model(model, weights_path):
     print(f'Loading model from {weights_path}')
-    ckpts = torch.load(weights_path, map_location='cuda' if torch.cuda.is_available() else 'cpu', weights_only=True)
+    ckpts = torch.load(weights_path, map_location='cuda' if torch.cuda.is_available() else 'cpu', weights_only=False)
     model.load_state_dict(ckpts['model_state_dict'])
     return model
 
