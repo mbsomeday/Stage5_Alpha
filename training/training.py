@@ -653,6 +653,7 @@ class train_ped_model_alpha():
                  warmup_epochs=0,
                  lr_patience=5,
                  camLoss_coefficient=None,
+                 ds_model_obj=None,
                  save_best_cls=False):
         '''
         todo: 为什么 camLoss_coefficient 不设置为0？
@@ -675,6 +676,7 @@ class train_ped_model_alpha():
         self.lr_patience = lr_patience
         self.save_best_cls = save_best_cls
         self.camLoss_coefficient = camLoss_coefficient
+        self.ds_model_obj = ds_model_obj
 
         # -------------------- 获取 ped model for train --------------------
         self.model = get_obj_from_str(model_obj)(num_class=2)
@@ -692,7 +694,6 @@ class train_ped_model_alpha():
         self.val_nonPed_num, self.val_ped_num = self.val_dataset.get_ped_cls_num()
 
         # -------------------- 训练配置 --------------------
-        # self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.base_lr, momentum=0.9)
         self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.base_lr, weight_decay=1e-5, eps=0.001)
         # self.optimizer = torch.optim.RMSprop([{'params': self.model.parameters(), 'initial_lr': 1e-5}], weight_decay=1e-5, eps=0.001)
         # self.lr_schedule = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, min_lr=1e-6, patience=lr_patience)   # 是分类任务，所以监控accuracy
@@ -723,7 +724,7 @@ class train_ped_model_alpha():
 
         # -------------------- 获取ds model，目的是融入 cam loss --------------------
         if self.camLoss_coefficient is not None:
-            self.ds_model = get_vgg_DSmodel()
+            self.ds_model = get_obj_from_str(self.ds_model_obj)(num_class=4)
             self.ds_model.eval()
             self.ds_model = self.ds_model.to(DEVICE)
 
@@ -837,27 +838,27 @@ class train_ped_model_alpha():
 
             loss_cls = self.loss_fn(out, labels)
 
-            # # ------------ 计算 cam loss ------------
-            # # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
-            # nonPed_idx = labels == 0
-            # nonPed_images = images[nonPed_idx]
-            # if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
-            #     masked_images = np.zeros(shape=nonPed_images.shape)
-            #     for img_idx, image in enumerate(nonPed_images):
-            #         image = torch.unsqueeze(image, dim=0)
-            #         heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
-            #         masked_images[img_idx] = masked_image.cpu().detach()
-            #     masked_images = torch.tensor(masked_images)
-            #     masked_images = masked_images.to(DEVICE)
-            #     masked_images = masked_images.type(torch.float32)
-            #     masked_out = self.model(masked_images)
-            #
-            #     masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
-            #     loss = loss_cls + self.camLoss_coefficient * masked_loss
-            # else:
-            #     loss = loss_cls
+            # ------------ 计算 cam loss ------------
+            # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
+            nonPed_idx = labels == 0
+            nonPed_images = images[nonPed_idx]
+            if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
+                masked_images = np.zeros(shape=nonPed_images.shape)
+                for img_idx, image in enumerate(nonPed_images):
+                    image = torch.unsqueeze(image, dim=0)
+                    heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
+                    masked_images[img_idx] = masked_image.cpu().detach()
+                masked_images = torch.tensor(masked_images)
+                masked_images = masked_images.to(DEVICE)
+                masked_images = masked_images.type(torch.float32)
+                masked_out = self.model(masked_images)
 
-            loss = loss_cls         # baseline时不计算camloss
+                masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
+                loss = loss_cls + self.camLoss_coefficient * masked_loss
+            else:
+                loss = loss_cls
+
+            # loss = loss_cls         # baseline时不计算camloss
 
             y_true.extend(labels.cpu().numpy())
             y_pred.extend(pred.cpu().numpy())
@@ -995,14 +996,6 @@ class train_ped_model_alpha():
             self.optimizer.param_groups[0]['lr'] = self.base_lr * epoch / self.warmup_epochs
         else:
             self.optimizer.param_groups[0]['lr'] = self.base_lr * 0.963 ** (epoch / 3)        # gamma=0.963, lr decay epochs=3
-
-        # else:       # monitored metric持续几个epoch不变，lr decay阶段,加入了ped和nonPed的count
-        #     if self.early_stopping.counter > self.lr_patience:
-        #         self.optimizer.param_groups[0]['lr'] *= 0.5
-        #     elif self.early_stopping.save_best_cls_model and self.early_stopping.save_nonPed_info.counter > self.lr_patience:
-        #         self.optimizer.param_groups[0]['lr'] *= 0.5
-        #     elif self.early_stopping.save_best_cls_model and self.early_stopping.save_ped_info.counter > self.lr_patience:
-        #         self.optimizer.param_groups[0]['lr'] *= 0.5
 
 
     def train_model(self):
