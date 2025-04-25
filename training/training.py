@@ -843,12 +843,10 @@ class train_ped_model_alpha():
             loss_cls = self.loss_fn(out, labels)
 
             # ------------ 计算 cam loss ------------
-            # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
-            nonPed_idx = labels == 0
-            nonPed_images = images[nonPed_idx]
-            if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
-                masked_images = np.zeros(shape=nonPed_images.shape)
-                for img_idx, image in enumerate(nonPed_images):
+            # 试验 case1: 对所有图片都进行cam_loss
+            if self.camLoss_coefficient is not None:
+                masked_images = np.zeros(shape=images.shape)
+                for img_idx, image in enumerate(images):
                     image = torch.unsqueeze(image, dim=0)
                     heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
                     masked_images[img_idx] = masked_image.cpu().detach()
@@ -857,8 +855,25 @@ class train_ped_model_alpha():
                 masked_images = masked_images.type(torch.float32)
                 masked_out = self.model(masked_images)
 
-                masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
+                masked_loss = self.loss_fn(masked_out, labels)
                 loss = (1 - self.camLoss_coefficient) * loss_cls + self.camLoss_coefficient * masked_loss
+
+            # # case2: 生成masked image，这里只对non ped进行mask
+            # nonPed_idx = labels == 0
+            # nonPed_images = images[nonPed_idx]
+            # if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
+            #     masked_images = np.zeros(shape=nonPed_images.shape)
+            #     for img_idx, image in enumerate(nonPed_images):
+            #         image = torch.unsqueeze(image, dim=0)
+            #         heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
+            #         masked_images[img_idx] = masked_image.cpu().detach()
+            #     masked_images = torch.tensor(masked_images)
+            #     masked_images = masked_images.to(DEVICE)
+            #     masked_images = masked_images.type(torch.float32)
+            #     masked_out = self.model(masked_images)
+            #     masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
+            #
+            #     loss = (1 - self.camLoss_coefficient) * loss_cls + self.camLoss_coefficient * masked_loss
             else:
                 loss = loss_cls
 
@@ -934,12 +949,10 @@ class train_ped_model_alpha():
                 loss_cls = self.loss_fn(out, labels)
 
                 # ------------ 计算 cam loss ------------
-                # 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
-                nonPed_idx = labels == 0
-                nonPed_images = images[nonPed_idx]
-                if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
-                    masked_images = np.zeros(shape=nonPed_images.shape)
-                    for img_idx, image in enumerate(nonPed_images):
+                # 试验 case1: 对所有图片都进行cam_loss
+                if self.camLoss_coefficient is not None:
+                    masked_images = np.zeros(shape=images.shape)
+                    for img_idx, image in enumerate(images):
                         image = torch.unsqueeze(image, dim=0)
                         heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
                         masked_images[img_idx] = masked_image.cpu().detach()
@@ -948,9 +961,26 @@ class train_ped_model_alpha():
                     masked_images = masked_images.type(torch.float32)
                     masked_out = self.model(masked_images)
 
-                    masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
-
+                    masked_loss = self.loss_fn(masked_out, labels)
                     loss = (1 - self.camLoss_coefficient) * loss_cls + self.camLoss_coefficient * masked_loss
+
+                # case2: 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
+                # nonPed_idx = labels == 0
+                # nonPed_images = images[nonPed_idx]
+                # if self.camLoss_coefficient is not None and nonPed_images.shape[0] > 0:
+                #     masked_images = np.zeros(shape=nonPed_images.shape)
+                #     for img_idx, image in enumerate(nonPed_images):
+                #         image = torch.unsqueeze(image, dim=0)
+                #         heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
+                #         masked_images[img_idx] = masked_image.cpu().detach()
+                #     masked_images = torch.tensor(masked_images)
+                #     masked_images = masked_images.to(DEVICE)
+                #     masked_images = masked_images.type(torch.float32)
+                #     masked_out = self.model(masked_images)
+                #
+                #     masked_loss = self.loss_fn(masked_out, labels[nonPed_idx])
+                #
+                #     loss = (1 - self.camLoss_coefficient) * loss_cls + self.camLoss_coefficient * masked_loss
                 else:
                     loss = loss_cls
 
