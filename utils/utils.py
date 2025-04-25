@@ -1,8 +1,6 @@
 import torch, importlib
 from sklearn.metrics import confusion_matrix
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 from torchvision import utils as vutils
 
 from models.VGG import vgg16_bn
