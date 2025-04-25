@@ -11,7 +11,7 @@ from tqdm import tqdm
 import numpy as np
 from torchvision import models
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import confusion_matrix
 from utils.utils import load_model
