@@ -727,7 +727,8 @@ class train_ped_model_alpha():
         if self.camLoss_coefficient is not None:
             self.ds_model = get_obj_from_str(self.ds_model_obj)(num_class=4)
             # ds_weights = r'/kaggle/input/stage5-weights-effidscls/efficientNetB0_dsCls-10-0.97636.pth'
-            ds_weights = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+            # ds_weights = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+            ds_weights = r'/veracruz/home/j/jwang/data/model_weights/efficientNetB0_dsCls-10-0.97636.pth'
             self.ds_model = load_model(self.ds_model, ds_weights)
             self.ds_model.eval()
             self.ds_model = self.ds_model.to(DEVICE)
