@@ -55,7 +55,7 @@ class my_test():
         self.grad_layer = 'features'
         self._register_hooks(self.ds_model, self.grad_layer)
 
-        ds_name_list = ['D2']
+        ds_name_list = ['D1']
         batch_size = 48
 
         self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
