@@ -4,7 +4,7 @@ curPath = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
 
-import torch
+import torch, argparse
 from torchvision import models
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -16,6 +16,16 @@ from sklearn.metrics import confusion_matrix
 from data.dataset import my_dataset
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_weights', type=str)
+    parser.add_argument('--ds_name', type=str, help='dataset that the model is tested on')
+    parser.add_argument('--txt_name', type=str)
+
+    args = parser.parse_args()
+    return args
 
 def load_model(model, weights_path):
     print(f'Loading model from {weights_path}')
@@ -35,11 +45,23 @@ class TemporaryGrad(object):
         torch.set_grad_enabled(self.prev)
 
 
+
+DICT = {
+    'M1':  r'/data/jcampos/jiawei_data/model_weights/Stage5/efficientB0_0.2CAMLoss_twoCls/efficientNetB0_D1_CAMLoss-17-0.97757.pth',
+    'M2':  r'/data/jcampos/jiawei_data/model_weights/Stage5/efficientB0_0.2CAMLoss_twoCls/efficientNetB0_D2_CAMLoss-29-0.95375.pth',
+    'M3': r'/data/jcampos/jiawei_data/model_weights/Stage5/efficientB0_0.2CAMLoss_twoCls/efficientNetB0_D3_CAMLoss-25-0.95017.pth',
+    'M4':  r'/data/jcampos/jiawei_data/model_weights/Stage5/efficientB0_0.2CAMLoss_twoCls/efficientNetB0_D4_CAMLoss-13-0.94797.pth',
+}
+
+
+
 class my_test():
-    def __init__(self):
+    def __init__(self, model_weights, ds_name):
+        self.model_weights = model_weights
+        self.ds_name = ds_name
+
         self.ped_model = models.efficientnet_b0(weights=None, num_classes=2)
-        ped_weights = r'/data/jcampos/jiawei_data/model_weights/Stage5/efficientB0_0.2CAMLoss_twoCls/efficientNetB0_D3_CAMLoss-25-0.95017.pth'
-        self.ped_model = load_model(self.ped_model, ped_weights)
+        self.ped_model = load_model(self.ped_model, self.model_weights)
         self.ped_model.eval()
         self.ped_model.to(DEVICE)
 
@@ -55,7 +77,7 @@ class my_test():
         self.grad_layer = 'features'
         self._register_hooks(self.ds_model, self.grad_layer)
 
-        ds_name_list = ['D4']
+        ds_name_list = [ds_name]
         batch_size = 48
 
         self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
@@ -172,7 +194,13 @@ class my_test():
 
 
 if __name__ == '__main__':
-    tt = my_test()
+    args = get_args()
+
+    model_weights = args.model_weights
+    ds_name = args.ds_name
+    txt_name = args.txt_name
+
+    tt = my_test(model_weights, ds_name)
     tt.val_and_test()
 
 
