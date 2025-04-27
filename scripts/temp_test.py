@@ -7,10 +7,15 @@ import numpy as np
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import confusion_matrix
 
-from utils.utils import load_model
 from data.dataset import my_dataset
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+def load_model(model, weights_path):
+    print(f'Loading model from {weights_path}')
+    ckpts = torch.load(weights_path, map_location='cuda' if torch.cuda.is_available() else 'cpu', weights_only=False)
+    model.load_state_dict(ckpts['model_state_dict'])
+    return model
 
 class TemporaryGrad(object):
     '''
@@ -129,7 +134,7 @@ class my_test():
         ped_acc_num = 0
 
         with torch.no_grad():
-            for data in tqdm(self.val_loader):
+            for data in tqdm(self.test_loader):
                 images = data['image']
                 labels = data['ped_label']
                 images = images.to(DEVICE)
@@ -163,7 +168,9 @@ class my_test():
 
 
 
-
+if __name__ == '__main__':
+    tt = my_test()
+    tt.val_and_test()
 
 
 
