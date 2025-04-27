@@ -38,7 +38,7 @@ class TemporaryGrad(object):
 class my_test():
     def __init__(self):
         self.ped_model = models.efficientnet_b0(weights=None, num_classes=2)
-        ped_weights = r'/data/jcampos/jiawei_data/model_weights/Stage5/efficientB0_0.2CAMLoss_twoClsefficientNetB0_D3_CAMLoss-25-0.95017.pth'
+        ped_weights = r'/data/jcampos/jiawei_data/model_weights/Stage5/efficientB0_0.2CAMLoss_twoCls/efficientNetB0_D3_CAMLoss-25-0.95017.pth'
         self.ped_model = load_model(self.ped_model, ped_weights)
         self.ped_model.eval()
         self.ped_model.to(DEVICE)
