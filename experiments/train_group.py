@@ -186,7 +186,7 @@ def vgg16_bn(num_class=3):
     return VGG(make_layers(cfg['D'], batch_norm=True), num_class)
 
 
-# train
+# training
 def train():
     ds_base = r'/kaggle/input/stage4-d1-ecpdaytime-7augs/Stage4_D1_ECPDaytime_7Augs'
 

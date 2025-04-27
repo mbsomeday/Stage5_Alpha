@@ -681,8 +681,6 @@ class train_ped_model_alpha():
 
         # -------------------- 获取 ped model for train --------------------
         self.model = get_obj_from_str(model_obj)(num_class=2)
-        m_weights = r'/data/jcampos/jiawei_data/model_weights/Stage5/efficientB0_0.2CAMLoss_twoCls/efficientNetB0_D1_CAMLoss-17-0.97757.pth'
-        self.model = load_model(self.model, m_weights)
         self.model = self.model.to(DEVICE)
 
         # -------------------- 获取数据 --------------------
@@ -720,10 +718,10 @@ class train_ped_model_alpha():
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
-        # self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
-        #                                  ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info,
-        #                                  task='ped_cls'
-        #                                  )
+        self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
+                                         ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info,
+                                         task='ped_cls'
+                                         )
 
         # -------------------- 获取ds model，目的是融入 cam loss --------------------
         if self.camLoss_coefficient is not None:
@@ -1007,10 +1005,8 @@ class train_ped_model_alpha():
 
         val_nonPed_acc = nonPed_acc_num / self.val_nonPed_num
         val_ped_acc = ped_acc_num / self.val_ped_num
-        bc = balanced_accuracy_score(y_true, y_pred)
 
         print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.6f}({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
-        print(bc)
 
         val_epoch_info = {
             'epoch': epoch,
