@@ -80,8 +80,8 @@ class my_test():
         ds_name_list = [ds_name]
         batch_size = 48
 
-        self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
-        self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
+        # self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
+        # self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
 
         self.val_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
