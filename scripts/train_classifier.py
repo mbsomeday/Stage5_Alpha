@@ -53,7 +53,8 @@ ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_l
                                         )
 
 
-ped_training.train_model()
+# ped_training.train_model()
+ped_training.val_on_epoch_end(-1)
 
 # ds_training = train_ds_model_alpha(model_obj=model_obj, batch_size=batch_size, ds_name_list=['D1', 'D2', 'D3', 'D4'], epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5)
 #
