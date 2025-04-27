@@ -196,7 +196,7 @@ class my_test():
 if __name__ == '__main__':
     args = get_args()
 
-    model_weights = args.model_weights
+    model_weights = DICT[args.model_weights]
     ds_name = args.ds_name
     txt_name = args.txt_name
 
