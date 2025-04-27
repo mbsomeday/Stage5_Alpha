@@ -132,12 +132,9 @@ class my_test():
 
     def val_and_test(self):
 
-        val_loss = 0.0
         val_correct_num = 0
         y_true = []
         y_pred = []
-        nonPed_acc_num = 0
-        ped_acc_num = 0
 
         with torch.no_grad():
             for data in tqdm(self.test_loader):
@@ -154,9 +151,9 @@ class my_test():
                 masked_images = torch.tensor(masked_images)
                 masked_images = masked_images.to(DEVICE)
                 masked_images = masked_images.type(torch.float32)
-                masked_out = self.ped_model(masked_images)
 
-                out = masked_out(images)
+                out = self.ped_model(masked_images)
+
                 _, pred = torch.max(out, 1)
 
                 val_correct_num += (pred == labels).sum()
