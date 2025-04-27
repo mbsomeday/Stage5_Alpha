@@ -727,8 +727,8 @@ class train_ped_model_alpha():
         if self.camLoss_coefficient is not None:
             self.ds_model = get_obj_from_str(self.ds_model_obj)(num_class=4)
             # ds_weights = r'/kaggle/input/stage5-weights-effidscls/efficientNetB0_dsCls-10-0.97636.pth'
-            # ds_weights = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
-            ds_weights = r'/veracruz/home/j/jwang/data/model_weights/efficientNetB0_dsCls-10-0.97636.pth'
+            ds_weights = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+            # ds_weights = r'/veracruz/home/j/jwang/data/model_weights/efficientNetB0_dsCls-10-0.97636.pth'
             self.ds_model = load_model(self.ds_model, ds_weights)
             self.ds_model.eval()
             self.ds_model = self.ds_model.to(DEVICE)
@@ -1006,7 +1006,10 @@ class train_ped_model_alpha():
         val_nonPed_acc = nonPed_acc_num / self.val_nonPed_num
         val_ped_acc = ped_acc_num / self.val_ped_num
 
+        bc = balanced_accuracy_score(y_true, y_pred)
+
         print(f'Val Loss:{val_loss:.6f}, Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.6f}({ped_acc_num}/{self.val_ped_num}), ({val_correct_num}/{len(self.val_dataset)})]')
+        print(bc)
 
         val_epoch_info = {
             'epoch': epoch,
