@@ -842,6 +842,7 @@ class train_ped_model_alpha():
             _, pred = torch.max(out, 1)
 
             # 筛出导致serWarning: y_pred contains classes not in y_true的原因
+            print(f'pred:{pred}')
             if pred != torch.Tensor([0]).to(DEVICE) and pred != torch.tensor([1]).to(DEVICE):
                 print(f'img name: {data["img_path"]}')
 
