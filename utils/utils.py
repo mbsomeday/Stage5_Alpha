@@ -1,4 +1,4 @@
-import torch, importlib
+import torch, importlib, os
 from sklearn.metrics import confusion_matrix
 import pandas as pd
 from torchvision import utils as vutils
@@ -89,6 +89,14 @@ def save_image_tensor(input_tensor: torch.Tensor, filename):
 
 
 
+def get_gpu_info():
+    '''
+        打印出显卡信息
+    '''
+    n_gpu = torch.cuda.device_count()
+    gpu_name = torch.cuda.get_device_name(torch.cuda.current_device())
+
+    print(f'GPU num: {n_gpu}, g_name: {gpu_name}')
 
 
 
