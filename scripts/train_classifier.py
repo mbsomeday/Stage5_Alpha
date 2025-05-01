@@ -8,6 +8,7 @@ import argparse
 
 from models.VGG import vgg16_bn
 from training.training import train_ped_model_alpha, train_ds_model_alpha
+from utils.utils import get_gpu_info
 
 
 def get_args():
@@ -44,6 +45,10 @@ save_best_cls = args.save_best_cls
 #                                     save_prefix=None, epochs=epochs, base_lr=0.01, warmup_epochs=2, lr_patience=5,
 #                                     camLoss_coefficient=camLoss_coefficient, save_best_cls=save_best_cls, gen_img=False)
 # my_training.train_model()
+
+# 打印当前使用的gpu信息
+get_gpu_info()
+
 
 ds_name_list = [ds_name]
 
