@@ -910,6 +910,9 @@ class train_ped_model_alpha():
         train_nonPed_acc = nonPed_acc_num / self.train_nonPed_num
         train_ped_acc = ped_acc_num / self.train_ped_num
 
+        cm = confusion_matrix(y_true, y_pred)
+        print(f'training cm:\n {cm}')
+
         print(f'Training Loss:{training_loss:.6f}, Balanced accuracy: {training_bc:.6f}, accuracy: {train_accuracy:.6f}, [0: {train_nonPed_acc:.6f}({nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.6f}({ped_acc_num}/{self.train_ped_num}), ({training_correct_num}/{len(self.train_dataset)})]')
 
         train_epoch_info = {
