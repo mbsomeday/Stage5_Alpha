@@ -15,7 +15,7 @@ from sklearn.metrics import confusion_matrix
 from data.dataset import my_dataset
 from models.VGG import vgg16_bn
 from configs.paths_dict import PATHS
-from utils.utils import plot_cm
+from utils.utils import plot_cm, get_gpu_info
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -97,6 +97,9 @@ def ds_test(model, test_dataset, test_loader):
 
 
 if __name__ == '__main__':
+    # 打印当前使用的gpu信息
+    get_gpu_info()
+
     args = get_args()
     ds_name = args.ds_name
     batch_size = args.batch_size
