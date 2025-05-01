@@ -15,12 +15,13 @@ from sklearn.metrics import confusion_matrix
 from data.dataset import my_dataset
 from models.VGG import vgg16_bn
 from configs.paths_dict import PATHS
-from utils.utils import plot_cm, get_gpu_info
+from utils.utils import plot_cm, get_gpu_info, get_obj_from_str
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--model_obj', type=str)
     parser.add_argument('-t', '--train_on', type=str)
     parser.add_argument('-d', '--ds_name', type=str, help='dataset that the model is tested on')
     parser.add_argument('-b', '--batch_size', type=int, default=4)
@@ -105,6 +106,7 @@ if __name__ == '__main__':
     batch_size = args.batch_size
     ds_key_name = args.ds_key_name
     txt_name = args.txt_name
+    model_obj = args.model_obj
 
     if args.weights_path is not None:
         weights_path = args.weights_path
@@ -116,7 +118,9 @@ if __name__ == '__main__':
     # model = vgg16_bn(num_class=2).to(DEVICE)
 
     from torchvision import models
-    model = models.efficientnet_b0(num_classes=2)
+    # model = models.efficientnet_b0(num_classes=2)
+
+    model = get_obj_from_str(model_obj)(num_class=2)
 
     # model = visionModels.efficientnet_b0(weights=None, progress=True, num_classes=2)
     print(f"Reload model {weights_path}")
