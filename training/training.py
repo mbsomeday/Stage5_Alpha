@@ -904,8 +904,8 @@ class train_ped_model_alpha():
             ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
             ped_acc_num += ped_acc.sum()
 
-            if batch == 10:
-                break
+            # if batch == 10:
+            #     break
 
             # break
 
