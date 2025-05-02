@@ -7,7 +7,7 @@ sys.path.append(root_path)
 import argparse
 
 from models.VGG import vgg16_bn
-from training.training import train_ped_model_alpha, train_ds_model_alpha
+from training.training import train_ped_model_alpha, train_ds_model_alpha, test_ped_model_alpha
 from utils.utils import get_gpu_info
 
 
@@ -21,6 +21,7 @@ def get_args():
     parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
     parser.add_argument('-r', '--reload', default=None)
     parser.add_argument('-c', '--cam_loss', type=float, default=0.0)
+    parser.add_argument('-pw', '--ped_weights', type=str)
 
     args = parser.parse_args()
     return args
@@ -33,6 +34,7 @@ reload = args.reload
 epochs = args.epochs
 camLoss_coefficient = args.cam_loss if args.cam_loss > 0 else None
 save_best_cls = args.save_best_cls
+ped_weights = args.ped_weights
 
 # num_classes = 2
 # model_name = 'vgg16bn'
@@ -60,12 +62,16 @@ ds_name_list = [ds_name]
 #
 # ped_training.train_model()
 
-# 行人分类 cam loss训练
-ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size,
-                                        reload=reload, epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5,
-                                        camLoss_coefficient=0.2, ds_model_obj=model_obj
-                                        )
-ped_training.train_model()
+# # 行人分类 cam loss训练
+# ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size,
+#                                         reload=reload, epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5,
+#                                         camLoss_coefficient=0.2, ds_model_obj=model_obj
+#                                         )
+# ped_training.train_model()
+
+ped_test = test_ped_model_alpha(model_obj=model_obj, ped_weights=ped_weights, ds_name_list=ds_name_list, batch_size=batch_size, camLoss_coefficient=0.2)
+
+ped_test.test_model()
 
 # # 数据集分类训练
 # ds_training = train_ds_model_alpha(model_obj=model_obj, batch_size=batch_size, ds_name_list=['D1', 'D2', 'D3', 'D4'], epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5)

@@ -1410,7 +1410,7 @@ class test_ped_model_alpha():
         return heatmap, mask, masked_image
 
 
-    def test_model(self, epoch):
+    def test_model(self):
         self.model.eval()
 
         val_loss = 0.0
