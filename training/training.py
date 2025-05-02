@@ -1295,6 +1295,179 @@ class train_ds_model_alpha():
 
 
 
+class test_ped_model_alpha():
+    def __init__(self, model_obj: str,
+                 ped_weights,
+                 ds_name_list,
+                 batch_size,
+                 camLoss_coefficient=None):
+        # -------------------- 打印训练信息 --------------------
+        print('-' * 20, 'Testing Info', '-' * 20)
+        print(f'batch_size: {batch_size}')
+        print(f'camLoss_coefficient: {camLoss_coefficient}')
+        print('-' * 20)
+
+        # -------------------- 成员变量 --------------------
+        self.camLoss_coefficient = camLoss_coefficient
+        self.ds_model_obj = model_obj
+        self.ped_weights = ped_weights
+
+        # -------------------- 获取 ped model for train --------------------
+        self.model = get_obj_from_str(model_obj)(num_class=2)
+        self.model = load_model(self.model, self.ped_weights)
+        self.model = self.model.to(DEVICE)
+
+        # -------------------- 获取数据 --------------------
+        self.ds_name_list = ds_name_list
+        self.test_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='test.txt')
+        self.test_loader = DataLoader(self.test_dataset, batch_size=batch_size, shuffle=True)
+
+
+        # -------------------- 获取ds model，目的是融入 cam loss --------------------
+        if self.camLoss_coefficient is not None:
+            self.ds_model = get_obj_from_str(self.ds_model_obj)(num_class=4)
+            # ds_weights = r'/kaggle/input/stage5-weights-effidscls/efficientNetB0_dsCls-10-0.97636.pth'
+            # ds_weights = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+            ds_weights = r'/data/jcampos/jiawei_data/code/ResNet34_dsCls/ResNet34_dsCls-23-0.96353.pth'
+            # ds_weights = r'/veracruz/home/j/jwang/data/model_weights/efficientNetB0_dsCls-10-0.97636.pth'
+            self.ds_model = load_model(self.ds_model, ds_weights)
+            self.ds_model.eval()
+            self.ds_model = self.ds_model.to(DEVICE)
+
+            self.feed_forward_features = None
+            self.backward_features = None
+
+            # self.grad_layer = 'features'  # efficient
+            self.grad_layer = 'layer4' # resnet
+            self._register_hooks(self.ds_model, self.grad_layer)
+
+            # sigma, omega for making the soft-mask
+            self.sigma = 0.25
+            self.omega = 100
+
+
+
+    def _register_hooks(self, model, grad_layer):
+        '''
+            为 ds_model 注册钩子函数
+        '''
+        def forward_hook(module, grad_input, grad_output):
+            self.feed_forward_features = grad_output
+
+        def backward_hook(module, grad_input, grad_output):
+            self.backward_features = grad_output[0]
+
+        gradient_layer_found = False
+        for idx, m in model.named_modules():
+            if idx == grad_layer:
+                m.register_forward_hook(forward_hook)
+                m.register_full_backward_hook(backward_hook)
+                print(f"Register forward hook and backward hook! Hooked layer: {self.grad_layer}")
+                gradient_layer_found = True
+                break
+
+        # for our own sanity, confirm its existence
+        if not gradient_layer_found:
+            raise AttributeError('Gradient layer %s not found in the internal model' % grad_layer)
+
+    def calc_cam(self, model, image):
+        '''
+            输入的image为4D
+        '''
+        with TemporaryGrad():
+            logits = model(image)
+            pred = torch.argmax(logits, dim=1)
+            model.zero_grad()
+            grad_yc = logits[0, pred]
+            grad_yc.backward()
+            # print(f'反向传播之后：{self.backward_features.shape}')
+            model.zero_grad()
+
+            w = F.adaptive_avg_pool2d(self.backward_features, 1)  # shape: (batch_size, 1280, 1, 1)
+            # print(f'w: {w.shape}')
+            temp_w = w[0].unsqueeze(0)
+            temp_fl = self.feed_forward_features[0].unsqueeze(0)
+            ac = F.conv2d(temp_fl, temp_w)
+            ac = F.relu(ac)
+
+            Ac = F.interpolate(ac, (224, 224))
+
+            heatmap = Ac
+
+            # 获取mask
+            Ac_min = Ac.min()
+            Ac_max = Ac.max()
+            # print(f'Attention map diff: {Ac_max - Ac_min}')
+            # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
+            # mask = torch.sigmoid(self.omega * (scaled_ac - self.sigma))
+            # masked_image = images - images * mask
+
+            mask = heatmap.detach().clone()
+            mask.requires_grad = False
+            mask[mask < Ac_max] = 0
+            masked_image = image - image * mask
+
+        return heatmap, mask, masked_image
+
+
+    def test_model(self, epoch):
+        self.model.eval()
+
+        val_loss = 0.0
+        val_correct_num = 0
+        y_true = []
+        y_pred = []
+        nonPed_acc_num = 0
+        ped_acc_num = 0
+
+        with torch.no_grad():
+            for data in tqdm(self.test_loader):
+                images = data['image']
+                labels = data['ped_label']
+                images = images.to(DEVICE)
+                labels = labels.to(DEVICE)
+
+                # ------------ 计算 cam loss ------------
+                # 试验 case1: 对所有图片都进行cam_loss
+                if self.camLoss_coefficient is not None:
+                    masked_images = np.zeros(shape=images.shape)
+                    for img_idx, image in enumerate(images):
+                        image = torch.unsqueeze(image, dim=0)
+                        heatmap, mask, masked_image = self.calc_cam(self.ds_model, image)
+                        masked_images[img_idx] = masked_image.cpu().detach()
+                    masked_images = torch.tensor(masked_images)
+                    masked_images = masked_images.to(DEVICE)
+                    masked_images = masked_images.type(torch.float32)
+                    masked_out = self.model(masked_images)
+                    _, masked_pred = torch.max(masked_out, 1)
+                    pred = masked_pred
+
+                else:
+                    out = self.model(images)
+                    _, org_pred = torch.max(out, 1)
+
+                    pred = org_pred
+
+                y_true.extend(labels.cpu().numpy())
+                y_pred.extend(pred.cpu().numpy())
+
+                # ------------ 计算各个类别的正确个数 ------------
+                nonPed_idx = labels == 0
+                nonPed_acc = (labels[nonPed_idx] == pred[nonPed_idx]) * 1
+                nonPed_acc_num += nonPed_acc.sum()
+
+                ped_idx = labels == 1
+                ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
+                ped_acc_num += ped_acc.sum()
+
+        val_accuracy = val_correct_num / len(self.test_dataset)
+        val_bc = balanced_accuracy_score(y_true, y_pred)
+
+
+        cm = confusion_matrix(y_true, y_pred)
+        print(f'Test cm:\n {cm}')
+
+        print(f'Balanced accuracy: {val_bc:.6f}, accuracy: {val_accuracy:.6f}')
 
 
 
