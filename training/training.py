@@ -727,7 +727,8 @@ class train_ped_model_alpha():
         if self.camLoss_coefficient is not None:
             self.ds_model = get_obj_from_str(self.ds_model_obj)(num_class=4)
             # ds_weights = r'/kaggle/input/stage5-weights-effidscls/efficientNetB0_dsCls-10-0.97636.pth'
-            ds_weights = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+            # ds_weights = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+            ds_weights = r'/data/jcampos/jiawei_data/code/ResNet34_dsCls/ResNet34_dsCls-23-0.96353.pth'
             # ds_weights = r'/veracruz/home/j/jwang/data/model_weights/efficientNetB0_dsCls-10-0.97636.pth'
             self.ds_model = load_model(self.ds_model, ds_weights)
             self.ds_model.eval()
@@ -947,10 +948,10 @@ class train_ped_model_alpha():
                 images = images.to(DEVICE)
                 labels = labels.to(DEVICE)
 
-                out = self.model(images)
-                _, pred = torch.max(out, 1)
-
-                loss_cls = self.loss_fn(out, labels)
+                # out = self.model(images)
+                # _, pred = torch.max(out, 1)
+                #
+                # loss_cls = self.loss_fn(out, labels)
 
                 # ------------ 计算 cam loss ------------
                 # 试验 case1: 对所有图片都进行cam_loss
@@ -964,9 +965,12 @@ class train_ped_model_alpha():
                     masked_images = masked_images.to(DEVICE)
                     masked_images = masked_images.type(torch.float32)
                     masked_out = self.model(masked_images)
+                    _, masked_pred = torch.max(out, 1)
+                    pred = masked_pred
 
                     masked_loss = self.loss_fn(masked_out, labels)
-                    loss = (1 - self.camLoss_coefficient) * loss_cls + self.camLoss_coefficient * masked_loss
+                    loss = masked_loss
+                    # loss = (1 - self.camLoss_coefficient) * loss_cls + self.camLoss_coefficient * masked_loss
 
                 # case2: 生成masked image，这里只对non ped进行mask，因为mask对ped的效果不好
                 # nonPed_idx = labels == 0
@@ -986,7 +990,12 @@ class train_ped_model_alpha():
                 #
                 #     loss = (1 - self.camLoss_coefficient) * loss_cls + self.camLoss_coefficient * masked_loss
                 else:
+                    out = self.model(images)
+                    _, org_pred = torch.max(out, 1)
+
+                    loss_cls = self.loss_fn(out, labels)
                     loss = loss_cls
+                    pred = org_pred
 
                 val_correct_num += (pred == labels).sum()
                 val_loss += loss.item()

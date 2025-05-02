@@ -61,16 +61,16 @@ ds_name_list = [ds_name]
 # ped_training.train_model()
 
 # 行人分类 cam loss训练
-# ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size,
-#                                         reload=reload, epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5,
-#                                         camLoss_coefficient=0.2, ds_model_obj=model_obj
-#                                         )
-# ped_training.train_model()
+ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size,
+                                        reload=reload, epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5,
+                                        camLoss_coefficient=0.2, ds_model_obj=model_obj
+                                        )
+ped_training.train_model()
 
-# 数据集分类训练
-ds_training = train_ds_model_alpha(model_obj=model_obj, batch_size=batch_size, ds_name_list=['D1', 'D2', 'D3', 'D4'], epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5)
-
-ds_training.train_model()
+# # 数据集分类训练
+# ds_training = train_ds_model_alpha(model_obj=model_obj, batch_size=batch_size, ds_name_list=['D1', 'D2', 'D3', 'D4'], epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5)
+#
+# ds_training.train_model()
 
 
 
