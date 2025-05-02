@@ -1300,17 +1300,20 @@ class test_ped_model_alpha():
                  ped_weights,
                  ds_name_list,
                  batch_size,
+                 txt_name='test.txt',
                  camLoss_coefficient=None):
         # -------------------- 打印训练信息 --------------------
         print('-' * 20, 'Testing Info', '-' * 20)
         print(f'batch_size: {batch_size}')
         print(f'camLoss_coefficient: {camLoss_coefficient}')
+        print(f'txt_name: {txt_name}')
         print('-' * 20)
 
         # -------------------- 成员变量 --------------------
         self.camLoss_coefficient = camLoss_coefficient
         self.ds_model_obj = model_obj
         self.ped_weights = ped_weights
+        self.txt_name = txt_name
 
         # -------------------- 获取 ped model for train --------------------
         self.model = get_obj_from_str(model_obj)(num_class=2)
@@ -1319,7 +1322,7 @@ class test_ped_model_alpha():
 
         # -------------------- 获取数据 --------------------
         self.ds_name_list = ds_name_list
-        self.test_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='test.txt')
+        self.test_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name=txt_name)
         self.test_loader = DataLoader(self.test_dataset, batch_size=batch_size, shuffle=True)
 
 

@@ -22,6 +22,7 @@ def get_args():
     parser.add_argument('-r', '--reload', default=None)
     parser.add_argument('-c', '--cam_loss', type=float, default=0.0)
     parser.add_argument('-pw', '--ped_weights', type=str)
+    parser.add_argument('-txt', '--txt_name', type=str)
 
     args = parser.parse_args()
     return args
@@ -35,6 +36,7 @@ epochs = args.epochs
 camLoss_coefficient = args.cam_loss if args.cam_loss > 0 else None
 save_best_cls = args.save_best_cls
 ped_weights = args.ped_weights
+txt_name = args.txt_name
 
 # num_classes = 2
 # model_name = 'vgg16bn'
@@ -69,7 +71,7 @@ ds_name_list = [ds_name]
 #                                         )
 # ped_training.train_model()
 
-ped_test = test_ped_model_alpha(model_obj=model_obj, ped_weights=ped_weights, ds_name_list=ds_name_list, batch_size=batch_size, camLoss_coefficient=0.2)
+ped_test = test_ped_model_alpha(model_obj=model_obj, ped_weights=ped_weights, ds_name_list=ds_name_list, batch_size=batch_size, camLoss_coefficient=0.2, txt_name=txt_name)
 
 ped_test.test_model()
 
