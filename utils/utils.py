@@ -51,6 +51,17 @@ def load_model(model, weights_path):
     model.load_state_dict(ckpts['model_state_dict'])
     return model
 
+class TemporaryGrad(object):
+    '''
+    https://blog.csdn.net/qq_44980390/article/details/123672147
+    '''
+    def __enter__(self):
+        self.prev = torch.is_grad_enabled()
+        torch.set_grad_enabled(True)
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        torch.set_grad_enabled(self.prev)
+
 
 def get_obj_from_str(in_str):
     '''
