@@ -904,6 +904,9 @@ class train_ped_model_alpha():
             ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
             ped_acc_num += ped_acc.sum()
 
+            if batch == 10:
+                break
+
             # break
 
         train_accuracy = training_correct_num / len(self.train_dataset)
@@ -966,7 +969,7 @@ class train_ped_model_alpha():
                     masked_images = masked_images.to(DEVICE)
                     masked_images = masked_images.type(torch.float32)
                     masked_out = self.model(masked_images)
-                    _, masked_pred = torch.max(out, 1)
+                    _, masked_pred = torch.max(masked_out, 1)
                     pred = masked_pred
 
                     masked_loss = self.loss_fn(masked_out, labels)
