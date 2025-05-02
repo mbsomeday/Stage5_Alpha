@@ -7,7 +7,7 @@ sys.path.append(root_path)
 import argparse
 
 from models.VGG import vgg16_bn
-from training.training import train_ped_model_alpha, train_ds_model_alpha, test_ped_model_alpha
+from training.training import train_ped_model_alpha, train_ds_model_alpha
 from utils.utils import get_gpu_info
 
 
