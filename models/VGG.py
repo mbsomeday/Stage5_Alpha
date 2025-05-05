@@ -146,9 +146,9 @@ def vgg19():
     return VGG(make_layers(cfg['E']))
 
 
-def vgg19_bn():
+def vgg19_bn(num_class=2):
     """VGG 19-layer model (configuration 'E') with batch normalization"""
-    return VGG(make_layers(cfg['E'], batch_norm=True))
+    return VGG(make_layers(cfg['E'], batch_norm=True), num_class=2)
 
 
 
