@@ -301,8 +301,8 @@ if __name__ == '__main__':
     # ped_test(model, ds_name=ds_name, test_dataset=test_dataset, test_loader=test_loader)
 
     ds_name_list = [ds_name]
-    test_ped_model_camLoss(model_obj=model_obj, ped_weights=weights_path, ds_name_list=ds_name_list, txt_name=txt_name, batch_size=batch_size)
-
+    my_test = test_ped_model_camLoss(model_obj=model_obj, ped_weights=weights_path, ds_name_list=ds_name_list, txt_name=txt_name, batch_size=batch_size)
+    my_test.test_model()
 
     # # AE Reconstruction dataset classification
     # model = vgg16_bn(num_class=4).to(DEVICE)
