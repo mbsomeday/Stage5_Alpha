@@ -253,6 +253,7 @@ class test_ped_model_camLoss():
                 ped_acc = (labels[ped_idx] == pred[ped_idx]) * 1
                 ped_acc_num += ped_acc.sum()
 
+        val_correct_num = nonPed_acc_num + ped_acc_num
         val_accuracy = val_correct_num / len(self.test_dataset)
         val_bc = balanced_accuracy_score(y_true, y_pred)
 
