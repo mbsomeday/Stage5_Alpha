@@ -51,8 +51,6 @@ class my_dataset(Dataset):
                 ped_labels.append(contents[-1])
                 ds_labels.append(ds_label)
 
-                if data_idx == 10:
-                    break
 
         # random.shuffle(images)
         # random.shuffle(ped_labels)
