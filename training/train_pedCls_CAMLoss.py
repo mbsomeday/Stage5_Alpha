@@ -536,14 +536,14 @@ class PedCls_with_camLoss():
         pass
 
 
-ds_weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
-pp = PedCls_with_camLoss(model_obj='models.EfficientNet.efficientNetB0',
-                         ds_name_list=['D1'],
-                         batch_size=4,
-                         ds_weights=ds_weights_path,
-                         mode='train')
-
-pp.train_one_epoch()
+# ds_weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
+# pp = PedCls_with_camLoss(model_obj='models.EfficientNet.efficientNetB0',
+#                          ds_name_list=['D1'],
+#                          batch_size=4,
+#                          ds_weights=ds_weights_path,
+#                          mode='train')
+#
+# pp.train_one_epoch()
 
 
 
