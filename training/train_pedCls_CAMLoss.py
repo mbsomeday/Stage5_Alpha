@@ -301,6 +301,7 @@ class PedCls_with_camLoss():
             print('-' * 20, 'Training Info', '-' * 20)
 
             self.ped_model.train()
+            self.ped_model = self.ped_model.to(DEVICE)
 
             # -------------------- 成员变量 --------------------
             self.warmup_epochs = warmup_epochs
