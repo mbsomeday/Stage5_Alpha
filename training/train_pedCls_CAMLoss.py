@@ -24,9 +24,9 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 def _get_gaussian_kernel1d(kernel_size: int, sigma: float):
     ksize_half = (kernel_size - 1) * 0.5
 
-    x = torch.linspace(-ksize_half, ksize_half, steps=kernel_size)
-    pdf = torch.exp(-0.5 * (x / sigma).pow(2))
-    kernel1d = pdf / pdf.sum()
+    x = torch.linspace(-ksize_half, ksize_half, steps=kernel_size).to(DEVICE)
+    pdf = torch.exp(-0.5 * (x / sigma).pow(2)).to(DEVICE)
+    kernel1d = pdf / pdf.sum().to(DEVICE)
 
     return kernel1d
 
