@@ -30,9 +30,9 @@ def _get_gaussian_kernel1d(kernel_size: int, sigma: float):
 
     return kernel1d
 
-def _get_gaussian_kernel2d(kernel_size, sigma, dtype, device):
-    kernel1d_x = _get_gaussian_kernel1d(kernel_size[0], sigma[0]).to(device, dtype=dtype)
-    kernel1d_y = _get_gaussian_kernel1d(kernel_size[1], sigma[1]).to(device, dtype=dtype)
+def _get_gaussian_kernel2d(kernel_size, sigma, dtype):
+    kernel1d_x = _get_gaussian_kernel1d(kernel_size[0], sigma[0]).to(DEVICE, dtype=dtype)
+    kernel1d_y = _get_gaussian_kernel1d(kernel_size[1], sigma[1]).to(DEVICE, dtype=dtype)
     kernel2d = torch.mm(kernel1d_y[:, None], kernel1d_x[None, :])
     return kernel2d
 
@@ -40,7 +40,6 @@ def get_gaussianFilter(sigma_list, k_size=5, blurred_expan_factor=100):
     '''
         用给定的n个数字来制作gaussian filter
     '''
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     dtype = torch.float32
     kernel_size = (k_size, k_size)
     kernel_list = []
@@ -49,7 +48,7 @@ def get_gaussianFilter(sigma_list, k_size=5, blurred_expan_factor=100):
         blurr_sigma = sigma_list[i] * blurred_expan_factor
         # print(f'blurr_sigma: {blurr_sigma}')
         sigma = (blurr_sigma, blurr_sigma)
-        kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=device)
+        kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype)
         kernel = kernel.expand(3, 1, kernel.shape[0], kernel.shape[1])
         kernel_list.append(kernel)
 
@@ -254,6 +253,7 @@ class Bathch_Image_Blur():
 
             selected_patches = torch.reshape(selected_patches, (1, -1, 36, 36))
             gaussian_kernels = get_gaussianFilter(selected_score, k_size=5, blurred_expan_factor=100)
+            selected_patches = selected_patches.to(DEVICE)
             selected_patches = selected_patches.to(DEVICE)
             blurred_patches = F.conv2d(selected_patches, gaussian_kernels, groups=selected_patches.shape[-3])
 
