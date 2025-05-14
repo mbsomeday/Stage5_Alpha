@@ -312,6 +312,7 @@ class PedCls_with_camLoss():
             self.save_best_cls = save_best_cls
             self.camLoss_coefficient = camLoss_coefficient
             self.ds_model_obj = ds_model_obj
+            self.start_epoch = 0
 
             # -------------------- 获取数据 --------------------
             self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
@@ -336,16 +337,16 @@ class PedCls_with_camLoss():
 
             callback_savd_dir += '_1CAMLoss'
             print(f'callback_savd_dir:{callback_savd_dir}')
-            # self.early_stopping = EarlyStopping(callback_savd_dir, top_k=2)
+            self.early_stopping = EarlyStopping(callback_savd_dir, top_k=2)
 
             train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
             val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
-            # self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
-            #                                  ds_name_list=ds_name_list, train_num_info=train_num_info,
-            #                                  val_num_info=val_num_info,
-            #                                  task='ped_cls'
-            #                                  )
+            self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
+                                             ds_name_list=ds_name_list, train_num_info=train_num_info,
+                                             val_num_info=val_num_info,
+                                             task='ped_cls'
+                                             )
             # -------------------- 如果reload，optmizer，start_epoch等也要重新设置 --------------------
 
             # todo: 写完 train 后再 test
@@ -360,6 +361,13 @@ class PedCls_with_camLoss():
 
         else:
             raise ValueError(f'mode should be train or test, current mode is {mode}, not recognized!')
+
+    def lr_decay(self, epoch):
+        # warm-up阶段
+        if epoch <= self.warmup_epochs:        # warm-up阶段
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * epoch / self.warmup_epochs
+        else:
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * 0.963 ** (epoch / 3)        # gamma=0.963, lr decay epochs=3
 
 
     def train_one_epoch(self):
@@ -488,6 +496,37 @@ class PedCls_with_camLoss():
 
         val_epoch_info = DotDict(val_epoch_info)
         return val_epoch_info
+
+
+    def train_model(self):
+
+        print('-' * 20 + 'Training Info' + '-' * 20)
+        print('Total training Samples:', len(self.train_dataset))
+        print(f'From dataset: {self.ds_name_list}')
+        print('Total Batch:', len(self.train_loader))
+        print('Total EPOCH:', self.epochs)
+        print('Runing device:', DEVICE)
+
+        print('-' * 20 + 'Validation Info' + '-' * 20)
+        print('Total Val Samples:', len(self.val_dataset))
+
+        for epoch in range(self.start_epoch, self.epochs):
+            # ------------------------ 开始训练 ------------------------
+            print('=' * 30 + ' begin EPOCH ' + str(epoch + 1) + '=' * 30)
+            train_epoch_info = self.train_one_epoch()
+            val_epoch_info = self.val_on_epoch_end(epoch)
+
+            # ------------------------ 训练epoch的callbacks ------------------------
+            self.early_stopping(epoch+1, self.ped_model, self.optimizer, val_epoch_info)
+            self.epoch_logger(epoch=epoch+1, training_info=train_epoch_info, val_info=val_epoch_info)
+
+            # ------------------------ 学习率调整 ------------------------
+            self.lr_decay(epoch + 1)
+
+            if self.early_stopping.early_stop:
+                print(f'Early Stopping!')
+                break
+
 
     def test(self):
         pass
