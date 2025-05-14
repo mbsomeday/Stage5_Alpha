@@ -6,23 +6,21 @@ sys.path.append(root_path)
 
 import argparse
 
-from models.VGG import vgg16_bn
-from training.training import train_ped_model_alpha, train_ds_model_alpha
+# from training.training import train_ped_model_alpha, train_ds_model_alpha
 from utils.utils import get_gpu_info
+from training.train_pedCls_CAMLoss import PedCls_with_camLoss
 
 
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', default=50, type=int)
-    parser.add_argument('--save_best_cls', default=False, type=bool, help='to decide whether to save the best models for each class')
+    # parser.add_argument('--save_best_cls', default=False, type=bool, help='to decide whether to save the best models for each class')
+    parser.add_argument('--ds_weights', type=str)
 
     parser.add_argument('-m', '--model_obj', default='models.VGG.vgg16_bn', type=str)
     parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
-    parser.add_argument('-r', '--reload', default=None)
-    parser.add_argument('-c', '--cam_loss', type=float, default=0.0)
-    parser.add_argument('-pw', '--ped_weights', type=str)
-    parser.add_argument('-txt', '--txt_name', type=str)
+    # parser.add_argument('-r', '--reload', default=None)
 
     args = parser.parse_args()
     return args
@@ -31,12 +29,29 @@ args = get_args()
 model_obj = args.model_obj
 ds_name = args.ds_name
 batch_size = args.batch_size
-reload = args.reload
+ds_weights_path = args.ds_weights
 epochs = args.epochs
-camLoss_coefficient = args.cam_loss if args.cam_loss > 0 else None
-save_best_cls = args.save_best_cls
-ped_weights = args.ped_weights
-txt_name = args.txt_name
+
+# reload = args.reload
+# ped_weights = args.ped_weights
+
+ds_name_list = [ds_name]
+
+
+# 打印当前使用的gpu信息
+get_gpu_info()
+
+
+# ds_weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
+
+pp = PedCls_with_camLoss(model_obj=model_obj,
+                         ds_name_list=ds_name_list,
+                         batch_size=4,
+                         epochs=epochs,
+                         ds_weights=ds_weights_path,
+                         mode='train')
+
+pp.train_one_epoch()
 
 # num_classes = 2
 # model_name = 'vgg16bn'
@@ -50,11 +65,7 @@ txt_name = args.txt_name
 #                                     camLoss_coefficient=camLoss_coefficient, save_best_cls=save_best_cls, gen_img=False)
 # my_training.train_model()
 
-# 打印当前使用的gpu信息
-get_gpu_info()
 
-
-ds_name_list = [ds_name]
 
 # 行人分类baseline,此时无camloss
 # ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size,
@@ -63,12 +74,12 @@ ds_name_list = [ds_name]
 #                                         )
 #
 # ped_training.train_model()
-# 行人分类 cam loss训练
-ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size,
-                                        reload=reload, epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5,
-                                        camLoss_coefficient=0.2, ds_model_obj=model_obj
-                                        )
-ped_training.train_model()
+# # 行人分类 cam loss训练
+# ped_training = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size,
+#                                         reload=reload, epochs=epochs, base_lr=0.01, warmup_epochs=5, lr_patience=5,
+#                                         camLoss_coefficient=0.2, ds_model_obj=model_obj
+#                                         )
+# ped_training.train_model()
 
 # ped_test = test_ped_model_alpha(model_obj=model_obj, ped_weights=ped_weights, ds_name_list=ds_name_list, batch_size=batch_size, camLoss_coefficient=0.2, txt_name=txt_name)
 #
