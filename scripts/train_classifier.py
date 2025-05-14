@@ -51,7 +51,7 @@ pp = PedCls_with_camLoss(model_obj=model_obj,
                          ds_weights=ds_weights_path,
                          mode='train')
 
-pp.train_one_epoch()
+pp.train_model()
 
 # num_classes = 2
 # model_name = 'vgg16bn'
