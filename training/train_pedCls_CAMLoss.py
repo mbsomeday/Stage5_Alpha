@@ -19,9 +19,6 @@ from training.train_callbacks import EarlyStopping, Epoch_logger
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-torch.manual_seed(13)
-
-BATCH_SIZE = 2
 
 # Build Gaussian Kernel, from pytorch
 def _get_gaussian_kernel1d(kernel_size: int, sigma: float):
@@ -245,7 +242,7 @@ class Bathch_Image_Blur():
             feature_maps = feature_maps.view(-1, batch_size * 1280, 7, 7)  # shape: (1, batch_size * 1280, 1, 1)
             batch_heatmaps = F.relu(F.conv2d(feature_maps, w, groups=batch_size))
 
-            print(f'batch_heatmaps： {batch_heatmaps.shape}')
+            # print(f'batch_heatmaps： {batch_heatmaps.shape}')
 
             hm_min = batch_heatmaps.min()
             hm_max = batch_heatmaps.max()
@@ -261,7 +258,7 @@ class Bathch_Image_Blur():
 
             images_with_blur = restore_images_with_blur(images, blurred_patches, mask_dict, batch_heatmaps)
 
-            print(f'images_with_blur:{images_with_blur.shape}')
+            # print(f'images_with_blur:{images_with_blur.shape}')
 
             # todo:检查单个heatmap跟batch heatmap是否一致
 
@@ -411,7 +408,8 @@ class PedCls_with_camLoss():
             ped_acc = (labels[ped_idx] == pred_blur[ped_idx]) * 1
             ped_acc_num += ped_acc.sum()
 
-            break
+            # break
+
         train_accuracy = training_correct_num / len(self.train_dataset)
         training_bc = balanced_accuracy_score(y_true, y_pred)
 
@@ -536,14 +534,6 @@ class PedCls_with_camLoss():
         pass
 
 
-# ds_weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
-# pp = PedCls_with_camLoss(model_obj='models.EfficientNet.efficientNetB0',
-#                          ds_name_list=['D1'],
-#                          batch_size=4,
-#                          ds_weights=ds_weights_path,
-#                          mode='train')
-#
-# pp.train_one_epoch()
 
 
 
