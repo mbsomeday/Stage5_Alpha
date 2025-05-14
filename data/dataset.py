@@ -41,7 +41,7 @@ class my_dataset(Dataset):
             with open(txt_path, 'r') as f:
                 data = f.readlines()
 
-            for line in data:
+            for data_idx, line in enumerate(data):
                 line = line.replace('\\', os.sep)
                 line = line.strip()
                 contents = line.split()
@@ -50,6 +50,9 @@ class my_dataset(Dataset):
                 images.append(image_path)
                 ped_labels.append(contents[-1])
                 ds_labels.append(ds_label)
+
+                if data_idx == 10:
+                    break
 
         # random.shuffle(images)
         # random.shuffle(ped_labels)
