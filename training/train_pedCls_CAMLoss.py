@@ -47,7 +47,7 @@ def get_gaussianFilter(sigma_list, k_size=5, blurred_expan_factor=100):
 
     for i in range(len(sigma_list)):
         blurr_sigma = sigma_list[i] * blurred_expan_factor
-        print(f'blurr_sigma: {blurr_sigma}')
+        # print(f'blurr_sigma: {blurr_sigma}')
         sigma = (blurr_sigma, blurr_sigma)
         kernel = _get_gaussian_kernel2d(kernel_size, sigma, dtype=dtype, device=device)
         kernel = kernel.expand(3, 1, kernel.shape[0], kernel.shape[1])
@@ -110,7 +110,7 @@ def select_patches_by_score(patches, scores, threshold=0.5):
         mask_dic.append(torch.unsqueeze(torch.reshape(mask, (7, 7)), 0))
         temp_score = scores_flat[b][mask]
         selected = patches[b][mask]
-        print(f'selefcted:{selected.shape}')
+        # print(f'selefcted:{selected.shape}')
 
         # # todo test
         # for p in selected:
@@ -125,7 +125,7 @@ def select_patches_by_score(patches, scores, threshold=0.5):
             selected_score.extend(temp_score)
 
     selected_patches = torch.cat(selected_patches, 0)
-    print(f'selected_patches{selected_patches.shape}, {len(selected_score)}')
+    # print(f'selected_patches{selected_patches.shape}, {len(selected_score)}')
 
     mask_dic = torch.cat(mask_dic, 0)
 
@@ -145,10 +145,10 @@ def restore_images_with_blur(images, blurred_patches, mask_dict, batch_heatmaps)
     images_with_blur = images.clone().detach()
     batch_size = images.shape[0]
 
-    print(f'images: {images_with_blur.shape}, blurred_patches:{blurred_patches.shape}, mask_dict:{mask_dict.shape}')
-    print(f'batch_heatmaps:{batch_heatmaps.shape}')
+    # print(f'images: {images_with_blur.shape}, blurred_patches:{blurred_patches.shape}, mask_dict:{mask_dict.shape}')
+    # print(f'batch_heatmaps:{batch_heatmaps.shape}')
     coords = torch.nonzero(mask_dict, as_tuple=False)   # 获取所有值为True的idx
-    print(f'coordds.shape:{coords.shape}')
+    # print(f'coordds.shape:{coords.shape}')
 
     idx_l = [0*i for i in range(batch_size)]
 
@@ -163,7 +163,7 @@ def restore_images_with_blur(images, blurred_patches, mask_dict, batch_heatmaps)
         # images_with_blur[b, :, x_start:x_end, y_start:y_end] = test_black
         images_with_blur[b, :, x_start:x_end, y_start:y_end] = blurred_patches[idx]
 
-    print(f'每个图片的patch:{idx_l}')
+    # print(f'每个图片的patch:{idx_l}')
 
 
     return images_with_blur
@@ -227,7 +227,7 @@ class Bathch_Image_Blur():
         with TemporaryGrad():
             ds_org_logits = self.ds_model(images)
             ds_org_pred = torch.argmax(ds_org_logits, 1)
-            print(f'ds_org_pred:{ds_org_pred}')
+            # print(f'ds_org_pred:{ds_org_pred}')
 
             self.ds_model.zero_grad()
             batch_indices = torch.arange(ds_org_logits.size(0))  # [0, 1, 2, 3]
@@ -254,6 +254,7 @@ class Bathch_Image_Blur():
 
             selected_patches = torch.reshape(selected_patches, (1, -1, 36, 36))
             gaussian_kernels = get_gaussianFilter(selected_score, k_size=5, blurred_expan_factor=100)
+            selected_patches = selected_patches.to(DEVICE)
             blurred_patches = F.conv2d(selected_patches, gaussian_kernels, groups=selected_patches.shape[-3])
 
             images_with_blur = restore_images_with_blur(images, blurred_patches, mask_dict, batch_heatmaps)
