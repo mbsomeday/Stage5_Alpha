@@ -138,12 +138,7 @@ else:
     raise Exception('运行平台未知，需配置路径!')
 
 
-def get_device(gid=None):
-    if gid is None:
-        return 'cuda' if torch.cuda.is_available() else "cpu"
-    else:
-        device_msg = 'cuda:' + str(gid)
-        return device_msg if torch.cuda.is_available() else "cpu"
+
 
 
 
