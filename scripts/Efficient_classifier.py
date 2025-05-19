@@ -6,9 +6,8 @@ sys.path.append(root_path)
 
 import argparse, torch
 
-from training.training import train_ped_model_alpha
-# from test.ds_cls import test_ds_classifier
-from my_test.ds_cls import test_ds_classifier
+# from training.training import train_ped_model_alpha
+from test.ds_cls import test_ds_classifier
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
