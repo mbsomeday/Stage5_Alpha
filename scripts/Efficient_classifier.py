@@ -7,14 +7,16 @@ sys.path.append(root_path)
 import argparse, torch
 
 from training.training import train_ped_model_alpha
+from test.ds_cls import test_ds_classifier
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
+    # parser.add_argument('-d', '--ds_name', type=str, help='datasets that model is trained on, ds_cls task do not need this param')
     parser.add_argument('--batch_size', type=int)
-    parser.add_argument('--epochs', default=50, type=int)
+    parser.add_argument('--weights_path', type=str)
+    # parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--model_obj', type=str)
 
     # parser.add_argument('--reload', default=None, type=str)
@@ -25,17 +27,25 @@ def get_args():
 
 
 args = get_args()
+weights_path = args.weights_path
 batch_size = args.batch_size
-ds_name = args.ds_name
-epochs = args.epochs
+# ds_name = args.ds_name
+# epochs = args.epochs
 # reload = args.reload
 model_obj = args.model_obj
 
-ds_name_list = [ds_name]
+# ds_name_list = [ds_name]
 
-my_train = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size)
+
+# model_obj = 'models.EfficientNet.efficientNetB0'
+# weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
+
+test_ds_classifier(model_obj=model_obj, weights_path=weights_path, batch_size=batch_size)
+
+
+# my_train = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size)
 # my_train.train_model()
-my_train.val_on_epoch_end(epoch=-1)
+# my_train.val_on_epoch_end(epoch=-1)
 
 # new_classifier = torch.nn.Sequential(
 #     torch.nn.Dropout(p=0.2, inplace=True),
