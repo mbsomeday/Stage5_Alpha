@@ -7,7 +7,8 @@ sys.path.append(root_path)
 import argparse, torch
 
 from training.training import train_ped_model_alpha
-from test.ds_cls import test_ds_classifier
+from test import ds_cls
+# from test.ds_cls import test_ds_classifier
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -40,7 +41,7 @@ model_obj = args.model_obj
 # model_obj = 'models.EfficientNet.efficientNetB0'
 # weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
 
-test_ds_classifier(model_obj=model_obj, weights_path=weights_path, batch_size=batch_size)
+ds_cls.test_ds_classifier(model_obj=model_obj, weights_path=weights_path, batch_size=batch_size)
 
 
 # my_train = train_ped_model_alpha(model_obj=model_obj, ds_name_list=ds_name_list, batch_size=batch_size)
