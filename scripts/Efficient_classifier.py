@@ -2,6 +2,8 @@
 import os, sys
 curPath = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(curPath)[0]
+
+print(f'root_path:{root_path}')
 sys.path.append(root_path)
 
 import argparse, torch
