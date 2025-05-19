@@ -1,3 +1,6 @@
+# url: https://github.com/ngxbac/GAIN/tree/master
+# paper: Tell Me Where to Look: Guided Attention Inference Network
+
 # # 将上级目录加入 sys.path， 防止命令行运行时找不到包
 # import os, sys
 # curPath = os.path.abspath(os.path.dirname(__file__))
@@ -17,7 +20,7 @@ from sklearn.metrics import confusion_matrix
 from utils.utils import load_model
 
 from data.dataset import my_dataset
-from training.train_callbacks import EarlyStopping, Epoch_logger
+from train_callbacks import EarlyStopping, Epoch_logger
 from utils.utils import get_obj_from_str, load_model
 from utils.utils import get_vgg_DSmodel, DotDict
 
@@ -1086,7 +1089,7 @@ class train_ped_model_alpha():
 class train_ds_model_alpha():
     def __init__(self, model_obj: str,
                  batch_size,
-                 ds_name_list,
+                 # ds_name_list,
                  epochs=50,
                  reload=None,
                  base_lr=0.01,
@@ -1113,12 +1116,13 @@ class train_ds_model_alpha():
         self.model = self.model.to(DEVICE)
 
         # -------------------- 获取数据 --------------------
-        self.ds_name_list = ds_name_list
+        # self.ds_name_list = ds_name_list
+        self.ds_name_list = ['D1', 'D2', 'D3', 'D4']
 
-        self.train_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
+        self.train_dataset = my_dataset(self.ds_name_list, path_key='org_dataset', txt_name='augmentation_train.txt')
         self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
 
-        self.val_dataset = my_dataset(ds_name_list, path_key='org_dataset', txt_name='val.txt')
+        self.val_dataset = my_dataset(self.ds_name_list, path_key='org_dataset', txt_name='val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False)
 
         # -------------------- 训练配置 --------------------
