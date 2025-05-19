@@ -28,12 +28,12 @@ def test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size, txt_n
             ds_label = data_dict['ds_label'].to(DEVICE)
 
             logits = ped_model(images)
-            probs = torch.argmax(logits, 1)
+            preds = torch.argmax(logits, 1)
 
             y_label.extend(ds_label.cpu().numpy())
-            y_pred.extend(probs.cpu().numpy())
+            y_pred.extend(preds.cpu().numpy())
 
-            correct_num += (ds_label == probs).sum()
+            correct_num += (ds_label == preds).sum()
 
         cm = confusion_matrix(y_label, y_pred)
         print(f'Testing cm:\n {cm}')
@@ -42,10 +42,10 @@ def test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size, txt_n
         print(f'行人分类模型准确率为：{ds_accuracy}')
 
 
-if __name__ == '__main__':
-    model_obj = 'models.EfficientNet.efficientNetB0'
-    weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
-    # weights_path = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+# if __name__ == '__main__':
+#     model_obj = 'models.EfficientNet.efficientNetB0'
+#     weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
+#     # weights_path = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
 
     # tt = test_ds_classifier(model_obj=model_obj, weights_path=weights_path, batch_size=8)
 
