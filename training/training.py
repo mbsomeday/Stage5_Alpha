@@ -1146,7 +1146,7 @@ class train_ds_model_alpha():
         val_num_info = [len(self.val_dataset), -1, -1]
 
         self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
-                                         ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info,
+                                         ds_name_list=self.ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info,
                                          task='ds_cls'
                                          )
 

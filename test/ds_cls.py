@@ -49,13 +49,13 @@ def test_ds_classifier(model_obj, weights_path, batch_size):
 
 
 
-if __name__ == '__main__':
-    model_obj = 'models.EfficientNet.efficientNetB0'
-    # weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
-    weights_path = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
-
-    tt = test_ds_classifier(model_obj=model_obj, weights_path=weights_path, batch_size=96)
-
+# if __name__ == '__main__':
+#     model_obj = 'models.EfficientNet.efficientNetB0'
+#     # weights_path = r'C:\Users\wangj\Desktop\efficientB0\efficientB0_dsCls\efficientNetB0_dsCls-10-0.97636.pth'
+#     weights_path = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+#
+#     tt = test_ds_classifier(model_obj=model_obj, weights_path=weights_path, batch_size=96)
+#
 
 
 
