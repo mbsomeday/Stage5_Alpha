@@ -19,7 +19,7 @@ def test_ds_classifier(model_obj, weights_path, batch_size):
     ds_model = load_model(ds_model, weights_path).to(DEVICE)
     ds_model.eval()
 
-    ds_dataset = my_dataset(ds_name_list=['D1', 'D2', 'D3', 'D4'], path_key='org_dataset', txt_name='test_func.txt')
+    ds_dataset = my_dataset(ds_name_list=['D1', 'D2', 'D3', 'D4'], path_key='org_dataset', txt_name='test.txt')
     ds_loader = DataLoader(ds_dataset, batch_size=batch_size, shuffle=False)
 
     correct_num = 0
