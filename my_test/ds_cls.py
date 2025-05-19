@@ -31,8 +31,6 @@ def test_ds_classifier(model_obj, weights_path, batch_size):
 
             correct_num += (ds_label == probs).sum()
 
-            break
-
         cm = confusion_matrix(y_label, y_pred)
         print(f'Testing cm:\n {cm}')
 
