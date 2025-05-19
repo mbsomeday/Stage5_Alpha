@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import balanced_accuracy_score
 
 from data.dataset import my_dataset
 from utils.utils import load_model, get_obj_from_str, DEVICE
@@ -35,11 +36,13 @@ def test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size, txt_n
 
             correct_num += (ped_label == preds).sum()
 
+
         cm = confusion_matrix(y_label, y_pred)
         print(f'Testing cm:\n {cm}')
 
+        bc = balanced_accuracy_score(y_label, y_pred)
         ds_accuracy = correct_num / len(ped_dataset)
-        print(f'行人分类模型准确率为：{ds_accuracy}')
+        print(f'行人分类模型准确率为：{ds_accuracy}, bc:{bc}')
 
 
 # if __name__ == '__main__':
