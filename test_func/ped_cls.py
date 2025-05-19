@@ -7,7 +7,7 @@ from data.dataset import my_dataset
 from utils.utils import load_model, get_obj_from_str, DEVICE
 
 
-def test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size):
+def test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size, txt_name):
     '''
         测试行人分类模型
     '''
@@ -15,7 +15,7 @@ def test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size):
     ped_model = load_model(ped_model, weights_path).to(DEVICE)
     ped_model.eval()
 
-    ped_dataset = my_dataset(ds_name_list=ds_name_list, path_key='org_dataset', txt_name='test.txt')
+    ped_dataset = my_dataset(ds_name_list=ds_name_list, path_key='org_dataset', txt_name=txt_name)
     ped_loader = DataLoader(ped_dataset, batch_size=batch_size, shuffle=False)
 
     correct_num = 0
