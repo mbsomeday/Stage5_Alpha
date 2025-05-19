@@ -8,8 +8,16 @@ from utils.utils import load_model, get_obj_from_str, DEVICE
 
 
 def test_ds_classifier(model_obj, weights_path, batch_size):
+    '''
+        测试数据集分类模型
+    :param model_obj:
+    :param weights_path:
+    :param batch_size:
+    :return:
+    '''
     ds_model = get_obj_from_str(model_obj)(num_class=4)
     ds_model = load_model(ds_model, weights_path).to(DEVICE)
+    ds_model.eval()
 
     ds_dataset = my_dataset(ds_name_list=['D1', 'D2', 'D3', 'D4'], path_key='org_dataset', txt_name='test.txt')
     ds_loader = DataLoader(ds_dataset, batch_size=batch_size, shuffle=False)
@@ -36,7 +44,6 @@ def test_ds_classifier(model_obj, weights_path, batch_size):
 
         ds_accuracy = correct_num / len(ds_dataset)
         print(f'准确率为：{ds_accuracy}')
-
 
 
 
