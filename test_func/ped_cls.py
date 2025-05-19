@@ -25,15 +25,15 @@ def test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size, txt_n
     with torch.no_grad():
         for idx, data_dict in enumerate(tqdm(ped_loader)):
             images = data_dict['image'].to(DEVICE)
-            ds_label = data_dict['ds_label'].to(DEVICE)
+            ped_label = data_dict['ped_label'].to(DEVICE)
 
             logits = ped_model(images)
             preds = torch.argmax(logits, 1)
 
-            y_label.extend(ds_label.cpu().numpy())
+            y_label.extend(ped_label.cpu().numpy())
             y_pred.extend(preds.cpu().numpy())
 
-            correct_num += (ds_label == preds).sum()
+            correct_num += (ped_label == preds).sum()
 
         cm = confusion_matrix(y_label, y_pred)
         print(f'Testing cm:\n {cm}')
