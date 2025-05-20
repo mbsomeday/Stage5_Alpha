@@ -139,6 +139,67 @@ class dataset_from_list(Dataset):
 
 
 
+class dataset_clip(Dataset):
+    def __init__(self, ds_name_list, path_key, txt_name):
+        self.ds_name_list = ds_name_list
+        self.ds_label_list = []
+        self.path_key = path_key
+        for ds_name in ds_name_list:
+            self.ds_label_list.append(int(ds_name[1]) - 1)
+
+        self.txt_name = txt_name
+        self.img_transforms = transforms.Compose([
+            transforms.ToTensor()
+        ])
+        self.images, self.ds_labels = self.init_ImagesLabels()
+        print(f'Get dataset: {ds_name_list}, txt_name: {txt_name}, total {len(self.images)} images')
+
+    def init_ImagesLabels(self):
+        images, ds_labels = [], []
+
+        for ds_idx, ds_name in enumerate(self.ds_name_list):
+            ds_label = self.ds_label_list[ds_idx]
+            ds_dir = PATHS[self.path_key][ds_name]
+            txt_path = os.path.join(ds_dir, 'clip', 'dataset_txt', self.txt_name)
+            print(f'Lodaing {txt_path}')
+
+            with open(txt_path, 'r') as f:
+                data = f.readlines()
+
+            for data_idx, line in enumerate(data):
+                line = line.replace('\\', os.sep)
+                line = line.strip()
+                contents = line.split()
+
+                image_path = os.path.join(ds_dir, contents[0])
+                images.append(image_path)
+                ds_labels.append(ds_label)
+
+        return images, ds_labels
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        image_path = self.images[idx]
+        ds_label = self.ds_labels[idx]
+
+        image = Image.open(image_path)
+        image = self.img_transforms(image)
+        ds_label = np.array(ds_label).astype(np.int64)
+
+        image_name = image_path.split(os.sep)[-1]
+
+        image_dict = {
+            'clip': image,
+            'img_name': image_name,
+            'img_path': image_path,
+            'ds_label': ds_label
+        }
+
+        return image_dict
+
+
 
 # if __name__ == '__main__':
 #     ds_name_list = list(['D3'])
