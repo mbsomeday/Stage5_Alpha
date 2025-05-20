@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import models
 from tqdm import tqdm
+from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import confusion_matrix
 
 from data.dataset import dataset_clip
@@ -149,6 +150,8 @@ class train_clipDS_model():
 
         cm = confusion_matrix(y_true, y_pred)
         print(f'val cm:\n {cm}')
+        bc = balanced_accuracy_score(y_true, y_pred)
+
 
         val_accuracy = val_correct_num / len(self.val_dataset)
 
@@ -158,6 +161,7 @@ class train_clipDS_model():
             'epoch': epoch,
             'val_accuracy': val_accuracy,
             'val_loss': val_loss,
+            'val_bc': bc,
             'val_correct_num': val_correct_num,
         }
 
