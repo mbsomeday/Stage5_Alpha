@@ -203,9 +203,9 @@ class train_clipDS_model():
 
 
 
-if __name__ == '__main__':
-    tt = train_clipDS_model(batch_size=48)
-    tt.train_model()
+# if __name__ == '__main__':
+#     tt = train_clipDS_model(batch_size=48)
+#     tt.train_model()
 
 
 

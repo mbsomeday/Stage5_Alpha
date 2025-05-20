@@ -1,9 +1,7 @@
 import argparse
 from torch.utils.data import DataLoader
 
-from models.VGG import vgg16_bn
-from training.training import train_model
-
+from training.exp_09 import train_clipDS_model
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -16,22 +14,8 @@ def get_args():
     return args
 
 
-
-model_name = 'vgg16'
-model = vgg16_bn(num_class=2)
-
-args = get_args()
-ds_name_list = args.ds_name_list
-batch_size = args.batch_size
-epochs = args.epochs
-
-save_prefix = args.save_prefix
-
-training = train_model(model_name, model, ds_name_list, batch_size, epochs, save_prefix)
-training.train()
-
-
-
+tt = train_clipDS_model(batch_size=48)
+tt.train_model()
 
 
 
