@@ -111,12 +111,14 @@ class train_clipDS_model():
 
         cm = confusion_matrix(y_true, y_pred)
         print(f'training cm:\n {cm}')
+        bc = balanced_accuracy_score(y_true, y_pred)
 
         print(f'Training Loss:{training_loss:.6f}, accuracy: {train_accuracy:.6f}')
 
         train_epoch_info = {
             'train_accuracy': train_accuracy,
             'training_loss': training_loss,
+            'training_bc': bc,
             'training_correct_num': training_correct_num,
         }
 
