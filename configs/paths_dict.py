@@ -26,6 +26,13 @@ LOCAL = {
         'D4': r'D:\my_phd\dataset\Stage3\D4_BDD100K',
     },
 
+    'tiny_dataset': {
+        'D1': r'D:\my_phd\dataset\Stage5\TinyD1',
+        'D2': r'D:\my_phd\dataset\Stage5\TinyD2',
+        'D3': r'D:\my_phd\dataset\Stage5\TinyD3',
+        'D4': r'D:\my_phd\dataset\Stage5\TinyD4',
+    },
+
     'ped_cls_ckpt': {
         'D1': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D1-014-0.9740.pth',
         'D2': r'D:\my_phd\Model_Weights\Stage4\Baseline\vgg16bn-D2-025-0.9124.pth',
@@ -58,6 +65,13 @@ KAGGLE = {
         'D2': r'/kaggle/input/stage4-d2-citypersons-7augs',
         'D3': r'/kaggle/input/stage4-d3-ecpnight-7augs',
         'D4': r'/kaggle/input/stage4-d4-7augs'
+    },
+
+    'tiny_dataset': {
+        'D1': r'/kaggle/input/stage5-clipds/D1clip',
+        'D2': r'/kaggle/input/stage5-clipds/D2clip',
+        'D3': r'/kaggle/input/stage5-clipds/D3clip',
+        'D4': r'/kaggle/input/stage5-clipds/D4clip',
     },
 
     'AE_same_dataset': {
