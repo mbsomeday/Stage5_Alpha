@@ -46,12 +46,12 @@ def test_ds_classifier(weights_path, batch_size):
 
 
 
-if __name__ == '__main__':
-    weights_path = r'/kaggle/working/Stage5_Alpha/vgg16_CropDSCls/vgg16_CropDSCls-44-0.76518.pth'
-    # weights_path = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
-
-    tt = test_ds_classifier(weights_path=weights_path, batch_size=48)
-
+# if __name__ == '__main__':
+#     weights_path = r'/kaggle/working/Stage5_Alpha/vgg16_CropDSCls/vgg16_CropDSCls-44-0.76518.pth'
+#     # weights_path = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
+#
+#     tt = test_ds_classifier(weights_path=weights_path, batch_size=48)
+#
 
 
 
