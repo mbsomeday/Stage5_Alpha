@@ -6,7 +6,7 @@ from sklearn.metrics import confusion_matrix
 
 from data.dataset import dataset_clip
 from utils.utils import DotDict
-from train_callbacks import EarlyStopping, Epoch_logger
+from training.train_callbacks import EarlyStopping, Epoch_logger
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
