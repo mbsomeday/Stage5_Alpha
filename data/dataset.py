@@ -24,7 +24,7 @@ class my_dataset(Dataset):
 
         self.txt_name = txt_name
         self.img_transforms = transforms.Compose([
-            # transforms.GaussianBlur(kernel_size=5),
+            transforms.GaussianBlur(kernel_size=5),
             transforms.ToTensor()
         ])
         self.images, self.ped_labels, self.ds_labels = self.init_ImagesLabels()
