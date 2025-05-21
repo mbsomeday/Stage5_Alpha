@@ -1,7 +1,8 @@
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, balanced_accuracy_score
+
 
 from data.dataset import my_dataset
 from utils.utils import load_model, get_obj_from_str, DEVICE
@@ -44,6 +45,9 @@ def test_ds_classifier(model_obj, weights_path, batch_size, txt_name):
 
         ds_accuracy = correct_num / len(ds_dataset)
         print(f'准确率为：{ds_accuracy}')
+
+        bc = balanced_accuracy_score(y_label, y_pred)
+        print(f'balanced accuracy为：{bc}')
 
 
 
