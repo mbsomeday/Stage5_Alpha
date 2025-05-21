@@ -10,7 +10,7 @@ def get_args():
     parser.add_argument('--weights_path', type=str)
     # parser.add_argument('-d', '--ds_name_list', nargs='+', help='dataset list')
     parser.add_argument('--batch_size', type=int)
-    parser.add_argument('--txt_name', type=int)
+    parser.add_argument('--txt_name', type=str)
     # parser.add_argument('--epochs', type=int)
     # parser.add_argument('--save_prefix', type=str)
 
