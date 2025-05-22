@@ -14,7 +14,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 class train_clipDS_model():
     def __init__(self,
                  batch_size,
-                 epochs=50,
+                 epochs=200,
                  reload=None,
                  base_lr=0.01,
                  warmup_epochs=0,
