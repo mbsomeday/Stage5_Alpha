@@ -9,7 +9,7 @@ from utils.utils import DotDict
 class EarlyStopping():
     def __init__(self, save_prefix,
                  top_k=2,
-                 patience=15,
+                 patience=10,
                  delta=0.00001):
         '''
         :param save_prefix: 存储前缀，例子：EfficientB0_D1，也用于创建save dir
