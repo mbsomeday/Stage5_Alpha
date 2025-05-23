@@ -60,7 +60,7 @@ class train_clipDS_model():
         save_prefix = 'vgg16_CropDSCls'
         callback_savd_dir = save_prefix
 
-        self.early_stopping = EarlyStopping(save_prefix, top_k=2)
+        self.early_stopping = EarlyStopping(save_prefix, top_k=2, patience=15)
         train_num_info = [len(self.train_dataset), -1, -1]
         val_num_info = [len(self.val_dataset), -1, -1]
 
