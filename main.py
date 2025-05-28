@@ -1,13 +1,14 @@
 import argparse
 from torch.utils.data import DataLoader
 
-from training.exp_09 import train_clipDS_model
-from test_func.ds_cls import test_ds_classifier
+from training.train_dsClip import train_clipDS_model
+# from test_func.ds_cls import test_ds_classifier
+from test_func.ped_cls import test_ped_classifier
 
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights_path', type=str)
-    # parser.add_argument('-d', '--ds_name_list', nargs='+', help='dataset list')
+    parser.add_argument('--ds_name_list', nargs='+', help='dataset list')
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--txt_name', type=str)
     # parser.add_argument('--epochs', type=int)
@@ -16,8 +17,14 @@ def get_args():
     args = parser.parse_args()
     return args
 
+args = get_args()
+model_obj = 'models.EfficientNet.efficientNetB0'
+weights_path = args.weights_path
+batch_size = args.batch_size
+ds_name_list = [args.ds_name_list]
+txt_name = args.txt_name
 
-tt = train_clipDS_model(batch_size=48)
+tt = test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size, txt_name)
 tt.train_model()
 
 # args = get_args()
