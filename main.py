@@ -24,6 +24,8 @@ batch_size = args.batch_size
 ds_name_list = [args.ds_name_list]
 txt_name = args.txt_name
 
+print(f'ds_name_list:{ds_name_list}')
+
 tt = test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size, txt_name)
 tt.train_model()
 
