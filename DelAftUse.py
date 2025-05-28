@@ -69,7 +69,11 @@ for idx, data_dict in enumerate(test_loader):
 
     model.set_input(image)
     model.optimize_parameters()
-    break
+    # break
+
+
+
+
 
 # from cycleGAN_utils import networks
 # from torchsummary import summary
