@@ -26,7 +26,6 @@ txt_name = args.txt_name
 
 
 tt = test_ped_classifier(model_obj, weights_path, ds_name_list, batch_size, txt_name)
-tt.train_model()
 
 # args = get_args()
 # weights_path = args.weights_path
