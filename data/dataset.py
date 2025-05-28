@@ -16,6 +16,11 @@ from configs.paths_dict import PATHS
 
 class my_dataset(Dataset):
     def __init__(self, ds_name_list, path_key, txt_name):
+        '''
+        :param ds_name_list:
+        :param path_key: org_dataset
+        :param txt_name:
+        '''
         self.ds_name_list = ds_name_list
         self.ds_label_list = []
         self.path_key = path_key
@@ -25,7 +30,7 @@ class my_dataset(Dataset):
         self.txt_name = txt_name
         self.img_transforms = transforms.Compose([
             # transforms.GaussianBlur(kernel_size=23, sigma=10),
-            transforms.ToTensor()
+            transforms.ToTensor(),
         ])
         self.images, self.ped_labels, self.ds_labels = self.init_ImagesLabels()
         print(f'Get dataset: {ds_name_list}, txt_name: {txt_name}, total {len(self.images)} images')
