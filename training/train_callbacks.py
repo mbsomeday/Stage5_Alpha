@@ -27,26 +27,6 @@ class EarlyStopping():
         if not os.path.exists(self.model_save_dir):
             os.mkdir(self.model_save_dir)
 
-        # if self.save_best_cls_model:
-        #     self.save_nonPed_info = DotDict({
-        #         'patience': patience,
-        #         'counter': 0,
-        #         'best_acc': -np.inf,
-        #         'save_dir': os.path.join(self.model_save_dir, 'nonPed')
-        #     })
-        #     self.save_ped_info = DotDict({
-        #         'patience': patience,
-        #         'counter': 0,
-        #         'best_acc': -np.inf,
-        #         'save_dir': os.path.join(self.model_save_dir, 'ped')
-        #     })
-        #
-        #     # 创建每个类保存ckpt的文件夹
-        #     if not os.path.exists(self.save_nonPed_info.save_dir):
-        #         os.mkdir(self.save_nonPed_info.save_dir)
-        #     if not os.path.exists(self.save_ped_info.save_dir):
-        #         os.mkdir(self.save_ped_info.save_dir)
-
         self.patience = patience
         self.counter = 0            # 记录loss不变的epoch数目
         self.early_stop = False     # 是否停止训练
