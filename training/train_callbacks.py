@@ -9,6 +9,8 @@ from utils.utils import DotDict
 class EarlyStopping():
     def __init__(self, save_prefix,
                  top_k=2,
+                 cur_epoch=0,
+                 best_monitor_metric=-np.inf,
                  patience=10,
                  delta=0.00001):
         '''
@@ -20,8 +22,8 @@ class EarlyStopping():
 
         self.top_k = top_k
         self.save_prefix = save_prefix
-        self.cur_epoch = 0
-
+        self.cur_epoch = cur_epoch
+        self.best_monitor_metric = best_monitor_metric
         self.model_save_dir = os.path.join(os.getcwd(), save_prefix)
 
         if not os.path.exists(self.model_save_dir):
@@ -30,7 +32,6 @@ class EarlyStopping():
         self.patience = patience
         self.counter = 0            # 记录loss不变的epoch数目
         self.early_stop = False     # 是否停止训练
-        self.best_val_acc = -np.inf
         self.delta = delta
 
         print('-' * 20 + 'Early Stopping Info' + '-' * 20)
@@ -43,7 +44,7 @@ class EarlyStopping():
         with open(os.path.join(self.model_save_dir, 'cb_EarlyStop.txt'), 'a') as f:
             f.write(msg)
 
-    def __call__(self, epoch, model, optimizer, val_epoch_info):
+    def __call__(self, epoch, model, optimizer, val_epoch_info, scheduler=None):
         '''
             目的是monitor总体及各类别的accuracy
         '''
@@ -51,12 +52,12 @@ class EarlyStopping():
         cur_lr = optimizer.param_groups[0]['lr']
         print(f'Current lr: {cur_lr}')
 
-        if val_epoch_info.val_bc < self.best_val_acc + self.delta:       # 表现没有提升的情况
+        if val_epoch_info.balanced_accuracy < self.best_monitor_metric + self.delta:       # 表现没有提升的情况
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} / {self.patience}')
         else:       # 表现提升
-            metrics = [self.best_val_acc, val_epoch_info.val_bc]
-            self.save_checkpoint(model=model, metrics=metrics, optimizer=optimizer, ckpt_dir=self.model_save_dir)
+            metrics = [self.best_monitor_metric, val_epoch_info.balanced_accuracy]
+            self.save_checkpoint(model=model, metrics=metrics, optimizer=optimizer, ckpt_dir=self.model_save_dir, scheduler=scheduler)
             self.counter = 0
 
         # 根据counter判断是否设置停止flag
@@ -91,24 +92,24 @@ class EarlyStopping():
             print('Del file:', del_path)
 
 
-    def save_checkpoint(self, model, metrics, optimizer, ckpt_dir):
-
+    def save_checkpoint(self, model, metrics, optimizer, ckpt_dir, scheduler=None):
         print(f'Performance increases ({metrics[0]} --> {metrics[1]}). Saving Model.')
 
         self.del_redundant_weights(ckpt_dir)
         save_name = f"{self.save_prefix}-{self.cur_epoch:02d}-{metrics[1]:.5f}.pth"     # 格式：prefix_{epoch}_{balanced_acc}.pth
-        self.best_val_acc = metrics[1]
+        self.best_monitor_metric = metrics[1]
 
         checkpoint = {
             'epoch': self.cur_epoch,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'best_val_bc': self.best_val_acc,
+            'best_val_bc': self.best_monitor_metric,
+            'lr': scheduler.get_last_lr(),
+            'scheduler_state_dict': scheduler.state_dict(),
         }
 
         save_path = os.path.join(ckpt_dir, save_name)
         torch.save(checkpoint, save_path)
-
 
 
 class ImageLogger():
@@ -143,27 +144,38 @@ class Epoch_logger():
             msg = f'Model: {model_name}, Training on datasets: {self.ds_name_list}\n'
             f.write(msg)
 
+    def get_print_msg(self, info_dict, type='Training'):
+
+        msg = f'{type} info: Balanced accuracy:{info_dict.balanced_accuracy:.4f}, accuracy:{info_dict.accuracy:.4f}'
+        if type == 'Training':
+            msg = msg + ' Loss: {info_dict.loss: .8f}\n'
+        else:
+            msg = msg + '\n'
+
+        return msg
+
 
     def __call__(self, epoch, training_info, val_info):
 
         if self.task == 'ped_cls':
-            train_nonPed_acc = training_info.nonPed_acc_num / self.train_nonPed_num
-            train_ped_acc = training_info.ped_acc_num / self.train_ped_num
-            val_nonPed_acc = val_info.nonPed_acc_num / self.val_nonPed_num
-            val_ped_acc = val_info.ped_acc_num / self.val_ped_num
-
-            train_msg = f'Training Loss:{training_info.training_loss:.6f}, Balanced accuracy: {training_info.training_bc:.6f}, accuracy: {training_info.train_accuracy:.6f}, [0: {train_nonPed_acc:.4f}({training_info.nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.4f}({training_info.ped_acc_num}/{self.train_ped_num}), all: ({training_info.training_correct_num}/{self.train_num})]\n'
-
-            val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({val_info.nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.4f}({val_info.ped_acc_num}/{self.val_ped_num}), all: ({val_info.val_correct_num}/{self.val_num})]\n'
-
+            # train_nonPed_acc = training_info.nonPed_acc_num / self.train_nonPed_num
+            # train_ped_acc = training_info.ped_acc_num / self.train_ped_num
+            # val_nonPed_acc = val_info.nonPed_acc_num / self.val_nonPed_num
+            # val_ped_acc = val_info.ped_acc_num / self.val_ped_num
+            #
+            # train_msg = f'Training Loss:{training_info.training_loss:.6f}, Balanced accuracy: {training_info.training_bc:.6f}, accuracy: {training_info.train_accuracy:.6f}, [0: {train_nonPed_acc:.4f}({training_info.nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.4f}({training_info.ped_acc_num}/{self.train_ped_num}), all: ({training_info.training_correct_num}/{self.train_num})]\n'
+            #
+            # val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({val_info.nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.4f}({val_info.ped_acc_num}/{self.val_ped_num}), all: ({val_info.val_correct_num}/{self.val_num})]\n'
+            train_msg = self.get_print_msg(info_dict=training_info, type='Training')
+            val_msg = self.get_print_msg(info_dict=val_info, type='Valisation')
             with open(self.txt_path, 'a') as f:
-                f.write(f'Epoch: {epoch}\n')
+                f.write(f'------------------------------ Epoch: {epoch} ------------------------------\n')
                 f.write(train_msg)
                 f.write(val_msg)
 
         elif self.task == 'ds_cls':
             train_msg = f'Training Loss:{training_info.training_loss:.6f}, Balanced accuracy: {training_info.training_bc:.6f}, accuracy: {training_info.train_accuracy:.6f}\n'
-            val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}\n'
+            val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.balanced_accuracy:.6f}, accuracy: {val_info.val_accuracy:.6f}\n'
 
             with open(self.txt_path, 'a') as f:
                 f.write(f'Epoch: {epoch}\n')
