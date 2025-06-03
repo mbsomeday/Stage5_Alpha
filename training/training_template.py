@@ -13,7 +13,7 @@ from torchcam.methods.gradient import LayerCAM
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict
 from data.dataset import my_dataset
-from train_callbacks import EarlyStopping, Epoch_logger
+from training.train_callbacks import EarlyStopping, Epoch_logger
 
 torch.manual_seed(16)
 
