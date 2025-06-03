@@ -198,7 +198,7 @@ class Ped_Classifier():
             self.best_val_bc = -np.inf
 
         # ********** callbacks **********
-        callback_savd_dir = model_obj.rsplit('.')[-1]
+        callback_savd_dir = self.model_obj.rsplit('.')[-1]
         for ds_name in self.ds_name_list:
             info = '_' + ds_name
             callback_savd_dir += info
@@ -211,7 +211,7 @@ class Ped_Classifier():
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
-        self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
+        self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=self.model_obj.split('.')[-1],
                                          ds_name_list=self.ds_name_list, train_num_info=train_num_info,
                                          val_num_info=val_num_info,
                                          task='ped_cls'
