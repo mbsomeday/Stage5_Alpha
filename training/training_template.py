@@ -156,7 +156,7 @@ class Ped_Classifier():
             self.ped_weights_path = ped_weights_path
 
         # ------------------------------------ 模型 ------------------------------------
-        self.ped_model = get_obj_from_str(model_obj)(num_class=2)
+        self.ped_model = get_obj_from_str(model_obj)(num_class=2).to(DEVICE)
 
         # ------------------------------------ blur，fade，等操作 ------------------------------------
         self.fade_operator = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
@@ -222,6 +222,7 @@ class Ped_Classifier():
         self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=True)
 
         self.ped_model = load_model(self.ped_model, self.ped_weights_path).to(DEVICE)
+        self.ped_model.eval()
 
     def reload(self):
         '''
@@ -251,7 +252,6 @@ class Ped_Classifier():
         '''
             整合训练过程中的accuracy和loss等数据并进行 输出 和 返回
         '''
-        # fixme, 如果是val则不需要监控opered的值
         correct_num_org = org_pred['nonPed_acc_num'] + org_pred['ped_acc_num']
         correct_num_opered = opered_pred['nonPed_acc_num'] + opered_pred['ped_acc_num']
 
