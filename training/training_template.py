@@ -334,9 +334,7 @@ class Ped_Classifier():
             opered_dict['nonPed_acc_num'] = ((ped_labels[nonPed_idx] == pred_opered[nonPed_idx]) * 1).sum()
             opered_dict['ped_acc_num'] = ((ped_labels[ped_idx] == pred_opered[ped_idx]) * 1).sum()
 
-            # if batch_idx == 3:
-            #     break
-            break
+
 
         train_epoch_info = self.handle_pred_info(y_true, org_pred=org_dict, opered_pred=opered_dict, info_type='Train')
 
@@ -371,8 +369,6 @@ class Ped_Classifier():
                 ped_idx = (ped_labels == 1)
                 ped_acc_num += ((ped_labels[ped_idx] == preds[ped_idx]) * 1).sum()
 
-                if batch_idx == 3:
-                    break
 
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_bc = balanced_accuracy_score(y_true, y_pred)
@@ -413,8 +409,6 @@ class Ped_Classifier():
                 ped_idx = (ped_labels == 1)
                 ped_acc_num += ((ped_labels[ped_idx] == preds[ped_idx]) * 1).sum()
 
-                if batch_idx == 3:
-                    break
 
         test_accuracy = test_correct_num / len(self.test_dataset)
         test_bc = balanced_accuracy_score(y_true, y_pred)
@@ -451,20 +445,19 @@ class Ped_Classifier():
         for EPOCH in range(self.start_epoch, self.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(EPOCH + 1) + '=' * 30)
             train_epoch_info = self.train_one_epoch()
-            # val_epoch_info = self.val_on_epoch_end()
-            #
-            # # ------------------------ 调用callbacks ------------------------
-            # self.early_stopping(EPOCH + 1, self.ped_model, self.optimizer, val_epoch_info, scheduler=self.scheduler)
-            # self.epoch_logger(epoch=EPOCH + 1, training_info=train_epoch_info, val_info=val_epoch_info)
-            #
-            # # ------------------------ 调用callbacks ------------------------
-            # # 每个epoch end调整learning rate
-            # self.update_learning_rate()
-            #
-            # if self.early_stopping.early_stop:
-            #     print(f'Early Stopping!')
-            #     break
-            break
+            val_epoch_info = self.val_on_epoch_end()
+
+            # ------------------------ 调用callbacks ------------------------
+            self.early_stopping(EPOCH + 1, self.ped_model, self.optimizer, val_epoch_info, scheduler=self.scheduler)
+            self.epoch_logger(epoch=EPOCH + 1, training_info=train_epoch_info, val_info=val_epoch_info)
+
+            # ------------------------ 调用callbacks ------------------------
+            # 每个epoch end调整learning rate
+            self.update_learning_rate()
+
+            if self.early_stopping.early_stop:
+                print(f'Early Stopping!')
+                break
 
 
 # if __name__ == '__main__':
