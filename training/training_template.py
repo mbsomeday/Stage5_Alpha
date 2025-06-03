@@ -122,7 +122,7 @@ class Blur_Image_Patch():
 
         for hp in heatmaps:
             cur_max = hp.max()
-            hp[heatmaps < cur_max] = 0
+            hp[hp < cur_max] = 0
 
         # heatmaps[heatmaps < self.attention_thresh] = 0
         heatmaps_resized = F.interpolate(heatmaps.unsqueeze(0), size=(224, 224), mode='bilinear', align_corners=False)
