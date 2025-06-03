@@ -18,10 +18,10 @@ from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
 # from train_callbacks import EarlyStopping, Epoch_logger
 
 
-torch.manual_seed(16)
+# torch.manual_seed(16)
 
 
-class DS_Bias_Loss(nn.Module):
+class NotYetUse_Loss(nn.Module):
 
     def __init__(self, ds_model_obj, ds_weights_path, grad_layer=None):
         super().__init__()
@@ -119,7 +119,12 @@ class Blur_Image_Patch():
         heatmap_list = self.cam_operator(class_idx=ds_preds, scores=ds_logits)
 
         heatmaps = heatmap_list[0]
-        heatmaps[heatmaps < self.attention_thresh] = 0
+
+        for hp in heatmaps:
+            cur_max = hp.max()
+            hp[heatmaps < cur_max] = 0
+
+        # heatmaps[heatmaps < self.attention_thresh] = 0
         heatmaps_resized = F.interpolate(heatmaps.unsqueeze(0), size=(224, 224), mode='bilinear', align_corners=False)
         heatmaps_resized = heatmaps_resized.squeeze().unsqueeze(1)
 
@@ -269,7 +274,7 @@ class Ped_Classifier():
             epoch_info['org_bc'] = balanced_accuracy_score(y_true, org_pred['y_pred'])      # 在训练baseline的时候，不需要这个
             epoch_info['operated_bc'] = balanced_accuracy_score(y_true, opered_pred['y_pred'])      # 在训练baseline的时候，不需要这个
 
-            show_info01 = f" org_bc:{epoch_info['org_bc']:.4f}, operated_bc:{epoch_info['operated_bc']:.4f}\n"
+            show_info01 = f"\norg_bc:{epoch_info['org_bc']:.4f}, operated_bc:{epoch_info['operated_bc']:.4f}\n"
 
         # 只用 original image 训练的情况
         else:
@@ -289,7 +294,6 @@ class Ped_Classifier():
         print(msg)
 
         return DotDict(epoch_info)
-
 
 
     def train_one_epoch(self):
@@ -479,14 +483,45 @@ if __name__ == '__main__':
     ped_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
     # ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
 
-    tt = Ped_Classifier(model_obj,
-                        ds_name_list=['D2'],
-                        batch_size=4, epochs=100,
-                        ds_weights_path=ds_weights_path,
-                        ped_weights_path=ped_weights_path,
-                        isTrain=True,
-                        beta=0.0,
-                        resume=False
-                        )
-    tt.train()
+    # tt = Ped_Classifier(model_obj,
+    #                     ds_name_list=['D2'],
+    #                     batch_size=4, epochs=100,
+    #                     ds_weights_path=ds_weights_path,
+    #                     ped_weights_path=ped_weights_path,
+    #                     isTrain=True,
+    #                     beta=0.0,
+    #                     resume=False
+    #                     )
+    # tt.train()
     # tt.test()
+
+    test_obj = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
+
+    torch.manual_seed(13)
+    ds_name_list = ['D3']
+    batch_size = 4
+    val_dataset = my_dataset(ds_name_list=ds_name_list, path_key='tiny_dataset', txt_name='val.txt')
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
+
+    for batch_idx, data_dict in enumerate(val_loader):
+        images = data_dict['image']
+
+        AC = test_obj(images)
+
+        break
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
