@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict
 from data.dataset import my_dataset
-from training.train_callbacks import EarlyStopping, Epoch_logger
+from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
 # from train_callbacks import EarlyStopping, Epoch_logger
 
 
@@ -213,10 +213,9 @@ class Ped_Classifier():
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
-        self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=self.model_obj.split('.')[-1],
+        self.epoch_logger = Ped_Epoch_Logger(save_dir=callback_savd_dir, model_name=self.model_obj.split('.')[-1],
                                          ds_name_list=self.ds_name_list, train_num_info=train_num_info,
                                          val_num_info=val_num_info,
-                                         task='ped_cls'
                                          )
 
     def test_steup(self):
@@ -270,7 +269,7 @@ class Ped_Classifier():
             epoch_info['org_bc'] = balanced_accuracy_score(y_true, org_pred['y_pred'])      # 在训练baseline的时候，不需要这个
             epoch_info['operated_bc'] = balanced_accuracy_score(y_true, opered_pred['y_pred'])      # 在训练baseline的时候，不需要这个
 
-            show_info01 = f"org_bc:{epoch_info['org_bc']:.4f}, operated_bc:{epoch_info['operated_bc']:.4f}\n"
+            show_info01 = f" org_bc:{epoch_info['org_bc']:.4f}, operated_bc:{epoch_info['operated_bc']:.4f}\n"
 
         # 只用 original image 训练的情况
         else:
@@ -438,7 +437,6 @@ class Ped_Classifier():
         old_lr = self.optimizer.param_groups[0]['lr']
         self.scheduler.step()
         lr = self.optimizer.param_groups[0]['lr']
-
         if lr != old_lr:
             print('learning rate %.7f -> %.7f' % (old_lr, lr))
 

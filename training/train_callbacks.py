@@ -117,16 +117,15 @@ class ImageLogger():
         pass
 
 
-class Epoch_logger():
+class Ped_Epoch_Logger():
     '''
         用于记录训练过程中的loss，accuracy变化情况
     '''
-    def __init__(self, save_dir, model_name, ds_name_list, train_num_info, val_num_info, task='ped_cls'):
+    def __init__(self, save_dir, model_name, ds_name_list, train_num_info, val_num_info):
         super().__init__()
         self.save_dir = save_dir
         self.model_name = model_name
         self.ds_name_list = ds_name_list
-        self.task = task
 
         # 获取数据集的总量，各个类别的量
         self.train_num, self.train_nonPed_num, self.train_ped_num = train_num_info
@@ -135,7 +134,7 @@ class Epoch_logger():
         self.txt_path = os.path.join(self.save_dir, 'train_info.txt')
 
         # 注：训练时取消下列注释
-        __stderr__ = sys.stderr  # 将当前默认的错误输出结果保存为__stderr__
+        # __stderr__ = sys.stderr  # 将当前默认的错误输出结果保存为__stderr__
         # sys.stderr = open(os.path.join(self.save_dir, 'errorLog.txt'), 'a')  # 将后续的报错信息写入对应的文件中
         # assert not os.path.exists(self.txt_path), f'The {self.txt_path} already exists, please chcek!'
 
@@ -145,6 +144,9 @@ class Epoch_logger():
             f.write(msg)
 
     def _get_msg_format(self, key):
+        '''
+            对 accuracy 和 loss 进行输出时设置不同的打印位数
+        '''
         if 'loss' in key:
             return '{:.8f}'
         if 'accuracy' in key or 'bc' in key:
@@ -152,59 +154,22 @@ class Epoch_logger():
         else:
             return '{}'
 
-    def get_print_msg(self, info_dict, type='Training'):
-
-
-
+    def get_print_msg(self, info_dict):
         msg = ', '.join([f"{k}: {self._get_msg_format(k).format(v)}" for k, v in info_dict.items()])
         msg = msg + '\n'
-
-        # msg = f'{type} info: Balanced accuracy:{info_dict.balanced_accuracy:.4f}, accuracy:{info_dict.accuracy:.4f}'
-        # if type == 'Training':
-        #     msg = msg + ' Loss: {info_dict.loss: .8f}\n'
-        # else:
-        #     msg = msg + '\n'
-
         return msg
 
-
     def __call__(self, epoch, training_info, val_info):
-
-        if self.task == 'ped_cls':
-            # train_nonPed_acc = training_info.nonPed_acc_num / self.train_nonPed_num
-            # train_ped_acc = training_info.ped_acc_num / self.train_ped_num
-            # val_nonPed_acc = val_info.nonPed_acc_num / self.val_nonPed_num
-            # val_ped_acc = val_info.ped_acc_num / self.val_ped_num
-            #
-            # train_msg = f'Training Loss:{training_info.training_loss:.6f}, Balanced accuracy: {training_info.training_bc:.6f}, accuracy: {training_info.train_accuracy:.6f}, [0: {train_nonPed_acc:.4f}({training_info.nonPed_acc_num}/{self.train_nonPed_num}), 1: {train_ped_acc:.4f}({training_info.ped_acc_num}/{self.train_ped_num}), all: ({training_info.training_correct_num}/{self.train_num})]\n'
-            #
-            # val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({val_info.nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.4f}({val_info.ped_acc_num}/{self.val_ped_num}), all: ({val_info.val_correct_num}/{self.val_num})]\n'
-            train_msg = self.get_print_msg(info_dict=training_info, type='Training')
-            val_msg = self.get_print_msg(info_dict=val_info, type='Validation')
-            with open(self.txt_path, 'a') as f:
-                f.write(f'------------------------------ Epoch: {epoch} ------------------------------\n')
-                f.write(train_msg)
-                f.write(val_msg)
-
-        elif self.task == 'ds_cls':
-            train_msg = f'Training Loss:{training_info.training_loss:.6f}, Balanced accuracy: {training_info.training_bc:.6f}, accuracy: {training_info.train_accuracy:.6f}\n'
-            val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.balanced_accuracy:.6f}, accuracy: {val_info.val_accuracy:.6f}\n'
-
-            with open(self.txt_path, 'a') as f:
-                f.write(f'Epoch: {epoch}\n')
-                f.write(train_msg)
-                f.write(val_msg)
-
-        else:
-            raise RuntimeError('Epoch_logger的task错误，请检查！')
+        train_msg = self.get_print_msg(info_dict=training_info)
+        val_msg = self.get_print_msg(info_dict=val_info)
+        with open(self.txt_path, 'a') as f:
+            f.write(f'------------------------------ Epoch: {epoch} ------------------------------\n')
+            f.write(train_msg)
+            f.write(val_msg)
 
 
-# class BestClsModel():
-#     '''
-#         根据模型在某一个类别上的
-#     '''
-#     def __init__(self):
-#         super().__init__()
+if __name__ == '__main__':
+    print('test')
 
 
 
