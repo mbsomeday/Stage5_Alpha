@@ -5,11 +5,7 @@ root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
 
 import argparse
-from torch.utils.data import DataLoader
 
-from training.train_dsClip import train_clipDS_model
-# from test_func.ds_cls import test_ds_classifier
-from test_func.ped_cls import test_ped_classifier
 from training.training_template import Ped_Classifier
 
 def get_args():
