@@ -153,7 +153,7 @@ class Ped_Classifier():
         self.resume = resume
         if ds_weights_path is not None:
             self.ds_weights_path = ds_weights_path
-        if ped_weights_path is None:
+        if ped_weights_path is not None:
             self.ped_weights_path = ped_weights_path
 
         # ------------------------------------ 模型 ------------------------------------
