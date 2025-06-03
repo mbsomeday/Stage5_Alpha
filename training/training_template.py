@@ -469,19 +469,20 @@ class Ped_Classifier():
             break
 
 
-if __name__ == '__main__':
-    model_obj = 'models.EfficientNet.efficientNetB0'
-
-    ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_dsCls-10-0.97636.pth'
-    ped_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
-    # ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
-
-    tt = Ped_Classifier(model_obj, ds_name_list=['D2'],
-                        batch_size=4, epochs=100,
-                        ds_weights_path=ds_weights_path,
-                        ped_weights_path=ped_weights_path,
-                        isTrain=True,
-                        resume=False
-                        )
-    tt.train()
+# if __name__ == '__main__':
+#     model_obj = 'models.EfficientNet.efficientNetB0'
+#
+#     ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_dsCls-10-0.97636.pth'
+#     ped_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
+#     # ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
+#
+#     tt = Ped_Classifier(model_obj,
+#                         ds_name_list=['D2'],
+#                         batch_size=4, epochs=100,
+#                         ds_weights_path=ds_weights_path,
+#                         ped_weights_path=ped_weights_path,
+#                         isTrain=True,
+#                         resume=False
+#                         )
+#     tt.train()
     # tt.test()
