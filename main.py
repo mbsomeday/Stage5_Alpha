@@ -42,6 +42,8 @@ tt = Ped_Classifier(model_obj,
                     isTrain=isTrain,
                     resume=False
                     )
-# tt.train()
-tt.test()
+if isTrain:
+    tt.train()
+else:
+    tt.test()
 
