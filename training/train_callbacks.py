@@ -144,13 +144,26 @@ class Epoch_logger():
             msg = f'Model: {model_name}, Training on datasets: {self.ds_name_list}\n'
             f.write(msg)
 
+    def _get_msg_format(self, key):
+        if 'loss' in key:
+            return '{:.8f}'
+        if 'accuracy' in key or 'bc' in key:
+            return '{:.4f}'
+        else:
+            return '{}'
+
     def get_print_msg(self, info_dict, type='Training'):
 
-        msg = f'{type} info: Balanced accuracy:{info_dict.balanced_accuracy:.4f}, accuracy:{info_dict.accuracy:.4f}'
-        if type == 'Training':
-            msg = msg + ' Loss: {info_dict.loss: .8f}\n'
-        else:
-            msg = msg + '\n'
+
+
+        msg = ', '.join([f"{k}: {self._get_msg_format(k).format(v)}" for k, v in info_dict.items()])
+        msg = msg + '\n'
+
+        # msg = f'{type} info: Balanced accuracy:{info_dict.balanced_accuracy:.4f}, accuracy:{info_dict.accuracy:.4f}'
+        # if type == 'Training':
+        #     msg = msg + ' Loss: {info_dict.loss: .8f}\n'
+        # else:
+        #     msg = msg + '\n'
 
         return msg
 
@@ -167,7 +180,7 @@ class Epoch_logger():
             #
             # val_msg = f'Val Loss:{val_info.val_loss:.6f}, Balanced accuracy: {val_info.val_bc:.6f}, accuracy: {val_info.val_accuracy:.6f}, [0: {val_nonPed_acc:.4f}({val_info.nonPed_acc_num}/{self.val_nonPed_num}), 1: {val_ped_acc:.4f}({val_info.ped_acc_num}/{self.val_ped_num}), all: ({val_info.val_correct_num}/{self.val_num})]\n'
             train_msg = self.get_print_msg(info_dict=training_info, type='Training')
-            val_msg = self.get_print_msg(info_dict=val_info, type='Valisation')
+            val_msg = self.get_print_msg(info_dict=val_info, type='Validation')
             with open(self.txt_path, 'a') as f:
                 f.write(f'------------------------------ Epoch: {epoch} ------------------------------\n')
                 f.write(train_msg)

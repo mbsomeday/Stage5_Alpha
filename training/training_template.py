@@ -14,7 +14,9 @@ from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict
 from data.dataset import my_dataset
-from training.train_callbacks import EarlyStopping, Epoch_logger
+# from training.train_callbacks import EarlyStopping, Epoch_logger
+from train_callbacks import EarlyStopping, Epoch_logger
+
 
 torch.manual_seed(16)
 
@@ -140,7 +142,7 @@ class Blur_Image_Patch():
 
 
 class Ped_Classifier():
-    def __init__(self, model_obj, ds_name_list, batch_size, epochs, isTrain=True, resume=False, ds_weights_path=None,
+    def __init__(self, model_obj, ds_name_list, batch_size, epochs, beta=0.2, isTrain=True, resume=False, ds_weights_path=None,
                  base_lr=1e-3, ped_weights_path=None):
         # ------------------------------------ 变量 ------------------------------------
         self.model_obj = model_obj
@@ -151,6 +153,7 @@ class Ped_Classifier():
         self.base_lr = base_lr
         self.isTrain = isTrain
         self.resume = resume
+        self.beta = beta  # loss 中，经过处理的 image 的损失函数所占比例
         if ds_weights_path is not None:
             self.ds_weights_path = ds_weights_path
         if ped_weights_path is not None:
@@ -188,8 +191,6 @@ class Ped_Classifier():
 
         # self.bias_loss = DS_Bias_Loss(ds_model_obj=model_obj, ds_weights_path=ds_weights_path)
         self.loss_fn = torch.nn.CrossEntropyLoss()
-
-        self.beta = 0.2  # loss 中，经过处理的 image 的损失函数所占比例
 
         # ********** 中断后重新训练 **********
         if self.resume is True:
@@ -249,71 +250,76 @@ class Ped_Classifier():
         }
         return pred_info
 
-    def handle_pred_info(self, y_true: list, org_pred: dict, opered_pred: dict, info_type='Train'):
+    def handle_pred_info(self, y_true: list, org_pred: dict, opered_pred=None, info_type='Train'):
         '''
             整合训练过程中的accuracy和loss等数据并进行 输出 和 返回
         '''
-        correct_num_org = org_pred['nonPed_acc_num'] + org_pred['ped_acc_num']
-        correct_num_opered = opered_pred['nonPed_acc_num'] + opered_pred['ped_acc_num']
+        epoch_info = {}
 
-        accuracy_org = correct_num_org / len(y_true)
-        accuracy_opered = correct_num_opered / len(y_true)
+        # 若有 operated images
+        if opered_pred is not None:
+            correct_num = org_pred['correct_num'] + opered_pred['correct_num']
+            accuracy = correct_num / (2 * len(y_true))
 
-        # 这里对y_ture进行了处理，因为pred的结果是org+opered的
-        y_true_bc = y_true + y_true
-        y_pred = org_pred['y_pred'] + opered_pred['y_pred']
-        balanced_accuracy = balanced_accuracy_score(y_true_bc, y_pred)
+            bc_y_true = y_true + y_true
+            bc_y_pred = org_pred['y_pred'] + opered_pred['y_pred']
+            balanced_accuracy = balanced_accuracy_score(bc_y_true, bc_y_pred)
 
-        accuracy = (correct_num_org + correct_num_opered) / (2 * len(y_true))
-        loss = org_pred['loss'] + opered_pred['loss']
+            loss = org_pred['loss'] + opered_pred['loss']
 
-        epoch_info = {
-            # 总体表现
-            'accuracy': accuracy,
-            'balanced_accuracy': balanced_accuracy,
-            'loss': loss,
+            epoch_info['org_bc'] = balanced_accuracy_score(y_true, org_pred['y_pred'])      # 在训练baseline的时候，不需要这个
+            epoch_info['operated_bc'] = balanced_accuracy_score(y_true, opered_pred['y_pred'])      # 在训练baseline的时候，不需要这个
 
-            # 分为在org和opered上的表现
-            'correct_num_org': correct_num_org,
-            'accuracy_org': accuracy_org,
+            show_info01 = f"org_bc:{epoch_info['org_bc']:.4f}, operated_bc:{epoch_info['operated_bc']:.4f}\n"
 
-            'correct_num_opered': correct_num_opered,
-            'accuracy_opered': accuracy_opered,
-        }
+        # 只用 original image 训练的情况
+        else:
+            correct_num = org_pred['correct_num']
+            accuracy = correct_num / len(y_true)
+            balanced_accuracy = balanced_accuracy_score(y_true, org_pred['y_pred'])
+            loss = org_pred['loss']
+            show_info01 = ''
 
-        msg = f'Overall accuracy: {accuracy:.6f}, Overall balanced accuracy:{balanced_accuracy:.6f}\naccuracy_org:{accuracy_org:.6f}, accuracy_opered:{accuracy_opered:.6f}'
+        epoch_info['accuracy'] = accuracy
+        epoch_info['balanced_accuracy'] = balanced_accuracy
+        epoch_info['loss'] = loss
+
+        msg = f'Overall accuracy: {accuracy:.6f}, Overall balanced accuracy:{balanced_accuracy:.6f}, loss:{loss}' + show_info01
 
         print('-' * 30, str(info_type) + ' Info' + '-' * 30)
         print(msg)
 
         return DotDict(epoch_info)
 
+
+
     def train_one_epoch(self):
         self.ped_model.train()
 
         y_true = []
         org_dict = self.inif_pred_info()
-        opered_dict = self.inif_pred_info()
+        opered_dict = self.inif_pred_info() if self.beta > 0.0 else None
 
         for batch_idx, data in enumerate(tqdm(self.train_loader)):
             images = data['image'].to(DEVICE)
             ped_labels = data['ped_label'].to(DEVICE)
 
             logits_org = self.ped_model(images)
-
-            fade_images = self.fade_operator(images)
-            logits_opered = self.ped_model(fade_images)
-
             pred_org = torch.argmax(logits_org, 1)
-            pred_opered = torch.argmax(logits_opered, 1)
-
             loss_org = self.loss_fn(logits_org, ped_labels)
-            loss_opered = self.loss_fn(logits_opered, ped_labels)
+
+            if self.beta > 0.0:
+                fade_images = self.fade_operator(images)
+                logits_opered = self.ped_model(fade_images)
+                pred_opered = torch.argmax(logits_opered, 1)
+                loss_opered = self.loss_fn(logits_opered, ped_labels)
+
+                opered_dict['loss'] += loss_opered.item()
+                loss_value = (1 - self.beta) * loss_org + self.beta * loss_opered
+            else:
+                loss_value = loss_org
 
             org_dict['loss'] += loss_org.item()
-            opered_dict['loss'] += loss_opered.item()
-
-            loss_value = (1 - self.beta) * loss_org + self.beta * loss_opered
 
             self.optimizer.zero_grad()
             loss_value.backward()
@@ -321,19 +327,25 @@ class Ped_Classifier():
 
             # ------------ 对 pred 进行记录 ------------
             y_true.extend(ped_labels.cpu().numpy())
-            org_dict['y_pred'].extend(pred_org.cpu().numpy())
-            opered_dict['y_pred'].extend(pred_opered.cpu().numpy())
-
-            # ------------ 计算各个类别的正确个数 ------------
-            org_dict['correct_num'] += (pred_org == ped_labels).sum()
-            opered_dict['correct_num'] += (pred_opered == ped_labels).sum()
-
             nonPed_idx = (ped_labels == 0)
             ped_idx = (ped_labels == 1)
-            org_dict['nonPed_acc_num'] = ((ped_labels[nonPed_idx] == pred_org[nonPed_idx]) * 1).sum()
-            org_dict['ped_acc_num'] = ((ped_labels[ped_idx] == pred_org[ped_idx]) * 1).sum()
-            opered_dict['nonPed_acc_num'] = ((ped_labels[nonPed_idx] == pred_opered[nonPed_idx]) * 1).sum()
-            opered_dict['ped_acc_num'] = ((ped_labels[ped_idx] == pred_opered[ped_idx]) * 1).sum()
+
+            org_dict['y_pred'].extend(pred_org.cpu().numpy())
+            org_dict['correct_num'] += (pred_org == ped_labels).sum()
+            a = ped_labels[nonPed_idx]
+            b = pred_org[nonPed_idx]
+            c = a == b
+            org_dict['nonPed_acc_num'] += ((ped_labels[nonPed_idx] == pred_org[nonPed_idx]) * 1).sum()
+            org_dict['ped_acc_num'] += ((ped_labels[ped_idx] == pred_org[ped_idx]) * 1).sum()
+
+            if self.beta > 0.0:
+                opered_dict['y_pred'].extend(pred_opered.cpu().numpy())
+                opered_dict['correct_num'] += (pred_opered == ped_labels).sum()
+                opered_dict['nonPed_acc_num'] += ((ped_labels[nonPed_idx] == pred_opered[nonPed_idx]) * 1).sum()
+                opered_dict['ped_acc_num'] += ((ped_labels[ped_idx] == pred_opered[ped_idx]) * 1).sum()
+
+            # if batch_idx == 3:
+            #     break
 
         train_epoch_info = self.handle_pred_info(y_true, org_pred=org_dict, opered_pred=opered_dict, info_type='Train')
 
@@ -368,6 +380,7 @@ class Ped_Classifier():
                 ped_idx = (ped_labels == 1)
                 ped_acc_num += ((ped_labels[ped_idx] == preds[ped_idx]) * 1).sum()
 
+                # break
 
         val_accuracy = val_correct_num / len(self.val_dataset)
         val_bc = balanced_accuracy_score(y_true, y_pred)
@@ -407,7 +420,6 @@ class Ped_Classifier():
                 nonPed_acc_num += (ped_labels[nonPed_idx] == preds[nonPed_idx]).sum()
                 ped_idx = (ped_labels == 1)
                 ped_acc_num += ((ped_labels[ped_idx] == preds[ped_idx]) * 1).sum()
-
 
         test_accuracy = test_correct_num / len(self.test_dataset)
         test_bc = balanced_accuracy_score(y_true, y_pred)
@@ -458,21 +470,25 @@ class Ped_Classifier():
                 print(f'Early Stopping!')
                 break
 
+            # if EPOCH == 2:
+            #     break
 
-# if __name__ == '__main__':
-#     model_obj = 'models.EfficientNet.efficientNetB0'
-#
-#     ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_dsCls-10-0.97636.pth'
-#     ped_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
-#     # ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
-#
-#     tt = Ped_Classifier(model_obj,
-#                         ds_name_list=['D2'],
-#                         batch_size=4, epochs=100,
-#                         ds_weights_path=ds_weights_path,
-#                         ped_weights_path=ped_weights_path,
-#                         isTrain=True,
-#                         resume=False
-#                         )
-#     tt.train()
+
+if __name__ == '__main__':
+    model_obj = 'models.EfficientNet.efficientNetB0'
+
+    ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_dsCls-10-0.97636.pth'
+    ped_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
+    # ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
+
+    tt = Ped_Classifier(model_obj,
+                        ds_name_list=['D2'],
+                        batch_size=4, epochs=100,
+                        ds_weights_path=ds_weights_path,
+                        ped_weights_path=ped_weights_path,
+                        isTrain=True,
+                        beta=0.0,
+                        resume=False
+                        )
+    tt.train()
     # tt.test()

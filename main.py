@@ -17,6 +17,7 @@ def get_args():
     parser.add_argument('--ds_weights_path', type=str)
     parser.add_argument('--isTrain', action='store_true')
     parser.add_argument('--ped_weights_path', type=str)
+    parser.add_argument('--beta', type=float)
 
     args = parser.parse_args()
     return args
@@ -29,12 +30,13 @@ epochs = args.epochs
 ds_weights_path = args.ds_weights_path
 isTrain = args.isTrain
 ped_weights_path = args.ped_weights_path
-
+beta = args.beta
 
 tt = Ped_Classifier(model_obj,
                     ds_name_list=ds_name_list,
                     batch_size=batch_size,
                     epochs=epochs,
+                    beta=beta,
                     ds_weights_path=ds_weights_path,
                     ped_weights_path=ped_weights_path,
                     isTrain=isTrain,
