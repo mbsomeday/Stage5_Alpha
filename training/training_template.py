@@ -335,8 +335,6 @@ class Ped_Classifier():
             opered_dict['nonPed_acc_num'] = ((ped_labels[nonPed_idx] == pred_opered[nonPed_idx]) * 1).sum()
             opered_dict['ped_acc_num'] = ((ped_labels[ped_idx] == pred_opered[ped_idx]) * 1).sum()
 
-
-
         train_epoch_info = self.handle_pred_info(y_true, org_pred=org_dict, opered_pred=opered_dict, info_type='Train')
 
         return train_epoch_info
