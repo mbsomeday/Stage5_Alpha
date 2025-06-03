@@ -10,6 +10,7 @@ from torch.optim import lr_scheduler
 from sklearn.metrics import balanced_accuracy_score, confusion_matrix
 from tqdm import tqdm
 from torchcam.methods.gradient import LayerCAM
+from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict
 from data.dataset import my_dataset
@@ -294,7 +295,7 @@ class Ped_Classifier():
         org_dict = self.inif_pred_info()
         opered_dict = self.inif_pred_info()
 
-        for batch_idx, data in enumerate(self.train_loader):
+        for batch_idx, data in enumerate(tqdm(self.train_loader)):
             images = data['image'].to(DEVICE)
             ped_labels = data['ped_label'].to(DEVICE)
 
