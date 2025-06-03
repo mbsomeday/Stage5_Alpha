@@ -68,10 +68,10 @@ KAGGLE = {
     },
 
     'tiny_dataset': {
-        'D1': r'/kaggle/input/stage5-clipds/D1clip',
-        'D2': r'/kaggle/input/stage5-clipds/D2clip',
-        'D3': r'/kaggle/input/stage5-clipds/D3clip',
-        'D4': r'/kaggle/input/stage5-clipds/D4clip',
+        'D1': r'/kaggle/input/stage5-datasets-tiny/TinyD1',
+        'D2': r'/kaggle/input/stage5-datasets-tiny/TinyD2',
+        'D3': r'/kaggle/input/stage5-datasets-tiny/TinyD3',
+        'D4': r'/kaggle/input/stage5-datasets-tiny/TinyD4',
     },
 
     'AE_same_dataset': {
