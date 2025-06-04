@@ -212,7 +212,7 @@ class Ped_Classifier():
             对模型权重进行初始化，保障多次训练结果变动不会变化太大
             适用 kaiming init，suitable for ReLU
         '''
-        for m in model:
+        for m in model.modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
                 nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')  # 或 kaiming_uniform_
                 if m.bias is not None:
@@ -552,20 +552,20 @@ if __name__ == '__main__':
     # tt.train()
     # tt.test()
 
-    test_obj = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
-
-    torch.manual_seed(13)
-    ds_name_list = ['D3']
-    batch_size = 4
-    val_dataset = my_dataset(ds_name_list=ds_name_list, path_key='tiny_dataset', txt_name='val.txt')
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-
-    for batch_idx, data_dict in enumerate(val_loader):
-        images = data_dict['image']
-
-        AC = test_obj(images)
-
-        break
+    # test_obj = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
+    #
+    # torch.manual_seed(13)
+    # ds_name_list = ['D3']
+    # batch_size = 4
+    # val_dataset = my_dataset(ds_name_list=ds_name_list, path_key='tiny_dataset', txt_name='val.txt')
+    # val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
+    #
+    # for batch_idx, data_dict in enumerate(val_loader):
+    #     images = data_dict['image']
+    #
+    #     AC = test_obj(images)
+    #
+    #     break
 
 
 
