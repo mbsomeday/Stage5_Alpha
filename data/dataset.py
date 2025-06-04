@@ -15,16 +15,16 @@ from configs.paths_dict import PATHS
 
 
 # 每次以一定概率对图片进行augmentation
-class RandomAugmentWithProb:
-    def __init__(self, transform_list, p):
-        self.transform_list = transform_list
-        self.p = p
-
-    def __call__(self, x):
-        if self.p > 0.0 and random.random() < self.p:
-            transform = random.choice(self.transform_list)
-            return transform(x)
-        return x
+# class RandomAugmentWithProb:
+#     def __init__(self, transform_list, p):
+#         self.transform_list = transform_list
+#         self.p = p
+#
+#     def __call__(self, x):
+#         if self.p > 0.0 and random.random() < self.p:
+#             transform = random.choice(self.transform_list)
+#             return transform(x)
+#         return x
 
 
 class my_dataset(Dataset):
@@ -42,14 +42,14 @@ class my_dataset(Dataset):
 
         self.txt_name = txt_name
         self.img_transforms = transforms.Compose([
-            RandomAugmentWithProb([
-                transforms.ColorJitter(brightness=1),
-                transforms.ColorJitter(contrast=1),
-                transforms.ColorJitter(saturation=0.5),
-                transforms.ColorJitter(brightness=1, contrast=1, saturation=0.5),
-                transforms.RandomHorizontalFlip(p=1.0),
-                transforms.RandomRotation(15),
-            ], p=augmentation_prob),  # 以p概率执行其中一个增强操作
+            # RandomAugmentWithProb([
+            #     transforms.ColorJitter(brightness=1),
+            #     transforms.ColorJitter(contrast=1),
+            #     transforms.ColorJitter(saturation=0.5),
+            #     transforms.ColorJitter(brightness=1, contrast=1, saturation=0.5),
+            #     transforms.RandomHorizontalFlip(p=1.0),
+            #     transforms.RandomRotation(15),
+            # ], p=augmentation_prob),  # 以p概率执行其中一个增强操作
             transforms.ToTensor(),
         ])
         self.images, self.ped_labels, self.ds_labels = self.init_ImagesLabels()
