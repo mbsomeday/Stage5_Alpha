@@ -104,8 +104,8 @@ class EarlyStopping():
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'best_val_bc': self.best_monitor_metric,
-            'lr': scheduler.get_last_lr(),
-            'scheduler_state_dict': scheduler.state_dict(),
+            'lr': scheduler.get_last_lr() if scheduler is not None else 0,
+            'scheduler_state_dict': scheduler.state_dict() if scheduler is not None else '',
         }
 
         save_path = os.path.join(ckpt_dir, save_name)

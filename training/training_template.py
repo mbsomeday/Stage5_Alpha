@@ -477,7 +477,7 @@ class Ped_Classifier():
             val_epoch_info = self.val_on_epoch_end()
 
             # ------------------------ 调用callbacks ------------------------
-            self.early_stopping(EPOCH + 1, self.ped_model, self.optimizer, val_epoch_info, scheduler=self.scheduler)
+            self.early_stopping(EPOCH + 1, self.ped_model, self.optimizer, val_epoch_info, scheduler=None)
             self.epoch_logger(epoch=EPOCH + 1, training_info=train_epoch_info, val_info=val_epoch_info)
 
             # ------------------------ 调用callbacks ------------------------
