@@ -147,7 +147,7 @@ class Blur_Image_Patch():
 
 
 class Ped_Classifier():
-    def __init__(self, model_obj, ds_name_list, batch_size, epochs, beta=0.2, isTrain=True, resume=False, ds_weights_path=None,
+    def __init__(self, model_obj, ds_name_list, batch_size, epochs, data_key='tiny_dataset', beta=0.2, isTrain=True, resume=False, ds_weights_path=None,
                  base_lr=1e-3, ped_weights_path=None):
         # ------------------------------------ 变量 ------------------------------------
         self.model_obj = model_obj
@@ -158,6 +158,7 @@ class Ped_Classifier():
         self.base_lr = base_lr
         self.isTrain = isTrain
         self.resume = resume
+        self.data_key = data_key
         self.beta = beta  # loss 中，经过处理的 image 的损失函数所占比例
         if ds_weights_path is not None:
             self.ds_weights_path = ds_weights_path
@@ -165,6 +166,9 @@ class Ped_Classifier():
             self.ped_weights_path = ped_weights_path
 
         self.ped_model = get_obj_from_str(self.model_obj)(num_class=2).to(DEVICE)
+
+        print('-' * 40 + 'Basic Info' + '-' * 40)
+        print(f'isTrain: {isTrain}, data_key:{data_key}, operated image loss beta:{beta}')
 
         # ------------------------------------ 初始化 ------------------------------------
         if self.isTrain:
@@ -181,10 +185,10 @@ class Ped_Classifier():
         self.fade_operator = Blur_Image_Patch(model_obj=self.model_obj, ds_weights_path=self.ds_weights_path)
 
         # ********** 数据准备 **********
-        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='train.txt', augmentation_prob=0.7)
+        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='train.txt', augmentation_prob=0.7)
         self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
 
-        self.val_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='val.txt')
+        self.val_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
 
         self.train_nonPed_num, self.train_ped_num = self.train_dataset.get_ped_cls_num()
@@ -224,7 +228,7 @@ class Ped_Classifier():
                                          )
 
     def test_steup(self):
-        self.test_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='test.txt')
+        self.test_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='test.txt')
         self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=True)
 
         self.ped_model = load_model(self.ped_model, self.ped_weights_path).to(DEVICE)
