@@ -211,10 +211,12 @@ class Ped_Classifier():
         '''
             对模型权重进行初始化，保障多次训练结果变动不会变化太大
             适用 kaiming init，suitable for ReLU
+            初始化种类参考： https://blog.csdn.net/shanglianlm/article/details/85165523
         '''
         for m in model.modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
-                nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')  # 或 kaiming_uniform_
+                # nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')  # 或 kaiming_uniform_
+                nn.init.orthogonal_(m.weight)     # 正交初始化
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
