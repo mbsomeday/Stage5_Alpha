@@ -164,6 +164,8 @@ class Ped_Classifier():
         if ped_weights_path is not None:
             self.ped_weights_path = ped_weights_path
 
+        self.ped_model = get_obj_from_str(self.model_obj)(num_class=2).to(DEVICE)
+
         # ------------------------------------ 初始化 ------------------------------------
         if self.isTrain:
             self.training_setup()
@@ -174,8 +176,6 @@ class Ped_Classifier():
         '''
             初始化训练的各种参数
         '''
-        # ********** 数据集分类数据准备 **********
-        self.ped_model = get_obj_from_str(self.model_obj)(num_class=2).to(DEVICE)
 
         # ********** blur，fade，等操作 **********
         self.fade_operator = Blur_Image_Patch(model_obj=self.model_obj, ds_weights_path=self.ds_weights_path)
