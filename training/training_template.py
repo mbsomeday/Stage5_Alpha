@@ -148,7 +148,8 @@ class Blur_Image_Patch():
 
 class Ped_Classifier():
     def __init__(self, model_obj, ds_name_list, batch_size, epochs, augmentation_prob=0.7, data_key='tiny_dataset', beta=0.2, isTrain=True, resume=False, ds_weights_path=None,
-                 base_lr=1e-3, ped_weights_path=None):
+                 base_lr=1e-2, warmup_epochs=0,
+                 ped_weights_path=None):
         # ------------------------------------ 变量 ------------------------------------
         self.model_obj = model_obj
         self.ds_name_list = ds_name_list
@@ -156,6 +157,7 @@ class Ped_Classifier():
         self.epochs = epochs
         self.ds_name_list = ds_name_list
         self.base_lr = base_lr
+        self.warmup_epochs = warmup_epochs
         self.isTrain = isTrain
         self.resume = resume
         self.data_key = data_key
@@ -170,7 +172,7 @@ class Ped_Classifier():
         self.ped_model = get_obj_from_str(self.model_obj)(num_class=2).to(DEVICE)
 
         print('-' * 40 + 'Basic Info' + '-' * 40)
-        print(f'isTrain: {isTrain}, data_key:{data_key}, operated image loss beta:{beta}, augmentation_prob:{augmentation_prob}')
+        print(f'isTrain: {isTrain}, data_key:{data_key}, operated image loss beta:{beta}, augmentation_prob:{augmentation_prob}, warmup_epochs:{warmup_epochs}')
 
         # ------------------------------------ 初始化 ------------------------------------
         if self.isTrain:
@@ -198,7 +200,7 @@ class Ped_Classifier():
 
         # ********** loss & scheduler **********
         self.optimizer = torch.optim.RMSprop(self.ped_model.parameters(), lr=self.base_lr, weight_decay=1e-5, eps=0.001)
-        self.scheduler = lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
+        # self.scheduler = lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
 
         # self.bias_loss = DS_Bias_Loss(ds_model_obj=model_obj, ds_weights_path=ds_weights_path)
         self.loss_fn = torch.nn.CrossEntropyLoss()
@@ -440,12 +442,23 @@ class Ped_Classifier():
         print(msg)
         print(f'CM on test set:\n{test_cm}')
 
-    def update_learning_rate(self):
+    def update_learning_rate(self, epoch):
         old_lr = self.optimizer.param_groups[0]['lr']
-        self.scheduler.step()
+
+        # warm-up阶段
+        if epoch <= self.warmup_epochs:  # warm-up阶段
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * epoch / self.warmup_epochs
+        else:
+            self.optimizer.param_groups[0]['lr'] = self.base_lr * 0.963 ** (epoch / 3)  # gamma=0.963, lr decay epochs=3
+
         lr = self.optimizer.param_groups[0]['lr']
-        if lr != old_lr:
-            print('learning rate %.7f -> %.7f' % (old_lr, lr))
+        print('learning rate %.7f -> %.7f' % (old_lr, lr))
+
+        # old_lr = self.optimizer.param_groups[0]['lr']
+        # self.scheduler.step()
+        # lr = self.optimizer.param_groups[0]['lr']
+        # if lr != old_lr:
+
 
     def train(self):
         print('-' * 20 + 'Training Info' + '-' * 20)
@@ -469,7 +482,7 @@ class Ped_Classifier():
 
             # ------------------------ 调用callbacks ------------------------
             # 每个epoch end调整learning rate
-            self.update_learning_rate()
+            self.update_learning_rate(EPOCH)
 
             if self.early_stopping.early_stop:
                 print(f'Early Stopping!')
