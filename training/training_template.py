@@ -91,26 +91,26 @@ class Blur_Image_Patch():
         self.backward_grad = None
 
         self.cam_operator = GradCAM(self.ds_model, target_layer=[self.grad_layer])
-        self._register_hooks()
+        # self._register_hooks()
 
-    def _register_hooks(self):
-        def forward_hook(module, in_features, out_features):
-            self.forward_feature = out_features
-
-        def backward_hook(module, in_grad, out_grad):
-            self.backward_grad = out_grad[0]
-
-        gradient_layer_found = False
-        for name, m in self.ds_model.named_modules():
-            if name == self.grad_layer:
-                m.register_forward_hook(forward_hook)
-                m.register_full_backward_hook(backward_hook)
-                print(f"Register forward hook and backward hook! Hooked layer: {self.grad_layer}")
-                gradient_layer_found = True
-                break
-        # for our own sanity, confirm its existence
-        if not gradient_layer_found:
-            raise AttributeError('Gradient layer %s not found in the internal model' % self.grad_layer)
+    # def _register_hooks(self):
+    #     def forward_hook(module, in_features, out_features):
+    #         self.forward_feature = out_features
+    #
+    #     def backward_hook(module, in_grad, out_grad):
+    #         self.backward_grad = out_grad[0]
+    #
+    #     gradient_layer_found = False
+    #     for name, m in self.ds_model.named_modules():
+    #         if name == self.grad_layer:
+    #             m.register_forward_hook(forward_hook)
+    #             m.register_full_backward_hook(backward_hook)
+    #             print(f"Register forward hook and backward hook! Hooked layer: {self.grad_layer}")
+    #             gradient_layer_found = True
+    #             break
+    #     # for our own sanity, confirm its existence
+    #     if not gradient_layer_found:
+    #         raise AttributeError('Gradient layer %s not found in the internal model' % self.grad_layer)
 
     def __call__(self, images):
 
