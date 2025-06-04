@@ -68,7 +68,8 @@ KAGGLE = {
     },
 
     'tiny_dataset': {
-        'D1': r'/kaggle/input/stage5-datasets-tiny/TinyD1',
+        # 'D1': r'/kaggle/input/stage5-datasets-tiny/TinyD1',
+        'D1':r'/kaggle/input/stage5-tinydsaug',
         'D2': r'/kaggle/input/stage5-datasets-tiny/TinyD2',
         'D3': r'/kaggle/input/stage5-datasets-tiny/TinyD3',
         'D4': r'/kaggle/input/stage5-datasets-tiny/TinyD4',
