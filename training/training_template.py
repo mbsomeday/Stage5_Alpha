@@ -9,13 +9,13 @@ import numpy as np
 from torch.optim import lr_scheduler
 from sklearn.metrics import balanced_accuracy_score, confusion_matrix
 from tqdm import tqdm
-from torchcam.methods.gradient import LayerCAM
+from torchcam.methods.gradient import LayerCAM, GradCAM
 from tqdm import tqdm
 
-from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict
+from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict, TemporaryGrad
 from data.dataset import my_dataset
-from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
-# from train_callbacks import EarlyStopping, Epoch_logger
+# from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
+from train_callbacks import EarlyStopping, Ped_Epoch_Logger
 
 
 # torch.manual_seed(16)
@@ -87,60 +87,88 @@ class Blur_Image_Patch():
 
         self.grad_layer = 'features'
         self.attention_thresh = 0.5
-        self.forward_feature_list = []
-        self.backward_grad_list = []
+        self.forward_feature = None
+        self.backward_grad = None
 
-        self.cam_operator = LayerCAM(self.ds_model, target_layer=[self.grad_layer])
+        self.cam_operator = GradCAM(self.ds_model, target_layer=[self.grad_layer])
+        self._register_hooks()
 
-    # def _register_hooks(self):
-    #     def forward_hook(module, in_features, out_features):
-    #         self.forward_feature_list.append(out_features)
-    #
-    #     def backward_hook(module, in_grad, out_grad):
-    #         self.backward_grad_list.append(out_grad[0])
-    #
-    #     gradient_layer_found = False
-    #     for name, m in self.ds_model.named_modules():
-    #         if name == self.grad_layer:
-    #             m.register_forward_hook(forward_hook)
-    #             m.register_full_backward_hook(backward_hook)
-    #             print(f"Register forward hook and backward hook! Hooked layer: {self.grad_layer}")
-    #             gradient_layer_found = True
-    #             break
-    #     # for our own sanity, confirm its existence
-    #     if not gradient_layer_found:
-    #         raise AttributeError('Gradient layer %s not found in the internal model' % self.grad_layer)
+    def _register_hooks(self):
+        def forward_hook(module, in_features, out_features):
+            self.forward_feature = out_features
+
+        def backward_hook(module, in_grad, out_grad):
+            self.backward_grad = out_grad[0]
+
+        gradient_layer_found = False
+        for name, m in self.ds_model.named_modules():
+            if name == self.grad_layer:
+                m.register_forward_hook(forward_hook)
+                m.register_full_backward_hook(backward_hook)
+                print(f"Register forward hook and backward hook! Hooked layer: {self.grad_layer}")
+                gradient_layer_found = True
+                break
+        # for our own sanity, confirm its existence
+        if not gradient_layer_found:
+            raise AttributeError('Gradient layer %s not found in the internal model' % self.grad_layer)
 
     def __call__(self, images):
 
+        '''
+            自己实现CAM
+        '''
+        # ds_logits = self.ds_model(images)
+        # ds_preds = torch.argmax(ds_logits, 1)
+        # print(f'ds_logits:{ds_logits}')
+        # print(f'ds_preds:{ds_preds}')
+        #
+        # grad_fn = torch.zeros_like(ds_logits)
+        # grad_fn[torch.arange(0, ds_logits.shape[0]), ds_preds] = 1
+        #
+        # self.ds_model.zero_grad()
+        # ds_logits.backward(grad_fn)
+        # self.ds_model.zero_grad()
+        #
+        # grad_weights = F.adaptive_avg_pool2d(self.backward_grad, 1)  # shape: (batch_size, 1280, 1, 1)
+        # print(f'grad_weights:{grad_weights.shape}')
+        #
+        # ww_heatmaps = F.relu(torch.sum((self.forward_feature * grad_weights), dim=1))
+        # print(f'ww_heatmaps:{ww_heatmaps.shape}')
+        # ww_heatmaps = F.interpolate(ww_heatmaps.unsqueeze(0), (224, 224)).squeeze(0)
+
+        '''
+            用 torchcam 生成特征图
+        '''
         ds_logits = self.ds_model(images)
         ds_preds = torch.argmax(ds_logits, 1).tolist()
-
         heatmap_list = self.cam_operator(class_idx=ds_preds, scores=ds_logits)
-
         heatmaps = heatmap_list[0]
 
-        for hp in heatmaps:
-            cur_max = hp.max()
-            hp[hp < cur_max] = 0
+        # for hp in heatmaps:
+        #     cur_max = hp.max()
+        #     hp[hp < cur_max] = 0
 
-        # heatmaps[heatmaps < self.attention_thresh] = 0
+        heatmaps[heatmaps < self.attention_thresh] = 0
         heatmaps_resized = F.interpolate(heatmaps.unsqueeze(0), size=(224, 224), mode='bilinear', align_corners=False)
         heatmaps_resized = heatmaps_resized.squeeze().unsqueeze(1)
-
         fade_images = images - images * heatmaps_resized
 
+        '''
+            展示 images
+        '''
         # image_idx1 = 3
         # plt_transform = transforms.ToPILImage()
         # plt.figure(figsize=(16, 8))
         # plt.subplot(141)
         # plt.imshow(plt_transform(images[image_idx1]))
+        # plt.title('org image')
         # plt.subplot(142)
         # plt.imshow(plt_transform(heatmaps[image_idx1]))
+        # plt.title('torchcam')
         # plt.subplot(143)
         # plt.imshow(plt_transform(fade_images[image_idx1]))
-        # plt.subplot(144)
-        # plt.imshow(plt_transform(masked_image))
+        # # plt.subplot(144)
+        # # plt.imshow(plt_transform(masked_image))
         # plt.show()
 
         return fade_images
