@@ -15,6 +15,7 @@ def get_args():
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--epochs', type=int)
     parser.add_argument('--warmup_epochs', type=int)
+    parser.add_argument('--rand_seed', type=int)
     parser.add_argument('--ds_weights_path', type=str)
     parser.add_argument('--isTrain', action='store_true')
     parser.add_argument('--ped_weights_path', type=str)
@@ -35,6 +36,7 @@ ped_weights_path = args.ped_weights_path
 beta = args.beta
 augmentation_prob = args.augmentation_prob
 warmup_epochs = args.warmup_epochs
+rand_seed = args.rand_seed
 
 tt = Ped_Classifier(model_obj,
                     ds_name_list=ds_name_list,
@@ -46,7 +48,8 @@ tt = Ped_Classifier(model_obj,
                     isTrain=isTrain,
                     resume=False,
                     warmup_epochs=warmup_epochs,
-                    augmentation_prob=augmentation_prob
+                    augmentation_prob=augmentation_prob,
+                    rand_seed=rand_seed
                     )
 if isTrain:
     tt.train()

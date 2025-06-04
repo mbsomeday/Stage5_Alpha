@@ -18,8 +18,6 @@ from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
 # from train_callbacks import EarlyStopping, Ped_Epoch_Logger
 
 
-# torch.manual_seed(16)
-
 
 class NotYetUse_Loss(nn.Module):
 
@@ -175,7 +173,7 @@ class Blur_Image_Patch():
 
 
 class Ped_Classifier():
-    def __init__(self, model_obj, ds_name_list, batch_size, epochs, augmentation_prob=0.7, data_key='tiny_dataset', beta=0.2, isTrain=True, resume=False, ds_weights_path=None,
+    def __init__(self, model_obj, ds_name_list, batch_size, epochs, augmentation_prob=0.7, data_key='tiny_dataset', beta=0.2, isTrain=True, resume=False, ds_weights_path=None, rand_seed=1,
                  base_lr=1e-2, warmup_epochs=0,
                  ped_weights_path=None):
         # ------------------------------------ 变量 ------------------------------------
@@ -191,6 +189,7 @@ class Ped_Classifier():
         self.data_key = data_key
         self.beta = beta  # loss 中，经过处理的 image 的损失函数所占比例
         self.augmentation_prob = augmentation_prob
+        self.rand_seed = rand_seed
 
         if ds_weights_path is not None:
             self.ds_weights_path = ds_weights_path
@@ -200,7 +199,7 @@ class Ped_Classifier():
         self.ped_model = get_obj_from_str(self.model_obj)(num_class=2).to(DEVICE)
 
         print('-' * 40 + 'Basic Info' + '-' * 40)
-        print(f'isTrain: {isTrain}, data_key:{data_key}, operated image loss beta:{beta}, augmentation_prob:{augmentation_prob}, warmup_epochs:{warmup_epochs}')
+        print(f'isTrain: {isTrain}, data_key:{data_key}, operated image loss beta:{beta}, augmentation_prob:{augmentation_prob}, warmup_epochs:{warmup_epochs}, rand_seed:{rand_seed}')
 
         # ------------------------------------ 初始化 ------------------------------------
         if self.isTrain:
