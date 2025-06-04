@@ -224,7 +224,7 @@ class Ped_Classifier():
                                          )
 
     def test_steup(self):
-        self.test_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='val.txt')
+        self.test_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='test.txt')
         self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=True)
 
         self.ped_model = load_model(self.ped_model, self.ped_weights_path).to(DEVICE)
