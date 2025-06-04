@@ -181,10 +181,10 @@ class Ped_Classifier():
             初始化训练的各种参数
         '''
         # ********** 数据准备 **********
-        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='tiny_dataset', txt_name='train.txt')
+        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='train.txt')
         self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
 
-        self.val_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='tiny_dataset', txt_name='val.txt')
+        self.val_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='val.txt')
         self.val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
 
         self.train_nonPed_num, self.train_ped_num = self.train_dataset.get_ped_cls_num()
@@ -224,7 +224,7 @@ class Ped_Classifier():
                                          )
 
     def test_steup(self):
-        self.test_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='tiny_dataset', txt_name='test.txt')
+        self.test_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='val.txt')
         self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=True)
 
         self.ped_model = load_model(self.ped_model, self.ped_weights_path).to(DEVICE)
@@ -335,9 +335,6 @@ class Ped_Classifier():
 
             org_dict['y_pred'].extend(pred_org.cpu().numpy())
             org_dict['correct_num'] += (pred_org == ped_labels).sum()
-            a = ped_labels[nonPed_idx]
-            b = pred_org[nonPed_idx]
-            c = a == b
             org_dict['nonPed_acc_num'] += ((ped_labels[nonPed_idx] == pred_org[nonPed_idx]) * 1).sum()
             org_dict['ped_acc_num'] += ((ped_labels[ped_idx] == pred_org[ped_idx]) * 1).sum()
 
