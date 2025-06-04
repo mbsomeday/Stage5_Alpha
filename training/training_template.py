@@ -181,7 +181,7 @@ class Ped_Classifier():
         self.fade_operator = Blur_Image_Patch(model_obj=self.model_obj, ds_weights_path=self.ds_weights_path)
 
         # ********** 数据准备 **********
-        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='train.txt')
+        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='train.txt', augmentation_prob=0.7)
         self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
 
         self.val_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='val.txt')
