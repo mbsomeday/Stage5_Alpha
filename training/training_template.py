@@ -248,7 +248,7 @@ class Ped_Classifier():
 
         callback_savd_dir += '_' + str(self.beta) + 'BiasLoss'
         print(f'Callback_savd_dir:{callback_savd_dir}')
-        self.early_stopping = EarlyStopping(callback_savd_dir, top_k=2, cur_epoch=self.start_epoch, patience=15,
+        self.early_stopping = EarlyStopping(callback_savd_dir, top_k=2, cur_epoch=self.start_epoch, patience=20,
                                             best_monitor_metric=self.best_val_bc)
 
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
