@@ -164,12 +164,6 @@ class Ped_Classifier():
         if ped_weights_path is not None:
             self.ped_weights_path = ped_weights_path
 
-        # ------------------------------------ 模型 ------------------------------------
-        self.ped_model = get_obj_from_str(model_obj)(num_class=2).to(DEVICE)
-
-        # ------------------------------------ blur，fade，等操作 ------------------------------------
-        self.fade_operator = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
-
         # ------------------------------------ 初始化 ------------------------------------
         if self.isTrain:
             self.training_setup()
@@ -180,6 +174,12 @@ class Ped_Classifier():
         '''
             初始化训练的各种参数
         '''
+        # ********** 数据集分类数据准备 **********
+        self.ped_model = get_obj_from_str(self.model_obj)(num_class=2).to(DEVICE)
+
+        # ********** blur，fade，等操作 **********
+        self.fade_operator = Blur_Image_Patch(model_obj=self.model_obj, ds_weights_path=self.ds_weights_path)
+
         # ********** 数据准备 **********
         self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key='org_dataset', txt_name='train.txt')
         self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
