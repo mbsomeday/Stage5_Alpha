@@ -208,6 +208,19 @@ class Ped_Classifier():
         else:
             self.test_steup()
 
+    def init_model(self, model):
+        '''
+            对模型权重进行初始化，保障多次训练结果变动不会变化太大
+            适用 kaiming init，suitable for ReLU
+        '''
+        for m in model:
+            if isinstance(m, (nn.Conv2d, nn.Linear)):
+                nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')  # 或 kaiming_uniform_
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+
+        return model
+
     def training_setup(self):
         '''
             初始化训练的各种参数
@@ -239,6 +252,7 @@ class Ped_Classifier():
         else:
             self.start_epoch = 0
             self.best_val_bc = -np.inf
+            self.ped_model = self.init_model(self.ped_model)
 
         # ********** callbacks **********
         callback_savd_dir = self.model_obj.rsplit('.')[-1]
