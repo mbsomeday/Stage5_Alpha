@@ -293,7 +293,7 @@ class Ped_Classifier():
         self.best_val_bc = ckpts['best_val_bc']
         self.base_lr = ckpts['lr']
         self.optimizer.load_state_dict(ckpts['optimizer_state_dict'])
-        self.scheduler.load_state_dict(ckpts['scheduler_state_dict'])
+        # self.scheduler.load_state_dict(ckpts['scheduler_state_dict'])
 
     def inif_pred_info(self):
         pred_info = {
