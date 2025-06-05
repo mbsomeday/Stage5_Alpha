@@ -15,8 +15,8 @@ from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict, TemporaryGrad
 from data.dataset import my_dataset
-# from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
-from train_callbacks import EarlyStopping, Ped_Epoch_Logger
+from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
+# from train_callbacks import EarlyStopping, Ped_Epoch_Logger
 
 
 
