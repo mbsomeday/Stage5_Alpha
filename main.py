@@ -35,7 +35,6 @@ ds_weights_path = args.ds_weights_path
 isTrain = args.isTrain
 ped_weights_path = args.ped_weights_path
 beta = args.beta
-augmentation_prob = args.augmentation_prob
 warmup_epochs = args.warmup_epochs
 rand_seed = args.rand_seed
 data_key = args.data_key
@@ -51,7 +50,6 @@ tt = Ped_Classifier(model_obj,
                     data_key=data_key,
                     resume=False,
                     warmup_epochs=warmup_epochs,
-                    augmentation_prob=augmentation_prob,
                     rand_seed=rand_seed
                     )
 if isTrain:

@@ -16,7 +16,7 @@ from configs.paths_dict import PATHS
 
 
 class my_dataset(Dataset):
-    def __init__(self, ds_name_list, path_key, txt_name, augmentation_prob=0):
+    def __init__(self, ds_name_list, path_key, txt_name):
         '''
         :param ds_name_list:
         :param path_key: org_dataset
