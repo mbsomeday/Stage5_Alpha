@@ -19,7 +19,6 @@ from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
 # from train_callbacks import EarlyStopping, Ped_Epoch_Logger
 
 
-
 class NotYetUse_Loss(nn.Module):
 
     def __init__(self, ds_model_obj, ds_weights_path, grad_layer=None):
