@@ -1,10 +1,11 @@
+import os.path
+
 import matplotlib.pyplot as plt
-import torch
+import torch, copy, inspect
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
 import torch.nn.functional as F
-import copy
 import numpy as np
 from torch.optim import lr_scheduler
 from sklearn.metrics import balanced_accuracy_score, confusion_matrix
@@ -14,8 +15,8 @@ from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict, TemporaryGrad
 from data.dataset import my_dataset
-from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
-# from train_callbacks import EarlyStopping, Ped_Epoch_Logger
+# from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
+from train_callbacks import EarlyStopping, Ped_Epoch_Logger
 
 
 
@@ -205,6 +206,28 @@ class Ped_Classifier():
             self.training_setup()
         else:
             self.test_steup()
+        self.print_basic_info()
+
+    def print_basic_info(self):
+        '''
+            打印类成员变量
+        :return:
+        '''
+        info = []
+        print('-' * 30 + 'Basic info about Pedestrian Classifier' + '-' * 30)
+        for name, value in inspect.getmembers(self):
+            if not name.startswith('__') and not callable(value):
+                msg = f'{name}: {value}'
+                print(msg)
+                if self.isTrain:
+                    info.append(msg)
+
+        if self.isTrain:
+            write_to = os.path.join(self.callback_savd_dir, 'train_info.txt')
+            with open(write_to, 'a') as f:
+                for item in info:
+                    f.write(item+'\n')
+
 
     def init_model(self, model):
         '''
@@ -255,20 +278,20 @@ class Ped_Classifier():
             self.ped_model = self.init_model(self.ped_model)
 
         # ********** callbacks **********
-        callback_savd_dir = self.model_obj.rsplit('.')[-1]
+        self.callback_savd_dir = self.model_obj.rsplit('.')[-1]
         for ds_name in self.ds_name_list:
             info = '_' + ds_name
-            callback_savd_dir += info
+            self.callback_savd_dir += info
 
-        callback_savd_dir += '_' + str(self.beta) + 'BiasLoss'
-        print(f'Callback_savd_dir:{callback_savd_dir}')
-        self.early_stopping = EarlyStopping(callback_savd_dir, top_k=2, cur_epoch=self.start_epoch, patience=15,
+        self.callback_savd_dir += '_' + str(self.beta) + 'BiasLoss'
+        print(f'Callback_savd_dir:{self.callback_savd_dir}')
+        self.early_stopping = EarlyStopping(self.callback_savd_dir, top_k=2, cur_epoch=self.start_epoch, patience=15,
                                             best_monitor_metric=self.best_val_bc)
 
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
-        self.epoch_logger = Ped_Epoch_Logger(save_dir=callback_savd_dir, model_name=self.model_obj.split('.')[-1],
+        self.epoch_logger = Ped_Epoch_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
                                          ds_name_list=self.ds_name_list, train_num_info=train_num_info,
                                          val_num_info=val_num_info,
                                          )
@@ -344,7 +367,6 @@ class Ped_Classifier():
         print(msg)
 
         return DotDict(epoch_info)
-
 
     def train_one_epoch(self):
         self.ped_model.train()
@@ -541,15 +563,15 @@ if __name__ == '__main__':
     ped_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
     # ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
 
-    # tt = Ped_Classifier(model_obj,
-    #                     ds_name_list=['D2'],
-    #                     batch_size=4, epochs=100,
-    #                     ds_weights_path=ds_weights_path,
-    #                     ped_weights_path=ped_weights_path,
-    #                     isTrain=True,
-    #                     beta=0.0,
-    #                     resume=False
-    #                     )
+    tt = Ped_Classifier(model_obj,
+                        ds_name_list=['D2'],
+                        batch_size=4, epochs=100,
+                        ds_weights_path=ds_weights_path,
+                        ped_weights_path=ped_weights_path,
+                        isTrain=True,
+                        beta=0.0,
+                        resume=False
+                        )
     # tt.train()
     # tt.test()
 
