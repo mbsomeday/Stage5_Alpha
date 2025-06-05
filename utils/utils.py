@@ -72,6 +72,9 @@ def get_obj_from_str(in_str):
 
 
 class DotDict(dict):
+    '''
+        将字典转换为可直接用 . 调用的对象
+    '''
     def __init__(self, *args, **kwargs):
         super(DotDict, self).__init__(*args, **kwargs)
 
