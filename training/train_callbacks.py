@@ -117,13 +117,20 @@ class ImageLogger():
         pass
 
 
-class Ped_Epoch_Logger():
+class Model_Logger():
+# class Classifier_Logger():
     '''
         用于记录训练过程中的loss，accuracy变化情况
     '''
+
+
+    # def __init__(self, save_dir, isTrain, train_dict=None, test_dict=None):
+
     def __init__(self, save_dir, model_name, ds_name_list, train_num_info, val_num_info):
         super().__init__()
         self.save_dir = save_dir
+        # self.isTrain = isTrain
+
         self.model_name = model_name
         self.ds_name_list = ds_name_list
 
@@ -168,8 +175,17 @@ class Ped_Epoch_Logger():
             f.write(val_msg)
 
 
-if __name__ == '__main__':
-    print('test')
+# if __name__ == '__main__':
+#     print('test')
+#     save_path = r'D:\my_phd\on_git\Stage5_Alpha\training\efficientNetB0_D2_0.0BiasLoss'
+#     test_dict = {
+#         'ba': 0.9,
+#         'epoch': 10
+#     }
+#
+#     my_logger = Model_Logger(save_dir=save_path, isTrain=False, test_dict=test_dict)
+
+
 
 
 

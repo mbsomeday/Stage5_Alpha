@@ -15,8 +15,8 @@ from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict, TemporaryGrad
 from data.dataset import my_dataset
-from training.train_callbacks import EarlyStopping, Ped_Epoch_Logger
-# from train_callbacks import EarlyStopping, Ped_Epoch_Logger
+# from training.train_callbacks import EarlyStopping, Model_Logger      # remote
+from train_callbacks import EarlyStopping, Model_Logger     # local
 
 
 class NotYetUse_Loss(nn.Module):
@@ -142,11 +142,11 @@ class Blur_Image_Patch():
         heatmap_list = self.cam_operator(class_idx=ds_preds, scores=ds_logits)
         heatmaps = heatmap_list[0]
 
-        # for hp in heatmaps:
-        #     cur_max = hp.max()
-        #     hp[hp < cur_max] = 0
+        for hp in heatmaps:
+            cur_max = hp.max()
+            hp[hp < cur_max] = 0
 
-        heatmaps[heatmaps < self.attention_thresh] = 0
+        # heatmaps[heatmaps < self.attention_thresh] = 0
         heatmaps_resized = F.interpolate(heatmaps.unsqueeze(0), size=(224, 224), mode='bilinear', align_corners=False)
         heatmaps_resized = heatmaps_resized.squeeze().unsqueeze(1)
         fade_images = images - images * heatmaps_resized
@@ -165,17 +165,17 @@ class Blur_Image_Patch():
         # plt.title('torchcam')
         # plt.subplot(143)
         # plt.imshow(plt_transform(fade_images[image_idx1]))
-        # # plt.subplot(144)
-        # # plt.imshow(plt_transform(masked_image))
+        # plt.subplot(144)
+        # plt.imshow(plt_transform(masked_image))
         # plt.show()
 
         return fade_images
 
 
 class Ped_Classifier():
-    def __init__(self, model_obj, ds_name_list, batch_size, epochs, data_key='tiny_dataset', beta=0.2, isTrain=True, resume=False, ds_weights_path=None, rand_seed=1,
-                 base_lr=1e-2, warmup_epochs=0,
-                 ped_weights_path=None):
+    def __init__(self, model_obj, ds_name_list, batch_size, epochs, data_key='tiny_dataset', beta=0.2, isTrain=True, resume=False, ds_weights_path=None, rand_seed=1, base_lr=1e-2, warmup_epochs=0, ped_weights_path=None,
+                 **testargs
+                 ):
         # ------------------------------------ 变量 ------------------------------------
         self.model_obj = model_obj
         self.ds_name_list = ds_name_list
@@ -189,6 +189,12 @@ class Ped_Classifier():
         self.data_key = data_key
         self.beta = beta  # loss 中，经过处理的 image 的损失函数所占比例
         self.rand_seed = rand_seed
+
+        # # 不论训练还是测试都要有的logger
+        # self.epoch_logger = Ped_Epoch_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
+        #                                  ds_name_list=self.ds_name_list, train_num_info=train_num_info,
+        #                                  val_num_info=val_num_info,
+        #                                  )
 
         if ds_weights_path is not None:
             self.ds_weights_path = ds_weights_path
@@ -205,7 +211,12 @@ class Ped_Classifier():
             self.training_setup()
         else:
             self.test_steup()
-        self.print_basic_info()
+
+        # print('*' * 100)
+        # for k, v in testargs.items():
+        #     print(f'{k} - {v}')
+
+        # self.print_basic_info()
 
     def print_basic_info(self):
         '''
@@ -226,7 +237,6 @@ class Ped_Classifier():
             with open(write_to, 'a') as f:
                 for item in info:
                     f.write(item+'\n')
-
 
     def init_model(self, model):
         '''
@@ -265,7 +275,6 @@ class Ped_Classifier():
         self.optimizer = torch.optim.RMSprop(self.ped_model.parameters(), lr=self.base_lr, weight_decay=1e-5, eps=0.001)
         # self.scheduler = lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
 
-        # self.bias_loss = DS_Bias_Loss(ds_model_obj=model_obj, ds_weights_path=ds_weights_path)
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
         # ********** 中断后重新训练 **********
@@ -282,6 +291,8 @@ class Ped_Classifier():
             info = '_' + ds_name
             self.callback_savd_dir += info
 
+        self.callback_savd_dir += '_' + str(self.rand_seed)
+
         self.callback_savd_dir += '_' + str(self.beta) + 'BiasLoss'
         print(f'Callback_savd_dir:{self.callback_savd_dir}')
         self.early_stopping = EarlyStopping(self.callback_savd_dir, top_k=2, cur_epoch=self.start_epoch, patience=15,
@@ -290,7 +301,7 @@ class Ped_Classifier():
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
-        self.epoch_logger = Ped_Epoch_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
+        self.epoch_logger = Model_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
                                          ds_name_list=self.ds_name_list, train_num_info=train_num_info,
                                          val_num_info=val_num_info,
                                          )
@@ -505,6 +516,31 @@ class Ped_Classifier():
         print(msg)
         print(f'CM on test set:\n{test_cm}')
 
+
+    def test_01(self):
+        '''
+            在一个数据集上测试并存储
+        '''
+        ds_list = ['D1', 'D2', 'D3', 'D4']
+        for ds_name in ds_list:
+            test_dataset = my_dataset(ds_name_list=[ds_name], path_key=self.data_key, txt_name='test.txt')
+            test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
+
+            balanced_accuracy, tnr, tpr = self.test_on_one_ds()
+
+
+    def test_on_one_ds(self):
+        balanced_accuracy = 0
+        tnr = 0
+        tpr = 0
+
+        return balanced_accuracy, tnr, tpr
+
+
+
+
+
+
     def update_learning_rate(self, epoch):
         old_lr = self.optimizer.param_groups[0]['lr']
 
@@ -521,7 +557,6 @@ class Ped_Classifier():
         # self.scheduler.step()
         # lr = self.optimizer.param_groups[0]['lr']
         # if lr != old_lr:
-
 
     def train(self):
         print('-' * 20 + 'Training Info' + '-' * 20)
@@ -562,32 +597,38 @@ if __name__ == '__main__':
     ped_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
     # ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
 
-    tt = Ped_Classifier(model_obj,
-                        ds_name_list=['D2'],
-                        batch_size=4, epochs=100,
-                        ds_weights_path=ds_weights_path,
-                        ped_weights_path=ped_weights_path,
-                        isTrain=True,
-                        beta=0.0,
-                        resume=False
-                        )
+    testarg_dict = {
+        'a': 1,
+        'b': 2
+    }
+    #
+    # tt = Ped_Classifier(model_obj,
+    #                     ds_name_list=['D2'],
+    #                     batch_size=4, epochs=100,
+    #                     ds_weights_path=ds_weights_path,
+    #                     ped_weights_path=ped_weights_path,
+    #                     isTrain=False,
+    #                     beta=0.0,
+    #                     resume=False,
+    #                     **testarg_dict
+    #                     )
     # tt.train()
     # tt.test()
 
-    # test_obj = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
-    #
-    # torch.manual_seed(13)
-    # ds_name_list = ['D3']
-    # batch_size = 4
-    # val_dataset = my_dataset(ds_name_list=ds_name_list, path_key='tiny_dataset', txt_name='val.txt')
-    # val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-    #
-    # for batch_idx, data_dict in enumerate(val_loader):
-    #     images = data_dict['image']
-    #
-    #     AC = test_obj(images)
-    #
-    #     break
+    test_obj = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
+
+    torch.manual_seed(13)
+    ds_name_list = ['D3']
+    batch_size = 4
+    val_dataset = my_dataset(ds_name_list=ds_name_list, path_key='tiny_dataset', txt_name='val.txt')
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
+
+    for batch_idx, data_dict in enumerate(val_loader):
+        images = data_dict['image']
+
+        AC = test_obj(images)
+
+        break
 
 
 
