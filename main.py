@@ -21,7 +21,6 @@ def get_args():
     parser.add_argument('--ped_weights_path', type=str)
     parser.add_argument('--data_key', type=str)
     parser.add_argument('--beta', type=float)
-    parser.add_argument('--augmentation_prob', type=float)
 
     args = parser.parse_args()
     return args
