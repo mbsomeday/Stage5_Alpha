@@ -76,6 +76,7 @@ class my_dataset(Dataset):
 
     def __getitem__(self, idx):
         image_path = self.images[idx]
+        print(f'image_path:{image_path}')
         ped_label = self.ped_labels[idx]
         ds_label = self.ds_labels[idx]
 
