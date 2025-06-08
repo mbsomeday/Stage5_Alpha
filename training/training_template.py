@@ -173,7 +173,7 @@ class Blur_Image_Patch():
 
 
 class Ped_Classifier():
-    def __init__(self, model_obj, ds_name_list, batch_size, epochs, data_key='tiny_dataset', beta=0.2, isTrain=True, resume=False, ds_weights_path=None, rand_seed=1, base_lr=1e-2, warmup_epochs=0, ped_weights_path=None,
+    def __init__(self, model_obj, ds_name_list, batch_size, epochs, data_key='tiny_dataset', ds_model_obj=None, beta=0.2, isTrain=True, resume=False, ds_weights_path=None, rand_seed=1, base_lr=1e-2, warmup_epochs=0, ped_weights_path=None,
                  **testargs
                  ):
         # ------------------------------------ 变量 ------------------------------------
@@ -189,6 +189,7 @@ class Ped_Classifier():
         self.data_key = data_key
         self.beta = beta  # loss 中，经过处理的 image 的损失函数所占比例
         self.rand_seed = rand_seed
+        self.ds_model_obj = ds_model_obj if ds_model_obj is not None else model_obj
 
         # # 不论训练还是测试都要有的logger
         # self.epoch_logger = Ped_Epoch_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
@@ -259,7 +260,7 @@ class Ped_Classifier():
         '''
 
         # ********** blur，fade，等操作 **********
-        self.fade_operator = Blur_Image_Patch(model_obj=self.model_obj, ds_weights_path=self.ds_weights_path)
+        self.fade_operator = Blur_Image_Patch(model_obj=self.ds_model_obj, ds_weights_path=self.ds_weights_path)
 
         # ********** 数据准备 **********    augmentation_train
         self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='train.txt')
