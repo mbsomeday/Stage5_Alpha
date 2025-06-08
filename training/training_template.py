@@ -216,7 +216,7 @@ class Ped_Classifier():
         # for k, v in testargs.items():
         #     print(f'{k} - {v}')
 
-        # self.print_basic_info()
+        self.print_basic_info()
 
     def print_basic_info(self):
         '''
@@ -261,8 +261,8 @@ class Ped_Classifier():
         # ********** blur，fade，等操作 **********
         self.fade_operator = Blur_Image_Patch(model_obj=self.model_obj, ds_weights_path=self.ds_weights_path)
 
-        # ********** 数据准备 **********
-        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='augmentation_train.txt')
+        # ********** 数据准备 **********    augmentation_train
+        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='train.txt')
         self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
 
         self.val_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='val.txt')
