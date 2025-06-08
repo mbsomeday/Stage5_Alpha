@@ -190,6 +190,7 @@ class Ped_Classifier():
         self.beta = beta  # loss 中，经过处理的 image 的损失函数所占比例
         self.rand_seed = rand_seed
         self.ds_model_obj = ds_model_obj if ds_model_obj is not None else model_obj
+        print(f'self.ds_model_obj:{self.ds_model_obj}')
 
         # # 不论训练还是测试都要有的logger
         # self.epoch_logger = Ped_Epoch_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
