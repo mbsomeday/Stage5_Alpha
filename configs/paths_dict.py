@@ -8,6 +8,12 @@ LCA = {
         'D4': r'/tormenta/s/ssesaai/data/Stage4_D4_BDD100K_7Augs'
     },
 
+    'tiny_dataset': {
+        'D1': r'/tormenta/s/ssesaai/data/TinyD1',
+        # 'D2': r'D:\my_phd\dataset\Stage5\TinyD2',
+        # 'D3': r'D:\my_phd\dataset\Stage5\TinyD3',
+        # 'D4': r'D:\my_phd\dataset\Stage5\TinyD4',
+    },
 
 
     'autoencoder_ckpt_dict': {
