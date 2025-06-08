@@ -51,7 +51,8 @@ tt = Ped_Classifier(model_obj,
                     data_key=data_key,
                     resume=False,
                     warmup_epochs=warmup_epochs,
-                    rand_seed=rand_seed
+                    rand_seed=rand_seed,
+                    ds_model_obj=ds_model_obj
                     )
 if isTrain:
     tt.train()
