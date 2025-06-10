@@ -84,6 +84,24 @@ class DotDict(dict):
             value = DotDict(value)
         return value
 
+    def __setitem__(self, key, value):
+        '''
+            保证 dict[key] 的形式可以更改值
+        '''
+        if isinstance(value, dict):
+            value = DotDict(value)
+        super().__setitem__(key, value)
+
+    def __setattr__(self, key, value):
+        '''
+            保证 dict.key 的形式可以更改值
+        '''
+        if isinstance(value, dict):
+            value = DotDict(value)
+        self[key] = value
+
+
+
 
 
 def save_image_tensor(input_tensor: torch.Tensor, filename):
