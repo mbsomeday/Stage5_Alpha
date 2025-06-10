@@ -432,7 +432,6 @@ class Ped_Classifier():
 
             # if batch_idx == 3:
             #     break
-            break
 
         train_epoch_info = self.handle_pred_info(y_true, org_pred=org_dict, opered_pred=opered_dict, info_type='Train')
 
