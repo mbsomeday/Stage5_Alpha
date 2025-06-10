@@ -10,9 +10,9 @@ LCA = {
 
     'tiny_dataset': {
         'D1': r'/tormenta/s/ssesaai/data/TinyD1',
-        # 'D2': r'D:\my_phd\dataset\Stage5\TinyD2',
-        # 'D3': r'D:\my_phd\dataset\Stage5\TinyD3',
-        # 'D4': r'D:\my_phd\dataset\Stage5\TinyD4',
+        'D2': r'/tormenta/s/ssesaai/data/TinyD2',
+        'D3': r'/tormenta/s/ssesaai/data/TinyD3',
+        'D4': r'/tormenta/s/ssesaai/data/TinyD4',
     },
 
 
