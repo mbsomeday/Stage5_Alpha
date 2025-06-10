@@ -526,16 +526,16 @@ class Ped_Classifier():
             test_cm = confusion_matrix(y_true, y_pred)
 
             print('-' * 40 + 'Test Info' + '-' * 40)
-            msg = f'Balanced accuracy:{test_bc:.4f}, accuracy: {test_accuracy:.4f}\nNon-ped accuracy:{test_nonPed_acc:.4f}({nonPed_acc_num}/{test_nonPed_num})\nPed accuracy:{test_ped_acc:.4f}({ped_acc_num}/{test_ped_num})'
+            msg = f'DS_name:{ds_name}, Balanced accuracy:{test_bc:.4f}, accuracy: {test_accuracy:.4f}\nNon-ped accuracy:{test_nonPed_acc:.4f}({nonPed_acc_num}/{test_nonPed_num})\nPed accuracy:{test_ped_acc:.4f}({ped_acc_num}/{test_ped_num})'
             print(msg)
             print(f'CM on test set:\n{test_cm}')
 
             tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
             print(tn, fp, fn, tp)
 
-            # with open(write_to_txt, 'a') as f:
-            #     f.write('-' * 80)
-            #     f.write(f'{ds_name}, {test_bc}, {tn}, {fp}, {fn}, {tp}')
+            with open(write_to_txt, 'a') as f:
+                f.write('-' * 80)
+                f.write(f'{ds_name}, {test_bc}, {tn}, {fp}, {fn}, {tp}')
 
 
 
