@@ -44,7 +44,7 @@ class TrainArgs(BaseArgs):
 
         parser.add_argument('--ds_model_obj', type=str, default=None)
         parser.add_argument('--ds_weights_path', type=str, default=None)
-        parser.add_argument('--epochs', type=int, default=100)
+        parser.add_argument('--epochs', type=int, default=150)
         parser.add_argument('--resume', action='store_true')
         parser.add_argument('--beta', type=float, default=0.0)
         parser.add_argument('--base_lr', type=float, default=0.01)

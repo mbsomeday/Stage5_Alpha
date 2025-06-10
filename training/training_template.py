@@ -1,4 +1,5 @@
 import os.path
+import shutil
 
 # import matplotlib.pyplot as plt
 import torch, copy, inspect
@@ -173,23 +174,38 @@ class Blur_Image_Patch():
 
 
 class Ped_Classifier():
-    def __init__(self, model_obj, ds_name_list, batch_size, epochs, data_key='tiny_dataset', ds_model_obj=None, beta=0.2, isTrain=True, resume=False, ds_weights_path=None, rand_seed=1, base_lr=1e-2, warmup_epochs=0, ped_weights_path=None,
-                 **testargs
-                 ):
-        # ------------------------------------ 变量 ------------------------------------
-        self.model_obj = model_obj
-        self.ds_name_list = ds_name_list
-        self.batch_size = batch_size
-        self.epochs = epochs
-        self.ds_name_list = ds_name_list
-        self.base_lr = base_lr
-        self.warmup_epochs = warmup_epochs
-        self.isTrain = isTrain
-        self.resume = resume
-        self.data_key = data_key
-        self.beta = beta  # loss 中，经过处理的 image 的损失函数所占比例
-        self.rand_seed = rand_seed
-        self.ds_model_obj = ds_model_obj if ds_model_obj is not None else model_obj
+    def __init__(self, opts):
+
+        self.opts = opts
+        self.ped_model = get_obj_from_str(self.opts.ped_model_obj)(num_class=2).to(DEVICE)
+
+        # 创建 callback save dir，该文件夹用于存储 train / test 的信息
+        self.callback_save_dir = self.opts.ped_model_obj.rsplit('.')[-1]
+        for ds_name in self.opts.ds_name_list:
+            info = '_' + ds_name
+            self.callback_save_dir += info
+        self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_' + str(self.opts.beta) + 'BiasLoss'
+        self.callback_save_path = os.path.join(os.getcwd(), self.callback_save_dir)
+        print(f'Callback_savd_dir:{self.callback_save_path}')
+        if not os.path.exists(self.callback_save_path):
+            os.mkdir(self.callback_save_path)
+
+        if self.opts.isTrain:
+            self.training_setup()
+
+        self.print_args()
+
+        # # ------------------- Basic Args -------------------
+        # self.basic_args = basic_args
+        # self.train_args = train_args
+        # self.ped_model_obj = basic_args.ped_model_obj
+        # self.ds_name_list = basic_args.ds_name_list
+        # self.batch_size = basic_args.batch_size
+        # self.data_key = self.basic_args.data_key
+        # self.isTrain = self.basic_args.isTrain
+        # self.base_lr = base_lr
+        # self.warmup_epochs = warmup_epochs
+
 
         # # 不论训练还是测试都要有的logger
         # self.epoch_logger = Ped_Epoch_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
@@ -197,47 +213,93 @@ class Ped_Classifier():
         #                                  val_num_info=val_num_info,
         #                                  )
 
-        if ds_weights_path is not None:
-            self.ds_weights_path = ds_weights_path
-        if ped_weights_path is not None:
-            self.ped_weights_path = ped_weights_path
+        # if ped_weights_path is not None:
+        #     self.ped_weights_path = ped_weights_path
+        #
 
-        self.ped_model = get_obj_from_str(self.model_obj)(num_class=2).to(DEVICE)
-
-        print('-' * 40 + 'Basic Info' + '-' * 40)
-        print(f'isTrain: {isTrain}, data_key:{data_key}, operated image loss beta:{beta}, warmup_epochs:{warmup_epochs}, rand_seed:{rand_seed}')
+        # print('-' * 40 + 'Basic Info' + '-' * 40)
+        # print(f'isTrain: {isTrain}, data_key:{data_key}, operated image loss beta:{beta}, warmup_epochs:{warmup_epochs}, rand_seed:{rand_seed}')
 
         # ------------------------------------ 初始化 ------------------------------------
-        if self.isTrain:
-            self.training_setup()
-        else:
-            self.test_steup()
+
 
         # print('*' * 100)
         # for k, v in testargs.items():
         #     print(f'{k} - {v}')
 
-        self.print_basic_info()
+        # self.print_basic_info()
+        # self.print_args(self.basic_args, msg='Basic Args')
+        # self.print_args(self.train_args, msg='Train Args')
+        # print('-' * 80)
 
-    def print_basic_info(self):
+    def training_setup(self):
         '''
-            打印类成员变量
-        :return:
+            初始化训练的各种参数
         '''
+
+        self.opts.ds_model_obj = self.opts.ped_model_obj if self.opts.ds_model_obj is None else self.opts.ds_model_obj
+
+        # ********** blur，fade，等操作 **********
+        self.fade_operator = Blur_Image_Patch(model_obj=self.opts.ds_model_obj, ds_weights_path=self.opts.ds_weights_path)
+
+        # ********** 数据准备 **********    augmentation_train
+        self.train_dataset = my_dataset(ds_name_list=self.opts.ds_name_list, path_key=self.opts.data_key, txt_name='augmentation_train.txt')
+        self.train_loader = DataLoader(self.train_dataset, batch_size=self.opts.batch_size, shuffle=True)
+
+        self.val_dataset = my_dataset(ds_name_list=self.opts.ds_name_list, path_key=self.opts.data_key, txt_name='val.txt')
+        self.val_loader = DataLoader(self.val_dataset, batch_size=self.opts.batch_size, shuffle=False)
+
+        self.train_nonPed_num, self.train_ped_num = self.train_dataset.get_ped_cls_num()
+        self.val_nonPed_num, self.val_ped_num = self.val_dataset.get_ped_cls_num()
+
+        # ********** loss & scheduler **********
+        self.optimizer = torch.optim.RMSprop(self.ped_model.parameters(), lr=self.opts.base_lr, weight_decay=1e-5, eps=0.001)
+        # self.scheduler = lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
+
+        self.loss_fn = torch.nn.CrossEntropyLoss()
+
+        # ********** 中断后重新训练 **********
+        if self.opts.resume is True:
+            self.reload()
+        else:
+            self.start_epoch = 0
+            self.best_val_bc = -np.inf
+            self.ped_model = self.init_model(self.ped_model)
+
+        # ********** callbacks **********
+
+        self.early_stopping = EarlyStopping(self.callback_save_path, top_k=2, cur_epoch=self.start_epoch, patience=15,
+                                            best_monitor_metric=self.best_val_bc)
+
+        train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
+        val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
+
+        self.epoch_logger = Model_Logger(save_dir=self.callback_save_path,
+                                         model_name=self.opts.ped_model_obj.split('.')[-1],
+                                         ds_name_list=self.opts.ds_name_list, train_num_info=train_num_info,
+                                         val_num_info=val_num_info,
+                                         )
+
+    def print_args(self):
+        '''
+            参数打印 并 保存到txt文件中
+        '''
+        print('-' * 40 + ' Args ' + '-' * 40)
+
         info = []
-        print('-' * 30 + 'Basic info about Pedestrian Classifier' + '-' * 30)
-        for name, value in inspect.getmembers(self):
-            if not name.startswith('__') and not callable(value):
-                msg = f'{name}: {value}'
-                print(msg)
-                if self.isTrain:
-                    info.append(msg)
+        for k, v in vars(self.opts).items():
+            msg = f'{k}: {v}'
+            print(msg)
+            info.append(msg)
 
-        if self.isTrain:
-            write_to = os.path.join(self.callback_savd_dir, 'train_info.txt')
-            with open(write_to, 'a') as f:
-                for item in info:
-                    f.write(item+'\n')
+        # 将本次实验的参数写入txt中
+        write_to_txt = os.path.join(self.callback_save_path, 'Args.txt')
+        if os.path.exists(write_to_txt):
+            os.remove(write_to_txt)
+        with open(write_to_txt, 'a') as f:
+            for item in info:
+                f.write(item+'\n')
+
 
     def init_model(self, model):
         '''
@@ -254,65 +316,6 @@ class Ped_Classifier():
 
         return model
 
-    def training_setup(self):
-        '''
-            初始化训练的各种参数
-        '''
-
-        # ********** blur，fade，等操作 **********
-        self.fade_operator = Blur_Image_Patch(model_obj=self.ds_model_obj, ds_weights_path=self.ds_weights_path)
-
-        # ********** 数据准备 **********    augmentation_train
-        self.train_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='augmentation_train.txt')
-        self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
-
-        self.val_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='val.txt')
-        self.val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
-
-        self.train_nonPed_num, self.train_ped_num = self.train_dataset.get_ped_cls_num()
-        self.val_nonPed_num, self.val_ped_num = self.val_dataset.get_ped_cls_num()
-
-        # ********** loss & scheduler **********
-        self.optimizer = torch.optim.RMSprop(self.ped_model.parameters(), lr=self.base_lr, weight_decay=1e-5, eps=0.001)
-        # self.scheduler = lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
-
-        self.loss_fn = torch.nn.CrossEntropyLoss()
-
-        # ********** 中断后重新训练 **********
-        if self.resume is True:
-            self.reload()
-        else:
-            self.start_epoch = 0
-            self.best_val_bc = -np.inf
-            self.ped_model = self.init_model(self.ped_model)
-
-        # ********** callbacks **********
-        self.callback_savd_dir = self.model_obj.rsplit('.')[-1]
-        for ds_name in self.ds_name_list:
-            info = '_' + ds_name
-            self.callback_savd_dir += info
-
-        self.callback_savd_dir += '_' + str(self.rand_seed)
-
-        self.callback_savd_dir += '_' + str(self.beta) + 'BiasLoss'
-        print(f'Callback_savd_dir:{self.callback_savd_dir}')
-        self.early_stopping = EarlyStopping(self.callback_savd_dir, top_k=2, cur_epoch=self.start_epoch, patience=15,
-                                            best_monitor_metric=self.best_val_bc)
-
-        train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
-        val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
-
-        self.epoch_logger = Model_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
-                                         ds_name_list=self.ds_name_list, train_num_info=train_num_info,
-                                         val_num_info=val_num_info,
-                                         )
-
-    def test_steup(self):
-        self.test_dataset = my_dataset(ds_name_list=self.ds_name_list, path_key=self.data_key, txt_name='test.txt')
-        self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=True)
-
-        self.ped_model = load_model(self.ped_model, self.ped_weights_path).to(DEVICE)
-        self.ped_model.eval()
 
     def reload(self):
         '''
@@ -384,7 +387,7 @@ class Ped_Classifier():
 
         y_true = []
         org_dict = self.inif_pred_info()
-        opered_dict = self.inif_pred_info() if self.beta > 0.0 else None
+        opered_dict = self.inif_pred_info() if self.opts.beta > 0.0 else None
 
         for batch_idx, data in enumerate(tqdm(self.train_loader)):
             images = data['image'].to(DEVICE)
@@ -394,14 +397,14 @@ class Ped_Classifier():
             pred_org = torch.argmax(logits_org, 1)
             loss_org = self.loss_fn(logits_org, ped_labels)
 
-            if self.beta > 0.0:
+            if self.opts.beta > 0.0:
                 fade_images = self.fade_operator(images)
                 logits_opered = self.ped_model(fade_images)
                 pred_opered = torch.argmax(logits_opered, 1)
                 loss_opered = self.loss_fn(logits_opered, ped_labels)
 
                 opered_dict['loss'] += loss_opered.item()
-                loss_value = (1 - self.beta) * loss_org + self.beta * loss_opered
+                loss_value = (1 - self.opts.beta) * loss_org + self.opts.beta * loss_opered
             else:
                 loss_value = loss_org
 
@@ -421,7 +424,7 @@ class Ped_Classifier():
             org_dict['nonPed_acc_num'] += ((ped_labels[nonPed_idx] == pred_org[nonPed_idx]) * 1).sum()
             org_dict['ped_acc_num'] += ((ped_labels[ped_idx] == pred_org[ped_idx]) * 1).sum()
 
-            if self.beta > 0.0:
+            if self.opts.beta > 0.0:
                 opered_dict['y_pred'].extend(pred_opered.cpu().numpy())
                 opered_dict['correct_num'] += (pred_opered == ped_labels).sum()
                 opered_dict['nonPed_acc_num'] += ((ped_labels[nonPed_idx] == pred_opered[nonPed_idx]) * 1).sum()
@@ -429,6 +432,7 @@ class Ped_Classifier():
 
             # if batch_idx == 3:
             #     break
+            break
 
         train_epoch_info = self.handle_pred_info(y_true, org_pred=org_dict, opered_pred=opered_dict, info_type='Train')
 
@@ -538,39 +542,29 @@ class Ped_Classifier():
         return balanced_accuracy, tnr, tpr
 
 
-
-
-
-
     def update_learning_rate(self, epoch):
         old_lr = self.optimizer.param_groups[0]['lr']
 
         # warm-up阶段
-        if epoch <= self.warmup_epochs:  # warm-up阶段
-            self.optimizer.param_groups[0]['lr'] = self.base_lr * epoch / self.warmup_epochs
+        if epoch <= self.opts.warmup_epochs:  # warm-up阶段
+            self.optimizer.param_groups[0]['lr'] = self.opts.base_lr * epoch / self.opts.warmup_epochs
         else:
-            self.optimizer.param_groups[0]['lr'] = self.base_lr * 0.963 ** (epoch / 3)  # gamma=0.963, lr decay epochs=3
+            self.optimizer.param_groups[0]['lr'] = self.opts.base_lr * 0.963 ** (epoch / 3)  # gamma=0.963, lr decay epochs=3
 
         lr = self.optimizer.param_groups[0]['lr']
         print('learning rate %.7f -> %.7f' % (old_lr, lr))
 
-        # old_lr = self.optimizer.param_groups[0]['lr']
-        # self.scheduler.step()
-        # lr = self.optimizer.param_groups[0]['lr']
-        # if lr != old_lr:
 
     def train(self):
         print('-' * 20 + 'Training Info' + '-' * 20)
         print('Total training Samples:', len(self.train_dataset))
-        print(f'From dataset: {self.ds_name_list}')
         print('Total Batch:', len(self.train_loader))
-        print('Maximux EPOCH:', self.epochs)
         print('Runing device:', DEVICE)
 
         print('-' * 20 + 'Validation Info' + '-' * 20)
         print('Total Val Samples:', len(self.val_dataset))
 
-        for EPOCH in range(self.start_epoch, self.epochs):
+        for EPOCH in range(self.start_epoch, self.opts.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(EPOCH + 1) + '=' * 30)
             train_epoch_info = self.train_one_epoch()
             val_epoch_info = self.val_on_epoch_end()
