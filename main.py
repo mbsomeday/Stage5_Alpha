@@ -7,7 +7,7 @@ sys.path.append(root_path)
 import argparse
 
 from training.training_template import Ped_Classifier
-from configs.pedCls_args import TrainArgs
+from configs.pedCls_args import TrainArgs, TestArgs
 
 # def get_args():
 #     parser = argparse.ArgumentParser()
@@ -31,8 +31,10 @@ from configs.pedCls_args import TrainArgs
 #     return args
 
 
-opts = TrainArgs().parse()
+# opts = TrainArgs().parse()
+# ped_cls = Ped_Classifier(opts=opts)
+# ped_cls.train()
+
+opts = TestArgs().parse()
 ped_cls = Ped_Classifier(opts=opts)
-ped_cls.train()
-
-
+ped_cls.test()

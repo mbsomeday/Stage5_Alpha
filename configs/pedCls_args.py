@@ -3,7 +3,6 @@
 import argparse
 
 
-
 class BaseArgs():
     def __init__(self):
         """Reset the class; indicates the class hasn't been initailized"""
@@ -51,6 +50,19 @@ class TrainArgs(BaseArgs):
         parser.add_argument('--warmup_epochs', type=int, default=3)
 
         return parser
+
+class TestArgs(BaseArgs):
+    def __init__(self):
+        super().__init__()
+
+
+    def initialize(self, parser):
+        parser = BaseArgs.initialize(self, parser)
+
+        parser.add_argument('--ped_weights_path', type=str, default=None)
+
+        return parser
+
 
 
 # if __name__ == '__main__':

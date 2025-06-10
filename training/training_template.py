@@ -481,44 +481,63 @@ class Ped_Classifier():
     def test(self):
         self.ped_model.eval()
 
-        y_true = []
-        y_pred = []
-        nonPed_acc_num = 0
-        ped_acc_num = 0
-        test_correct_num = 0
+        write_to_txt = os.path.join(self.callback_save_path, 'Test.txt')
+        with open(write_to_txt, 'a') as f:
+            f.write(f'Testing modle: {self.opts.ped_weights_path}.')
+            f.write('ds_name, test_ba, tn, fp, fn, tp')
 
-        self.test_nonPed_num, self.test_ped_num = self.test_dataset.get_ped_cls_num()
+        for ds_name in self.opts.ds_name_list:
+            test_dataset = my_dataset(ds_name_list=[ds_name], path_key=self.opts.data_key, txt_name='test.txt')
+            test_loader = DataLoader(test_dataset, batch_size=self.opts.batch_size, shuffle=False)
 
-        with torch.no_grad():
-            for batch_idx, data in enumerate(tqdm(self.test_loader)):
-                images = data['image'].to(DEVICE)
-                ped_labels = data['ped_label'].to(DEVICE)
+            y_true = []
+            y_pred = []
+            nonPed_acc_num = 0
+            ped_acc_num = 0
+            test_correct_num = 0
 
-                logits = self.ped_model(images)
-                preds = torch.argmax(logits, dim=1)
+            test_nonPed_num, test_ped_num = test_dataset.get_ped_cls_num()
 
-                y_true.extend(ped_labels.cpu().numpy())
-                y_pred.extend(preds.cpu().numpy())
+            with torch.no_grad():
+                for batch_idx, data in enumerate(tqdm(test_loader)):
+                    images = data['image'].to(DEVICE)
+                    ped_labels = data['ped_label'].to(DEVICE)
 
-                test_correct_num += (preds == ped_labels).sum()
+                    logits = self.ped_model(images)
+                    preds = torch.argmax(logits, dim=1)
 
-                nonPed_idx = (ped_labels == 0)
-                nonPed_acc_num += (ped_labels[nonPed_idx] == preds[nonPed_idx]).sum()
-                ped_idx = (ped_labels == 1)
-                ped_acc_num += ((ped_labels[ped_idx] == preds[ped_idx]) * 1).sum()
+                    y_true.extend(ped_labels.cpu().numpy())
+                    y_pred.extend(preds.cpu().numpy())
 
-        test_accuracy = test_correct_num / len(self.test_dataset)
-        test_bc = balanced_accuracy_score(y_true, y_pred)
+                    test_correct_num += (preds == ped_labels).sum()
 
-        test_nonPed_acc = nonPed_acc_num / self.test_nonPed_num
-        test_ped_acc = ped_acc_num / self.test_ped_num
+                    nonPed_idx = (ped_labels == 0)
+                    nonPed_acc_num += (ped_labels[nonPed_idx] == preds[nonPed_idx]).sum()
+                    ped_idx = (ped_labels == 1)
+                    ped_acc_num += ((ped_labels[ped_idx] == preds[ped_idx]) * 1).sum()
 
-        test_cm = confusion_matrix(y_true, y_pred)
+            test_accuracy = test_correct_num / len(test_dataset)
+            test_bc = balanced_accuracy_score(y_true, y_pred)
 
-        print('-' * 40 + 'Test Info' + '-' * 40)
-        msg = f'Balanced accuracy:{test_bc:.4f}, accuracy: {test_accuracy:.4f}\nNon-ped accuracy:{test_nonPed_acc:.4f}({nonPed_acc_num}/{self.test_nonPed_num})\nPed accuracy:{test_ped_acc:.4f}({ped_acc_num}/{self.test_ped_num})'
-        print(msg)
-        print(f'CM on test set:\n{test_cm}')
+            test_nonPed_acc = nonPed_acc_num / test_nonPed_num
+            test_ped_acc = ped_acc_num / test_ped_num
+
+            test_cm = confusion_matrix(y_true, y_pred)
+
+            print('-' * 40 + 'Test Info' + '-' * 40)
+            msg = f'Balanced accuracy:{test_bc:.4f}, accuracy: {test_accuracy:.4f}\nNon-ped accuracy:{test_nonPed_acc:.4f}({nonPed_acc_num}/{test_nonPed_num})\nPed accuracy:{test_ped_acc:.4f}({ped_acc_num}/{test_ped_num})'
+            print(msg)
+            print(f'CM on test set:\n{test_cm}')
+
+            tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+            print(tn, fp, fn, tp)
+
+            # with open(write_to_txt, 'a') as f:
+            #     f.write('-' * 80)
+            #     f.write(f'{ds_name}, {test_bc}, {tn}, {fp}, {fn}, {tp}')
+
+
+
 
 
     def test_01(self):
