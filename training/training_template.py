@@ -534,7 +534,6 @@ class Ped_Classifier():
             print(tn, fp, fn, tp)
 
             with open(write_to_txt, 'a') as f:
-                f.write('\n' + '-' * 80 + '\n')
                 f.write(f'{ds_name}, {test_bc}, {tn}, {fp}, {fn}, {tp}\n')
 
 
