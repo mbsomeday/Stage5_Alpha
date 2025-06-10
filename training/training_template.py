@@ -490,7 +490,7 @@ class Ped_Classifier():
 
         write_to_txt = os.path.join(self.callback_save_path, 'Test.txt')
         with open(write_to_txt, 'a') as f:
-            f.write('\n' + '-' * 80 + '\n')
+            f.write('-' * 80 + '\n')
             f.write(f'Testing modle: {self.opts.ped_weights_path}.\n')
             f.write('ds_name, test_ba, tnr, tpr, tn, fp, fn, tp\n')
 
