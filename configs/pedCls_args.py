@@ -16,7 +16,6 @@ class BaseArgs():
         parser.add_argument('--data_key', type=str, default='tiny_dataset')
         parser.add_argument('--isTrain', action='store_true')
         parser.add_argument('--rand_seed', type=int, default=3)
-        parser.add_argument('--beta', type=float, default=0.0)
 
         self.initialized = True
         return parser
@@ -48,6 +47,7 @@ class TrainArgs(BaseArgs):
         parser.add_argument('--resume', action='store_true')
         parser.add_argument('--base_lr', type=float, default=0.01)
         parser.add_argument('--warmup_epochs', type=int, default=3)
+        parser.add_argument('--beta', type=float, default=0.0)
 
         return parser
 
