@@ -53,10 +53,10 @@ class TrainArgs(BaseArgs):
         return parser
 
 
-if __name__ == '__main__':
-    print('test')
-    opts = TrainArgs().parse()
-    print(opts)
+# if __name__ == '__main__':
+#     print('test')
+#     opts = TrainArgs().parse()
+#     print(opts)
 
 
 
