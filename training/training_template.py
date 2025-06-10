@@ -479,6 +479,7 @@ class Ped_Classifier():
         return DotDict(val_epoch_info)
 
     def test(self):
+        self.ped_model = load_model(self.ped_model, self.opts.ped_weights_path)
         self.ped_model.eval()
 
         write_to_txt = os.path.join(self.callback_save_path, 'Test.txt')
