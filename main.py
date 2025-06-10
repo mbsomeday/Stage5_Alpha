@@ -31,10 +31,10 @@ from configs.pedCls_args import TrainArgs, TestArgs
 #     return args
 
 
-# opts = TrainArgs().parse()
-# ped_cls = Ped_Classifier(opts=opts)
-# ped_cls.train()
-
-opts = TestArgs().parse()
+opts = TrainArgs().parse()
 ped_cls = Ped_Classifier(opts=opts)
-ped_cls.test()
+ped_cls.train()
+
+# opts = TestArgs().parse()
+# ped_cls = Ped_Classifier(opts=opts)
+# ped_cls.test()
