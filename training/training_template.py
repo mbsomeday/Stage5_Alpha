@@ -179,19 +179,14 @@ class Ped_Classifier():
         self.opts = opts
         self.ped_model = get_obj_from_str(self.opts.ped_model_obj)(num_class=2).to(DEVICE)
 
-        # 创建 callback save dir，该文件夹用于存储 train / test 的信息
-        self.callback_save_dir = self.opts.ped_model_obj.rsplit('.')[-1]
-        for ds_name in self.opts.ds_name_list:
-            info = '_' + ds_name
-            self.callback_save_dir += info
-        self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_' + str(self.opts.beta) + 'BiasLoss'
-        self.callback_save_path = os.path.join(os.getcwd(), self.callback_save_dir)
-        print(f'Callback_savd_dir:{self.callback_save_path}')
-        if not os.path.exists(self.callback_save_path):
-            os.mkdir(self.callback_save_path)
+
 
         if self.opts.isTrain:
             self.training_setup()
+        else:
+            self.callback_save_path = os.path.join(os.getcwd(), 'Test')
+            if not os.path.exists(self.callback_save_path):
+                os.mkdir(self.callback_save_path)
 
         self.print_args()
 
@@ -236,6 +231,17 @@ class Ped_Classifier():
         '''
             初始化训练的各种参数
         '''
+
+        # 创建 callback save dir
+        self.callback_save_dir = self.opts.ped_model_obj.rsplit('.')[-1]
+        for ds_name in self.opts.ds_name_list:
+            info = '_' + ds_name
+            self.callback_save_dir += info
+        self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_' + str(self.opts.beta) + 'BiasLoss'
+        self.callback_save_path = os.path.join(os.getcwd(), self.callback_save_dir)
+        print(f'Callback_savd_dir:{self.callback_save_path}')
+        if not os.path.exists(self.callback_save_path):
+            os.mkdir(self.callback_save_path)
 
         self.opts.ds_model_obj = self.opts.ped_model_obj if self.opts.ds_model_obj is None else self.opts.ds_model_obj
 
@@ -484,6 +490,7 @@ class Ped_Classifier():
 
         write_to_txt = os.path.join(self.callback_save_path, 'Test.txt')
         with open(write_to_txt, 'a') as f:
+            f.write('\n' + '-' * 80 + '\n')
             f.write(f'Testing modle: {self.opts.ped_weights_path}.\n')
             f.write('ds_name, test_ba, tnr, tpr, tn, fp, fn, tp\n')
 
