@@ -7,7 +7,7 @@ from utils.utils import DotDict
 
 
 class EarlyStopping():
-    def __init__(self, save_prefix,
+    def __init__(self, callback_save_path,
                  top_k=2,
                  cur_epoch=0,
                  best_monitor_metric=-np.inf,
@@ -20,14 +20,12 @@ class EarlyStopping():
         :param delta: 监控metric增加的最小值，当超过该值的时候表示模型有进步
         '''
 
+        self.model_save_dir = callback_save_path
         self.top_k = top_k
-        self.save_prefix = save_prefix
+
+        self.save_prefix = callback_save_path.split(os.sep)[-1]
         self.cur_epoch = cur_epoch
         self.best_monitor_metric = best_monitor_metric
-        self.model_save_dir = os.path.join(os.getcwd(), save_prefix)
-
-        if not os.path.exists(self.model_save_dir):
-            os.mkdir(self.model_save_dir)
 
         self.patience = patience
         self.counter = 0            # 记录loss不变的epoch数目
@@ -37,7 +35,7 @@ class EarlyStopping():
         print('-' * 20 + 'Early Stopping Info' + '-' * 20)
         print('Create early stopping, monitoring [validation balanced accuracy] changes')
         print(f'The best {self.top_k} models will be saved to {self.model_save_dir}')
-        print(f'File saving format: {save_prefix}_epoch_acc.pth')
+        print(f'File saving format: {self.save_prefix}_epoch_acc.pth')
         print(f'Early Stop with patience: {self.patience}')
 
         msg = f'The best {self.top_k} models will be saved to {self.model_save_dir}\n'
@@ -78,7 +76,7 @@ class EarlyStopping():
                 all_weights.append(weights)
 
         # 按存储格式来： save_name = prefix_{epoch}_{balanced_acc}.pth
-        if len(all_weights) > self.top_k:
+        if len(all_weights) > self.top_k - 1:
             sorted = []
             for weight in all_weights:
                 val_acc = weight.split('-')[-1]
@@ -175,15 +173,14 @@ class Model_Logger():
             f.write(val_msg)
 
 
-# if __name__ == '__main__':
-#     print('test')
-#     save_path = r'D:\my_phd\on_git\Stage5_Alpha\training\efficientNetB0_D2_0.0BiasLoss'
-#     test_dict = {
-#         'ba': 0.9,
-#         'epoch': 10
-#     }
-#
-#     my_logger = Model_Logger(save_dir=save_path, isTrain=False, test_dict=test_dict)
+if __name__ == '__main__':
+    print('test')
+    save_path = r'D:\my_phd\on_git\Stage5_Alpha\training\efficientNetB0_D2_0.0BiasLoss'
+    test_dict = {
+        'test_ds_name_list': []
+    }
+
+    # my_logger = Model_Logger(save_dir=save_path, isTrain=False, test_dict=test_dict)
 
 
 
