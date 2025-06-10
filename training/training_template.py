@@ -485,7 +485,7 @@ class Ped_Classifier():
         write_to_txt = os.path.join(self.callback_save_path, 'Test.txt')
         with open(write_to_txt, 'a') as f:
             f.write(f'Testing modle: {self.opts.ped_weights_path}.\n')
-            f.write('ds_name, test_ba, tn, fp, fn, tp\n')
+            f.write('ds_name, test_ba, tnr, tpr, tn, fp, fn, tp\n')
 
         for ds_name in self.opts.ds_name_list:
             test_dataset = my_dataset(ds_name_list=[ds_name], path_key=self.opts.data_key, txt_name='test.txt')
@@ -534,7 +534,7 @@ class Ped_Classifier():
             print(tn, fp, fn, tp)
 
             with open(write_to_txt, 'a') as f:
-                f.write(f'{ds_name}, {test_bc:.6f}, {tn}, {fp}, {fn}, {tp}\n')
+                f.write(f'{ds_name}, {test_bc:.6f}, {test_nonPed_acc:.4f}, {test_ped_acc:.4f}, {tn}, {fp}, {fn}, {tp}\n')
 
 
 
