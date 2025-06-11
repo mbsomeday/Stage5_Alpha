@@ -10,13 +10,13 @@ from training.training_template import Ped_Classifier
 from configs.pedCls_args import BaseArgs, TrainArgs, TestArgs
 
 
-# opts = TrainArgs().parse()
-# ped_cls = Ped_Classifier(opts=opts)
-# ped_cls.train()
-
-opts = TestArgs().parse()
+opts = TrainArgs().parse()
 ped_cls = Ped_Classifier(opts=opts)
-ped_cls.test()
+ped_cls.train()
+
+# opts = TestArgs().parse()
+# ped_cls = Ped_Classifier(opts=opts)
+# ped_cls.test()
 
 
 
