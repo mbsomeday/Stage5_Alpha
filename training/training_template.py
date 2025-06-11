@@ -175,78 +175,47 @@ class Blur_Image_Patch():
 
 class Ped_Classifier():
     def __init__(self, opts):
-
         self.opts = opts
         self.ped_model = get_obj_from_str(self.opts.ped_model_obj)(num_class=2).to(DEVICE)
-
-
 
         if self.opts.isTrain:
             self.training_setup()
         else:
+            # 若是测试，则创建 test 文件夹用于存储结果
             self.callback_save_path = os.path.join(os.getcwd(), 'Test')
             if not os.path.exists(self.callback_save_path):
                 os.mkdir(self.callback_save_path)
 
         self.print_args()
 
-        # # ------------------- Basic Args -------------------
-        # self.basic_args = basic_args
-        # self.train_args = train_args
-        # self.ped_model_obj = basic_args.ped_model_obj
-        # self.ds_name_list = basic_args.ds_name_list
-        # self.batch_size = basic_args.batch_size
-        # self.data_key = self.basic_args.data_key
-        # self.isTrain = self.basic_args.isTrain
-        # self.base_lr = base_lr
-        # self.warmup_epochs = warmup_epochs
-
-
-        # # 不论训练还是测试都要有的logger
-        # self.epoch_logger = Ped_Epoch_Logger(save_dir=self.callback_savd_dir, model_name=self.model_obj.split('.')[-1],
-        #                                  ds_name_list=self.ds_name_list, train_num_info=train_num_info,
-        #                                  val_num_info=val_num_info,
-        #                                  )
-
-        # if ped_weights_path is not None:
-        #     self.ped_weights_path = ped_weights_path
-        #
-
-        # print('-' * 40 + 'Basic Info' + '-' * 40)
-        # print(f'isTrain: {isTrain}, data_key:{data_key}, operated image loss beta:{beta}, warmup_epochs:{warmup_epochs}, rand_seed:{rand_seed}')
-
-        # ------------------------------------ 初始化 ------------------------------------
-
-
-        # print('*' * 100)
-        # for k, v in testargs.items():
-        #     print(f'{k} - {v}')
-
-        # self.print_basic_info()
-        # self.print_args(self.basic_args, msg='Basic Args')
-        # self.print_args(self.train_args, msg='Train Args')
-        # print('-' * 80)
 
     def training_setup(self):
         '''
             初始化训练的各种参数
         '''
+        # ********** 变量配置 **********
+        self.opts.ds_model_obj = self.opts.ped_model_obj if self.opts.ds_model_obj is None else self.opts.ds_model_obj
 
-        # 创建 callback save dir
+        # ********** 创建 callback save dir **********
         self.callback_save_dir = self.opts.ped_model_obj.rsplit('.')[-1]
         for ds_name in self.opts.ds_name_list:
             info = '_' + ds_name
             self.callback_save_dir += info
-        self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_' + str(self.opts.beta) + 'BiasLoss'
+        self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_' + str(self.opts.beta) + self.opts.operator.lower() +'Loss'
         self.callback_save_path = os.path.join(os.getcwd(), self.callback_save_dir)
         print(f'Callback_savd_dir:{self.callback_save_path}')
         if not os.path.exists(self.callback_save_path):
             os.mkdir(self.callback_save_path)
 
-        self.opts.ds_model_obj = self.opts.ped_model_obj if self.opts.ds_model_obj is None else self.opts.ds_model_obj
-
         # ********** blur，fade，等操作 **********
-        self.fade_operator = Blur_Image_Patch(model_obj=self.opts.ds_model_obj, ds_weights_path=self.opts.ds_weights_path)
+        if self.opts.operator.lower() == 'fade':
+            self.image_operator = Blur_Image_Patch(model_obj=self.opts.ds_model_obj, ds_weights_path=self.opts.ds_weights_path)
+        elif self.opts.operator.lower() == 'blur':
+            # self.image_operator = Blur_Image_Patch(model_obj=self.opts.ds_model_obj, ds_weights_path=self.opts.ds_weights_path)
+            print('test blur')
+        else:
+            raise ValueError(f'The type of image operator evokes error, current:{self.opts.operator}')
+
 
         # ********** 数据准备 **********    augmentation_train
         self.train_dataset = my_dataset(ds_name_list=self.opts.ds_name_list, path_key=self.opts.data_key, txt_name='augmentation_train.txt')
@@ -273,8 +242,7 @@ class Ped_Classifier():
             self.ped_model = self.init_model(self.ped_model)
 
         # ********** callbacks **********
-
-        self.early_stopping = EarlyStopping(self.callback_save_path, top_k=2, cur_epoch=self.start_epoch, patience=15,
+        self.early_stopping = EarlyStopping(self.callback_save_path, top_k=self.opts.top_k, cur_epoch=self.start_epoch, patience=self.opts.patience,
                                             best_monitor_metric=self.best_val_bc)
 
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
@@ -282,7 +250,8 @@ class Ped_Classifier():
 
         self.epoch_logger = Model_Logger(save_dir=self.callback_save_path,
                                          model_name=self.opts.ped_model_obj.split('.')[-1],
-                                         ds_name_list=self.opts.ds_name_list, train_num_info=train_num_info,
+                                         ds_name_list=self.opts.ds_name_list,
+                                         train_num_info=train_num_info,
                                          val_num_info=val_num_info,
                                          )
 
@@ -306,7 +275,6 @@ class Ped_Classifier():
             for item in info:
                 f.write(item+'\n')
 
-
     def init_model(self, model):
         '''
             对模型权重进行初始化，保障多次训练结果变动不会变化太大
@@ -327,7 +295,7 @@ class Ped_Classifier():
         '''
             中断后重新训练的情况，本函数加载模型，optimizer等参数
         '''
-        ckpts = torch.load(self.ped_weights_path, map_location='cuda' if torch.cuda.is_available() else 'cpu',
+        ckpts = torch.load(self.opts.ped_weights_path, map_location='cuda' if torch.cuda.is_available() else 'cpu',
                            weights_only=False)
         self.ped_model.load_state_dict(ckpts['model_state_dict'])
 
@@ -404,7 +372,7 @@ class Ped_Classifier():
             loss_org = self.loss_fn(logits_org, ped_labels)
 
             if self.opts.beta > 0.0:
-                fade_images = self.fade_operator(images)
+                fade_images = self.image_operator(images)
                 logits_opered = self.ped_model(fade_images)
                 pred_opered = torch.argmax(logits_opered, 1)
                 loss_opered = self.loss_fn(logits_opered, ped_labels)
@@ -542,29 +510,6 @@ class Ped_Classifier():
 
             with open(write_to_txt, 'a') as f:
                 f.write(f'{ds_name}, {test_bc:.6f}, {test_nonPed_acc:.4f}, {test_ped_acc:.4f}, {tn}, {fp}, {fn}, {tp}\n')
-
-
-
-
-
-    def test_01(self):
-        '''
-            在一个数据集上测试并存储
-        '''
-        ds_list = ['D1', 'D2', 'D3', 'D4']
-        for ds_name in ds_list:
-            test_dataset = my_dataset(ds_name_list=[ds_name], path_key=self.data_key, txt_name='test.txt')
-            test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
-
-            balanced_accuracy, tnr, tpr = self.test_on_one_ds()
-
-
-    def test_on_one_ds(self):
-        balanced_accuracy = 0
-        tnr = 0
-        tpr = 0
-
-        return balanced_accuracy, tnr, tpr
 
 
     def update_learning_rate(self, epoch):

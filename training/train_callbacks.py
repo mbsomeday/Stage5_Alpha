@@ -14,7 +14,6 @@ class EarlyStopping():
                  patience=10,
                  delta=0.00001):
         '''
-        :param save_prefix: 存储前缀，例子：EfficientB0_D1，也用于创建save dir
         :param top_k: 保存几个最好模型
         :param patience: 当监控的 metric 连续 patience 个 epoch 不增加，则触发early stopping
         :param delta: 监控metric增加的最小值，当超过该值的时候表示模型有进步
@@ -116,27 +115,18 @@ class ImageLogger():
 
 
 class Model_Logger():
-# class Classifier_Logger():
     '''
         用于记录训练过程中的loss，accuracy变化情况
     '''
 
-
-    # def __init__(self, save_dir, isTrain, train_dict=None, test_dict=None):
-
     def __init__(self, save_dir, model_name, ds_name_list, train_num_info, val_num_info):
         super().__init__()
         self.save_dir = save_dir
-        # self.isTrain = isTrain
-
         self.model_name = model_name
         self.ds_name_list = ds_name_list
-
-        # 获取数据集的总量，各个类别的量
-        self.train_num, self.train_nonPed_num, self.train_ped_num = train_num_info
+        self.train_num, self.train_nonPed_num, self.train_ped_num = train_num_info      # 获取数据集的总量，各个类别的量
         self.val_num, self.val_nonPed_num, self.val_ped_num = val_num_info
-
-        self.txt_path = os.path.join(self.save_dir, 'train_info.txt')
+        self.txt_path = os.path.join(self.save_dir, 'Train_info.txt')
 
         # 注：训练时取消下列注释
         # __stderr__ = sys.stderr  # 将当前默认的错误输出结果保存为__stderr__
@@ -148,10 +138,12 @@ class Model_Logger():
             msg = f'Model: {model_name}, Training on datasets: {self.ds_name_list}\n'
             f.write(msg)
 
-    def _get_msg_format(self, key):
+    @staticmethod
+    def _get_msg_format(key):
         '''
-            对 accuracy 和 loss 进行输出时设置不同的打印位数
+            tool_function，对 accuracy 和 loss 进行输出时设置不同的打印位数
         '''
+
         if 'loss' in key:
             return '{:.8f}'
         if 'accuracy' in key or 'bc' in key:
@@ -160,8 +152,7 @@ class Model_Logger():
             return '{}'
 
     def get_print_msg(self, info_dict):
-        msg = ', '.join([f"{k}: {self._get_msg_format(k).format(v)}" for k, v in info_dict.items()])
-        msg = msg + '\n'
+        msg = ', '.join([f"{k}: {self._get_msg_format(k).format(v)}" for k, v in info_dict.items()]) + '\n'
         return msg
 
     def __call__(self, epoch, training_info, val_info):

@@ -37,7 +37,6 @@ class TrainArgs(BaseArgs):
     def __init__(self):
         super().__init__()
 
-
     def initialize(self, parser):
         parser = BaseArgs.initialize(self, parser)
 
@@ -45,16 +44,25 @@ class TrainArgs(BaseArgs):
         parser.add_argument('--ds_weights_path', type=str, default=None)
         parser.add_argument('--epochs', type=int, default=150)
         parser.add_argument('--resume', action='store_true')
-        parser.add_argument('--base_lr', type=float, default=0.01)
         parser.add_argument('--warmup_epochs', type=int, default=3)
+
+        # image operator type, blur / fade
+        parser.add_argument('--operator', type=str, default='fade', help='types of operator that handle the image')
         parser.add_argument('--beta', type=float, default=0.0)
+
+        # model
+        parser.add_argument('--init_method', type=str, default='orthogonal', help='the way to initialize model weights, e.g., kaiming, orthogonal')
+        parser.add_argument('--base_lr', type=float, default=0.01)
+
+        # callbacks
+        parser.add_argument('--top_k', type=int, default=2)
+        parser.add_argument('--patience', type=int, default=15)
 
         return parser
 
 class TestArgs(BaseArgs):
     def __init__(self):
         super().__init__()
-
 
     def initialize(self, parser):
         parser = BaseArgs.initialize(self, parser)
