@@ -9,23 +9,14 @@ import argparse
 from training.training_template import Ped_Classifier
 from configs.pedCls_args import BaseArgs, TrainArgs, TestArgs
 
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--isTrain', action='store_true')
-    args = parser.parse_args()
-    return args
 
+# opts = TrainArgs().parse()
+# ped_cls = Ped_Classifier(opts=opts)
+# ped_cls.train()
 
-isTrain = get_args().isTrain
-
-if isTrain:
-    opts = TrainArgs().parse()
-    ped_cls = Ped_Classifier(opts=opts)
-    ped_cls.train()
-else:
-    opts = TestArgs().parse()
-    ped_cls = Ped_Classifier(opts=opts)
-    ped_cls.test()
+opts = TestArgs().parse()
+ped_cls = Ped_Classifier(opts=opts)
+ped_cls.test()
 
 
 
