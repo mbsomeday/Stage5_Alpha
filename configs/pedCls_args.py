@@ -28,9 +28,9 @@ class BaseArgs():
 
         # get basic args
         opt, _ = parser.parse_known_args()
-        self.parser = parser
+        # self.parser = parser
 
-        return parser.parse_args()
+        return opt
 
 
 class TrainArgs(BaseArgs):
