@@ -577,10 +577,15 @@ class Ped_Classifier():
         print('-' * 20 + 'Training Info' + '-' * 20)
         print('Total training Samples:', len(self.train_dataset))
         print('Total Batch:', len(self.train_loader))
-        print('Runing device:', DEVICE)
 
         print('-' * 20 + 'Validation Info' + '-' * 20)
         print('Total Val Samples:', len(self.val_dataset))
+
+        # 打印运行设备
+        if torch.cuda.device_count() > 1:
+            raise RuntimeError('More than one GPU')
+
+        print(f'Runing on {torch.cuda.get_device_name(0)} GPU')
 
         for EPOCH in range(self.start_epoch, self.opts.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(EPOCH + 1) + '=' * 30)
