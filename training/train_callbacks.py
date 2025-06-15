@@ -118,7 +118,6 @@ class Model_Logger():
     '''
         用于记录训练过程中的loss，accuracy变化情况
     '''
-
     def __init__(self, save_dir, model_name, ds_name_list, train_num_info, val_num_info):
         super().__init__()
         self.save_dir = save_dir
@@ -156,8 +155,8 @@ class Model_Logger():
         return msg
 
     def __call__(self, epoch, training_info, val_info):
-        train_msg = self.get_print_msg(info_dict=training_info)
-        val_msg = self.get_print_msg(info_dict=val_info)
+        train_msg = 'Train: ' + self.get_print_msg(info_dict=training_info)
+        val_msg = 'Test: ' + self.get_print_msg(info_dict=val_info)
         with open(self.txt_path, 'a') as f:
             f.write(f'------------------------------ Epoch: {epoch} ------------------------------\n')
             f.write(train_msg)
