@@ -235,7 +235,7 @@ class Ped_Classifier():
             self.callback_save_path = os.path.join(os.getcwd(), 'Test')
             if not os.path.exists(self.callback_save_path):
                 os.mkdir(self.callback_save_path)
-
+            print(f'Test saving dir:{self.callback_save_path}')
         self.print_args()
 
 
@@ -253,7 +253,7 @@ class Ped_Classifier():
             self.callback_save_dir += info
         self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_' + str(self.opts.beta) + self.opts.operator.lower() +'Loss'
         self.callback_save_path = os.path.join(os.getcwd(), self.callback_save_dir)
-        print(f'Callback_savd_dir:{self.callback_save_path}')
+        print(f'Callback_save_dir:{self.callback_save_path}')
         if not os.path.exists(self.callback_save_path):
             os.mkdir(self.callback_save_path)
 
@@ -366,7 +366,7 @@ class Ped_Classifier():
 
     def handle_pred_info(self, y_true: list, org_pred: dict, opered_pred=None, info_type='Train'):
         '''
-            整合训练过程中的accuracy和loss等数据并进行 输出 和 返回
+            整合训练过程中的 accuracy 和 loss 等数据并进行 输出 和 返回
         '''
         epoch_info = {}
 
@@ -431,8 +431,6 @@ class Ped_Classifier():
             else:
                 loss_value = loss_org
 
-            org_dict['loss'] += loss_org.item()
-
             self.optimizer.zero_grad()
             loss_value.backward()
             self.optimizer.step()
@@ -442,6 +440,7 @@ class Ped_Classifier():
             nonPed_idx = (ped_labels == 0)
             ped_idx = (ped_labels == 1)
 
+            org_dict['loss'] += loss_org.item()
             org_dict['y_pred'].extend(pred_org.cpu().numpy())
             org_dict['correct_num'] += (pred_org == ped_labels).sum()
             org_dict['nonPed_acc_num'] += ((ped_labels[nonPed_idx] == pred_org[nonPed_idx]) * 1).sum()
@@ -452,9 +451,6 @@ class Ped_Classifier():
                 opered_dict['correct_num'] += (pred_opered == ped_labels).sum()
                 opered_dict['nonPed_acc_num'] += ((ped_labels[nonPed_idx] == pred_opered[nonPed_idx]) * 1).sum()
                 opered_dict['ped_acc_num'] += ((ped_labels[ped_idx] == pred_opered[ped_idx]) * 1).sum()
-
-            # if batch_idx == 3:
-            #     break
 
         train_epoch_info = self.handle_pred_info(y_true, org_pred=org_dict, opered_pred=opered_dict, info_type='Train')
 
