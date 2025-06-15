@@ -1,7 +1,7 @@
 import os.path
 import shutil
 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import torch, copy, inspect
 from torch import nn
 from torch.utils.data import DataLoader
@@ -16,8 +16,9 @@ from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict, TemporaryGrad
 from data.dataset import my_dataset
-from training.train_callbacks import EarlyStopping, Model_Logger      # remote
-# from train_callbacks import EarlyStopping, Model_Logger     # local
+# from training.train_callbacks import EarlyStopping, Model_Logger      # remote
+from train_callbacks import EarlyStopping, Model_Logger     # local
+
 
 
 class NotYetUse_Loss(nn.Module):
@@ -77,39 +78,88 @@ class NotYetUse_Loss(nn.Module):
 class Blur_Image_Patch():
     '''
         根据 heatmap 对图片进行部分 blur
+        现在版本：code实现heatmap
     '''
 
     def __init__(self, model_obj, ds_weights_path):
         self.ds_weights_path = ds_weights_path
-        self.ds_model = get_obj_from_str(model_obj)(num_class=4)
+        self.num_classes = 4
+        self.ds_model = get_obj_from_str(model_obj)(num_class=self.num_classes)
         self.ds_model = load_model(self.ds_model, self.ds_weights_path).to(DEVICE).eval()
 
         self.grad_layer = 'features'
         self.attention_thresh = 0.5
         self.forward_feature = None
-        self.backward_grad = None
+        self.backward_grads = None
 
-        self.cam_operator = GradCAM(self.ds_model, target_layer=[self.grad_layer])
-        # self._register_hooks()
+        # self.cam_operator = GradCAM(self.ds_model, target_layer=[self.grad_layer])
 
-    # def _register_hooks(self):
-    #     def forward_hook(module, in_features, out_features):
-    #         self.forward_feature = out_features
-    #
-    #     def backward_hook(module, in_grad, out_grad):
-    #         self.backward_grad = out_grad[0]
-    #
-    #     gradient_layer_found = False
-    #     for name, m in self.ds_model.named_modules():
-    #         if name == self.grad_layer:
-    #             m.register_forward_hook(forward_hook)
-    #             m.register_full_backward_hook(backward_hook)
-    #             print(f"Register forward hook and backward hook! Hooked layer: {self.grad_layer}")
-    #             gradient_layer_found = True
-    #             break
-    #     # for our own sanity, confirm its existence
-    #     if not gradient_layer_found:
-    #         raise AttributeError('Gradient layer %s not found in the internal model' % self.grad_layer)
+        self._register_hooks()
+        # sigma, omega for making the soft-mask
+        self.sigma = 0.25
+        self.omega = 100
+
+    def _register_hooks(self):
+        def forward_hook(module, in_features, out_features):
+            self.forward_feature = out_features
+
+        def backward_hook(module, in_grad, out_grad):
+            self.backward_grads = out_grad[0]
+
+        gradient_layer_found = False
+        for name, m in self.ds_model.named_modules():
+            if name == self.grad_layer:
+                m.register_forward_hook(forward_hook)
+                m.register_full_backward_hook(backward_hook)
+                print(f"Register forward hook and backward hook! Hooked layer: {self.grad_layer}")
+                gradient_layer_found = True
+                break
+        # for our own sanity, confirm its existence
+        if not gradient_layer_found:
+            raise AttributeError('Gradient layer %s not found in the internal model' % self.grad_layer)
+
+
+    def calc_cam(self, images):
+        with torch.enable_grad():
+            _, _, img_h, img_w = images.size()
+            logits = self.ds_model(images)
+            preds = torch.argmax(logits, dim=1)
+            pred_idx = F.one_hot(preds, num_classes=self.num_classes)
+
+            self.ds_model.zero_grad()
+            logits.backward(gradient=pred_idx)
+            self.ds_model.zero_grad()
+
+            backward_features = self.backward_grads
+            fl = self.forward_feature
+
+            weights = F.adaptive_avg_pool2d(backward_features, 1)   # [batch_size, 1280, 1, 1]
+            Ac = torch.mul(fl, weights).sum(dim=1, keepdim=True)
+            Ac = F.relu(Ac)
+            Ac = F.interpolate(Ac, size=images.size()[2:])
+            heatmap = Ac
+
+            Ac_min = Ac.min()
+            Ac_max = Ac.max()
+            # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
+
+            mask = heatmap.detach().clone()
+            mask.requires_grad = False
+            mask[mask < Ac_max] = 0
+            masked_image = images - images * mask
+
+            # plt_transform = transforms.ToPILImage()
+            # img_idx = 0
+            # plt.figure()
+            # plt.subplot(131)
+            # plt.imshow(plt_transform(images[img_idx]))
+            # plt.subplot(132)
+            # plt.imshow(plt_transform(mask[img_idx]))
+            # plt.subplot(133)
+            # plt.imshow(plt_transform(masked_image[img_idx]))
+            # plt.show()
+
+        return heatmap, mask, masked_image
 
     def __call__(self, images):
 
@@ -138,19 +188,19 @@ class Blur_Image_Patch():
         '''
             用 torchcam 生成特征图
         '''
-        ds_logits = self.ds_model(images)
-        ds_preds = torch.argmax(ds_logits, 1).tolist()
-        heatmap_list = self.cam_operator(class_idx=ds_preds, scores=ds_logits)
-        heatmaps = heatmap_list[0]
-
-        for hp in heatmaps:
-            cur_max = hp.max()
-            hp[hp < cur_max] = 0
-
-        # heatmaps[heatmaps < self.attention_thresh] = 0
-        heatmaps_resized = F.interpolate(heatmaps.unsqueeze(0), size=(224, 224), mode='bilinear', align_corners=False)
-        heatmaps_resized = heatmaps_resized.squeeze().unsqueeze(1)
-        fade_images = images - images * heatmaps_resized
+        # ds_logits = self.ds_model(images)
+        # ds_preds = torch.argmax(ds_logits, 1).tolist()
+        # heatmap_list = self.cam_operator(class_idx=ds_preds, scores=ds_logits)
+        # heatmaps = heatmap_list[0]
+        #
+        # for hp in heatmaps:
+        #     cur_max = hp.max()
+        #     hp[hp < cur_max] = 0
+        #
+        # # heatmaps[heatmaps < self.attention_thresh] = 0
+        # heatmaps_resized = F.interpolate(heatmaps.unsqueeze(0), size=(224, 224), mode='bilinear', align_corners=False)
+        # heatmaps_resized = heatmaps_resized.squeeze().unsqueeze(1)
+        # fade_images = images - images * heatmaps_resized
 
         '''
             展示 images
@@ -170,7 +220,7 @@ class Blur_Image_Patch():
         # plt.imshow(plt_transform(masked_image))
         # plt.show()
 
-        return fade_images
+        return self.calc_cam(images)
 
 
 class Ped_Classifier():
@@ -215,7 +265,6 @@ class Ped_Classifier():
             print('test blur')
         else:
             raise ValueError(f'The type of image operator evokes error, current:{self.opts.operator}')
-
 
         # ********** 数据准备 **********    augmentation_train
         self.train_dataset = my_dataset(ds_name_list=self.opts.ds_name_list, path_key=self.opts.data_key, txt_name='augmentation_train.txt')
@@ -453,6 +502,9 @@ class Ped_Classifier():
         return DotDict(val_epoch_info)
 
     def test(self):
+        '''
+            遍历每个数据集对模型进行测试，并将结果保存到Test文件夹中
+        '''
         self.ped_model = load_model(self.ped_model, self.opts.ped_weights_path)
         self.ped_model.eval()
 
@@ -556,17 +608,13 @@ class Ped_Classifier():
 
 
 if __name__ == '__main__':
+
     model_obj = 'models.EfficientNet.efficientNetB0'
 
     ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_dsCls-10-0.97636.pth'
     ped_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
     # ds_weights_path = r'D:\my_phd\Model_Weights\Stage5\EfficientNetB0_Scratch\efficientNetB0_D2-21-0.94403.pth'
 
-    testarg_dict = {
-        'a': 1,
-        'b': 2
-    }
-    #
     # tt = Ped_Classifier(model_obj,
     #                     ds_name_list=['D2'],
     #                     batch_size=4, epochs=100,
@@ -582,7 +630,7 @@ if __name__ == '__main__':
 
     test_obj = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
 
-    torch.manual_seed(13)
+    torch.manual_seed(4)
     ds_name_list = ['D3']
     batch_size = 4
     val_dataset = my_dataset(ds_name_list=ds_name_list, path_key='tiny_dataset', txt_name='val.txt')
@@ -590,8 +638,12 @@ if __name__ == '__main__':
 
     for batch_idx, data_dict in enumerate(val_loader):
         images = data_dict['image']
+        ped_labels = data_dict['ped_label']
 
-        AC = test_obj(images)
+        print(ped_labels)
+
+        test_obj.calc_cam(images)
+
 
         break
 
