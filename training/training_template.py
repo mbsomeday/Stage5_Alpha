@@ -1,7 +1,7 @@
 import os.path
 import shutil
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import torch, copy, inspect
 from torch import nn
 from torch.utils.data import DataLoader
@@ -11,68 +11,68 @@ import numpy as np
 from torch.optim import lr_scheduler
 from sklearn.metrics import balanced_accuracy_score, confusion_matrix
 from tqdm import tqdm
-from torchcam.methods.gradient import LayerCAM, GradCAM
+# from torchcam.methods.gradient import LayerCAM, GradCAM
 from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict, TemporaryGrad
 from data.dataset import my_dataset
-# from training.train_callbacks import EarlyStopping, Model_Logger      # remote
-from train_callbacks import EarlyStopping, Model_Logger     # local
+from training.train_callbacks import EarlyStopping, Model_Logger      # remote
+# from train_callbacks import EarlyStopping, Model_Logger     # local
 
 
 
-class NotYetUse_Loss(nn.Module):
-
-    def __init__(self, ds_model_obj, ds_weights_path, grad_layer=None):
-        super().__init__()
-        self.ds_model_obj = ds_model_obj
-        self.ds_weights_path = ds_weights_path
-
-        # 实现 ds classifier
-        self.ds_model = get_obj_from_str(ds_model_obj)(num_class=2)
-        self.ds_model = load_model(self.ds_model, ds_weights_path).to(DEVICE)
-        self.ds_model.eval()
-
-        grad_layer = ['features.0', 'features.1', 'features.2', 'features.3', 'features.4', 'features.5', 'features.6',
-                      'features.7']
-
-        self.cam_operator = LayerCAM(self.ds_model, target_layer=grad_layer)
-
-    def heatmap_fusion(self, heatmaps):
-        resized_hp = []
-        for hp in heatmaps:
-            hp = transforms.Resize(224)(hp).unsqueeze(0)
-            resized_hp.append(hp)
-
-        batch_heatmaps = torch.cat(resized_hp, dim=0)
-        fused_heatmaps = torch.sum(batch_heatmaps, 0)
-
-        (cam_min, cam_max) = (fused_heatmaps.min(), fused_heatmaps.max())
-        fused_heatmaps = (fused_heatmaps - cam_min) / (((cam_max - cam_min) + 1e-08)).data
-
-        print(f'fused_heatmaps:{fused_heatmaps.shape}')
-        return fused_heatmaps
-
-    def forward(self, images):
-        ds_logits = self.ds_model(images)
-        ds_preds = torch.argmax(ds_logits, 1)
-
-        heatmaps = self.cam_operator(ds_preds[0].item(), scores=ds_logits)
-        fused_heatmaps = self.heatmap_fusion(heatmaps)
-
-        temp_hp = transforms.ToPILImage()(fused_heatmaps)
-        thresh_hp = copy.deepcopy(temp_hp)
-
-        print('thresh_hp', type(thresh_hp))
-
-        # plt.figure(figsize=(8, 8))
-        # plt.subplot(131)
-        # plt.imshow(transforms.ToPILImage()(images[0]))
-        # plt.subplot(132)
-        # plt.imshow(temp_hp)
-        # plt.subplot(133)
-        # plt.imshow(thresh_hp)
-        # plt.show()
+# class NotYetUse_Loss(nn.Module):
+#
+#     def __init__(self, ds_model_obj, ds_weights_path, grad_layer=None):
+#         super().__init__()
+#         self.ds_model_obj = ds_model_obj
+#         self.ds_weights_path = ds_weights_path
+#
+#         # 实现 ds classifier
+#         self.ds_model = get_obj_from_str(ds_model_obj)(num_class=2)
+#         self.ds_model = load_model(self.ds_model, ds_weights_path).to(DEVICE)
+#         self.ds_model.eval()
+#
+#         grad_layer = ['features.0', 'features.1', 'features.2', 'features.3', 'features.4', 'features.5', 'features.6',
+#                       'features.7']
+#
+#         self.cam_operator = LayerCAM(self.ds_model, target_layer=grad_layer)
+#
+#     def heatmap_fusion(self, heatmaps):
+#         resized_hp = []
+#         for hp in heatmaps:
+#             hp = transforms.Resize(224)(hp).unsqueeze(0)
+#             resized_hp.append(hp)
+#
+#         batch_heatmaps = torch.cat(resized_hp, dim=0)
+#         fused_heatmaps = torch.sum(batch_heatmaps, 0)
+#
+#         (cam_min, cam_max) = (fused_heatmaps.min(), fused_heatmaps.max())
+#         fused_heatmaps = (fused_heatmaps - cam_min) / (((cam_max - cam_min) + 1e-08)).data
+#
+#         print(f'fused_heatmaps:{fused_heatmaps.shape}')
+#         return fused_heatmaps
+#
+#     def forward(self, images):
+#         ds_logits = self.ds_model(images)
+#         ds_preds = torch.argmax(ds_logits, 1)
+#
+#         heatmaps = self.cam_operator(ds_preds[0].item(), scores=ds_logits)
+#         fused_heatmaps = self.heatmap_fusion(heatmaps)
+#
+#         temp_hp = transforms.ToPILImage()(fused_heatmaps)
+#         thresh_hp = copy.deepcopy(temp_hp)
+#
+#         print('thresh_hp', type(thresh_hp))
+#
+#         # plt.figure(figsize=(8, 8))
+#         # plt.subplot(131)
+#         # plt.imshow(transforms.ToPILImage()(images[0]))
+#         # plt.subplot(132)
+#         # plt.imshow(temp_hp)
+#         # plt.subplot(133)
+#         # plt.imshow(thresh_hp)
+#         # plt.show()
 
 
 class Blur_Image_Patch():
