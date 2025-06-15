@@ -159,7 +159,7 @@ class Blur_Image_Patch():
             # plt.imshow(plt_transform(masked_image[img_idx]))
             # plt.show()
 
-        return heatmap, mask, masked_image
+        return masked_image
 
     def __call__(self, images):
 
