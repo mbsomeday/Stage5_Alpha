@@ -748,8 +748,8 @@ class train_ped_model_alpha():
             self.feed_forward_features = None
             self.backward_features = None
 
-            # self.grad_layer = 'features'  # efficient
-            self.grad_layer = 'layer4' # resnet
+            self.grad_layer = 'features'  # efficient
+            # self.grad_layer = 'layer4' # resnet
             self._register_hooks(self.ds_model, self.grad_layer)
 
             # sigma, omega for making the soft-mask

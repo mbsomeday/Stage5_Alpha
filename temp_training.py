@@ -31,7 +31,8 @@ tt = train_ped_model_alpha(model_obj=model_obj,
                            ds_name_list=ds_name_list,
                            batch_size=batch_size,
                            epochs=100,
-                           warmup_epochs=3
+                           warmup_epochs=3,
+                           camLoss_coefficient=0.2
                            )
 tt.train_model()
 
