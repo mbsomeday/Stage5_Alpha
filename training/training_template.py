@@ -154,6 +154,7 @@ class Blur_Image_Patch():
             # Ac_max = Ac.max()
             # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
 
+
             # mask = heatmap.detach().clone()
             # mask.requires_grad = False
             # mask[mask < Ac_max] = 0
