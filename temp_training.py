@@ -28,6 +28,7 @@ ds_name_list = [args.ds_name]
 
 
 tt = train_ped_model_alpha(model_obj=model_obj,
+                           ds_model_obj=model_obj,
                            ds_name_list=ds_name_list,
                            batch_size=batch_size,
                            epochs=100,
