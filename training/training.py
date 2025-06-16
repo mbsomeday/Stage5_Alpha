@@ -20,7 +20,9 @@ from sklearn.metrics import confusion_matrix
 from utils.utils import load_model
 
 from data.dataset import my_dataset
-from train_callbacks import EarlyStopping, Epoch_logger
+# from train_callbacks import EarlyStopping, Model_Logger   # local
+from training.train_callbacks import EarlyStopping, Model_Logger
+
 from utils.utils import get_obj_from_str, load_model
 from utils.utils import get_vgg_DSmodel, DotDict
 
@@ -345,7 +347,7 @@ class train_pedmodel_camLoss():
         self.val_nonPed_num, self.val_ped_num = self.val_dataset.get_ped_cls_num()
 
         # ------------ 增加ds model，目的是融入 cam loss ------------
-        self.ds_model = get_vgg_DSmodel(device=DEVICE)
+        self.ds_model = get_vgg_DSmodel()
         self.ds_model.eval()
         self.ds_model.to(DEVICE)
 
@@ -373,7 +375,7 @@ class train_pedmodel_camLoss():
 
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
-        self.training_logger = Training_logger(save_prefix, model_name=model_name, ds_name_list=ds_name_list,
+        self.training_logger = Model_Logger(save_prefix, model_name=model_name, ds_name_list=ds_name_list,
                                                train_num_info=train_num_info, val_num_info=val_num_info)
         # ------------ callbacks end ------------
 
@@ -721,17 +723,16 @@ class train_ped_model_alpha():
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
-        self.epoch_logger = Epoch_logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
-                                         ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info,
-                                         task='ped_cls'
+        self.epoch_logger = Model_Logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
+                                         ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info
                                          )
 
         # -------------------- 获取ds model，目的是融入 cam loss --------------------
         if self.camLoss_coefficient is not None:
             self.ds_model = get_obj_from_str(self.ds_model_obj)(num_class=4)
-            # ds_weights = r'/kaggle/input/stage5-weights-effidscls/efficientNetB0_dsCls-10-0.97636.pth'
+            ds_weights = r'/kaggle/input/stage5-weights-effidscls/efficientNetB0_dsCls-10-0.97636.pth'
             # ds_weights = r'/data/jcampos/jiawei_data/code/efficientNetB0_dsCls/efficientNetB0_dsCls-10-0.97636.pth'
-            ds_weights = r'/data/jcampos/jiawei_data/code/ResNet34_dsCls/ResNet34_dsCls-23-0.96353.pth'
+            # ds_weights = r'/data/jcampos/jiawei_data/code/ResNet34_dsCls/ResNet34_dsCls-23-0.96353.pth'
             # ds_weights = r'/veracruz/home/j/jwang/data/model_weights/efficientNetB0_dsCls-10-0.97636.pth'
             self.ds_model = load_model(self.ds_model, ds_weights)
             self.ds_model.eval()
