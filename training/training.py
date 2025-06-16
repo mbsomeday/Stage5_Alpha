@@ -717,7 +717,7 @@ class train_ped_model_alpha():
         if self.camLoss_coefficient is not None:
             save_prefix += '_CAMLoss'
 
-        self.callback_savd_dir = save_prefix
+        self.callback_save_dir = save_prefix
         self.callback_save_path = os.path.join(os.getcwd(), self.callback_save_dir)
         print(f'Callback_save_dir:{self.callback_save_path}')
         if not os.path.exists(self.callback_save_path):
