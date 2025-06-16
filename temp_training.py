@@ -13,6 +13,7 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--batch_size', type=int, default=64)
+    parser.add_argument('--ds_name', type=str)
 
     args = parser.parse_args()
 
@@ -23,7 +24,7 @@ args = get_args()
 batch_size = args.batch_size
 
 model_obj = 'models.EfficientNet.efficientNetB0'
-ds_name_list = ['D2']
+ds_name_list = [args.ds_name]
 
 
 tt = train_ped_model_alpha(model_obj=model_obj,
