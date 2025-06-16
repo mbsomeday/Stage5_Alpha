@@ -707,6 +707,7 @@ class train_ped_model_alpha():
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
         # -------------------- Callbacks --------------------
+
         # 设置保存训练信息的文件夹的名字
         save_prefix = model_obj.rsplit('.')[-1]
         for ds_name in ds_name_list:
@@ -716,15 +717,21 @@ class train_ped_model_alpha():
         if self.camLoss_coefficient is not None:
             save_prefix += '_CAMLoss'
 
-        callback_savd_dir = save_prefix
+        self.callback_savd_dir = save_prefix
+        self.callback_save_path = os.path.join(os.getcwd(), self.callback_save_dir)
+        print(f'Callback_save_dir:{self.callback_save_path}')
+        if not os.path.exists(self.callback_save_path):
+            os.mkdir(self.callback_save_path)
 
         self.early_stopping = EarlyStopping(save_prefix, top_k=2)
 
         train_num_info = [len(self.train_dataset), self.train_nonPed_num, self.train_ped_num]
         val_num_info = [len(self.val_dataset), self.val_nonPed_num, self.val_ped_num]
 
-        self.epoch_logger = Model_Logger(save_dir=callback_savd_dir, model_name=model_obj.split('.')[-1],
-                                         ds_name_list=ds_name_list, train_num_info=train_num_info, val_num_info=val_num_info
+        self.epoch_logger = Model_Logger(save_dir=self.callback_save_path,
+                                         model_name=model_obj.split('.')[-1],
+                                         ds_name_list=ds_name_list,
+                                         train_num_info=train_num_info, val_num_info=val_num_info
                                          )
 
         # -------------------- 获取ds model，目的是融入 cam loss --------------------
