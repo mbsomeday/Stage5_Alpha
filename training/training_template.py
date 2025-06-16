@@ -1,7 +1,7 @@
 import os.path
 import shutil
 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import torch, copy, inspect
 from torch import nn
 from torch.utils.data import DataLoader
@@ -16,10 +16,13 @@ from tqdm import tqdm
 
 from utils.utils import DEVICE, get_obj_from_str, load_model, DotDict, TemporaryGrad
 from data.dataset import my_dataset
-from training.train_callbacks import EarlyStopping, Model_Logger      # remote
-# from train_callbacks import EarlyStopping, Model_Logger     # local
+# from training.train_callbacks import EarlyStopping, Model_Logger      # remote
+from train_callbacks import EarlyStopping, Model_Logger     # local
 
 
+'''
+    Code
+'''
 
 # class NotYetUse_Loss(nn.Module):
 #
@@ -95,9 +98,9 @@ class Blur_Image_Patch():
         # self.cam_operator = GradCAM(self.ds_model, target_layer=[self.grad_layer])
 
         self._register_hooks()
-        # sigma, omega for making the soft-mask
-        self.sigma = 0.25
-        self.omega = 100
+        # # sigma, omega for making the soft-mask
+        # self.sigma = 0.25
+        # self.omega = 100
 
     def _register_hooks(self):
         def forward_hook(module, in_features, out_features):
@@ -139,24 +142,28 @@ class Blur_Image_Patch():
             Ac = F.interpolate(Ac, size=images.size()[2:])
             heatmap = Ac
 
-            Ac_min = Ac.min()
-            Ac_max = Ac.max()
-            # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
-
-            mask = heatmap.detach().clone()
-            mask.requires_grad = False
-            mask[mask < Ac_max] = 0
+            ac_max = torch.amax(Ac, dim=(1, 2, 3), keepdim=True)
+            mask = torch.where(Ac == ac_max, Ac, torch.zeros_like(Ac))  # 关键步骤
             masked_image = images - images * mask
 
+            # Ac_min = Ac.min()
+            # Ac_max = Ac.max()
+            # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
+
+            # mask = heatmap.detach().clone()
+            # mask.requires_grad = False
+            # mask[mask < Ac_max] = 0
+            # masked_image = images - images * mask
+
             # plt_transform = transforms.ToPILImage()
-            # img_idx = 0
-            # plt.figure()
-            # plt.subplot(131)
-            # plt.imshow(plt_transform(images[img_idx]))
-            # plt.subplot(132)
-            # plt.imshow(plt_transform(mask[img_idx]))
-            # plt.subplot(133)
-            # plt.imshow(plt_transform(masked_image[img_idx]))
+            # for img_idx in range(len(images)):
+            #     plt.figure()
+            #     plt.subplot(131)
+            #     plt.imshow(plt_transform(images[img_idx]))
+            #     plt.subplot(132)
+            #     plt.imshow(plt_transform(mask[img_idx]))
+            #     plt.subplot(133)
+            #     plt.imshow(plt_transform(masked_image[img_idx]))
             # plt.show()
 
         return masked_image
@@ -225,6 +232,14 @@ class Blur_Image_Patch():
 
 class Ped_Classifier():
     def __init__(self, opts):
+
+        # 控制在服务器运行时只用一个GPU
+        if torch.cuda.is_available():
+            if torch.cuda.device_count() > 1:
+                raise RuntimeError('More than one GPU')
+            else:
+                print(f'Runing on {torch.cuda.get_device_name(0)} GPU')
+
         self.opts = opts
         self.ped_model = get_obj_from_str(self.opts.ped_model_obj)(num_class=2).to(DEVICE)
 
@@ -581,12 +596,6 @@ class Ped_Classifier():
         print('-' * 20 + 'Validation Info' + '-' * 20)
         print('Total Val Samples:', len(self.val_dataset))
 
-        # 打印运行设备
-        if torch.cuda.device_count() > 1:
-            raise RuntimeError('More than one GPU')
-
-        print(f'Runing on {torch.cuda.get_device_name(0)} GPU')
-
         for EPOCH in range(self.start_epoch, self.opts.epochs):
             print('=' * 30 + ' begin EPOCH ' + str(EPOCH + 1) + '=' * 30)
             train_epoch_info = self.train_one_epoch()
@@ -631,8 +640,8 @@ if __name__ == '__main__':
 
     test_obj = Blur_Image_Patch(model_obj=model_obj, ds_weights_path=ds_weights_path)
 
-    torch.manual_seed(4)
-    ds_name_list = ['D3']
+    torch.manual_seed(20)
+    ds_name_list = ['D2']
     batch_size = 4
     val_dataset = my_dataset(ds_name_list=ds_name_list, path_key='tiny_dataset', txt_name='val.txt')
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
@@ -641,7 +650,7 @@ if __name__ == '__main__':
         images = data_dict['image']
         ped_labels = data_dict['ped_label']
 
-        print(ped_labels)
+        print(f'ped_labels: {ped_labels}')
 
         test_obj.calc_cam(images)
 
