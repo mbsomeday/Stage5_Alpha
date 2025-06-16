@@ -26,14 +26,13 @@ model_obj = 'models.EfficientNet.efficientNetB0'
 ds_name_list = ['D4']
 
 
-
 tt = train_ped_model_alpha(model_obj=model_obj,
                            ds_name_list=ds_name_list,
                            batch_size=batch_size,
                            epochs=100,
                            warmup_epochs=3
                            )
-
+tt.train_model()
 
 
 
