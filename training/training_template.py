@@ -136,7 +136,6 @@ class Blur_Image_Patch():
             logits.backward(gradient=pred_idx, retain_graph=True)
             self.ds_model.zero_grad()
 
-
             backward_features = self.backward_grads
             fl = self.forward_feature
 
@@ -147,9 +146,10 @@ class Blur_Image_Patch():
             heatmap = Ac
 
             ac_max = torch.amax(Ac, dim=(1, 2, 3), keepdim=True)
-            mask = torch.where(Ac == ac_max, Ac, torch.zeros_like(Ac))  # 关键步骤
+            # mask = torch.where(Ac == ac_max, Ac, torch.zeros_like(Ac))  # 将所有值小于max的进行mask，该操作按维度进行
+            mask = Ac
+            mask[mask < ac_max*0.5] = 0
             masked_image = images - images * mask
-
             # Ac_min = Ac.min()
             # Ac_max = Ac.max()
             # scaled_ac = (Ac - Ac_min) / (Ac_max - Ac_min)
@@ -162,11 +162,13 @@ class Blur_Image_Patch():
             # plt_transform = transforms.ToPILImage()
             # for img_idx in range(len(images)):
             #     plt.figure()
-            #     plt.subplot(131)
+            #     plt.subplot(141)
             #     plt.imshow(plt_transform(images[img_idx]))
-            #     plt.subplot(132)
+            #     plt.subplot(142)
             #     plt.imshow(plt_transform(mask[img_idx]))
-            #     plt.subplot(133)
+            #     plt.subplot(143)
+            #     plt.imshow(plt_transform(heatmap[img_idx]))
+            #     plt.subplot(144)
             #     plt.imshow(plt_transform(masked_image[img_idx]))
             # plt.show()
 
@@ -237,7 +239,7 @@ class Blur_Image_Patch():
 class Ped_Classifier():
     def __init__(self, opts):
 
-        # 控制在服务器运行时只用一个GPU
+        # 确保在服务器运行时只用一个GPU
         if torch.cuda.is_available():
             if torch.cuda.device_count() > 1:
                 raise RuntimeError('More than one GPU')
