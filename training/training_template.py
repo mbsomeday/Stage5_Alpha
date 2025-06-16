@@ -136,6 +136,7 @@ class Blur_Image_Patch():
             logits.backward(gradient=pred_idx, retain_graph=True)
             self.ds_model.zero_grad()
 
+
             backward_features = self.backward_grads
             fl = self.forward_feature
 
