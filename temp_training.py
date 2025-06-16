@@ -23,7 +23,7 @@ args = get_args()
 batch_size = args.batch_size
 
 model_obj = 'models.EfficientNet.efficientNetB0'
-ds_name_list = ['D4']
+ds_name_list = ['D2']
 
 
 tt = train_ped_model_alpha(model_obj=model_obj,
