@@ -623,6 +623,7 @@ class Ped_Classifier():
             if self.early_stopping.early_stop:
                 if EPOCH < (20 + self.opts.patience):
                     self.early_stopping.counter -= 8
+                    self.early_stopping.early_stop = False
                     print(f'Stopped to early (at {EPOCH}), still training')
                 else:
                     print(f'Early Stopping!')
