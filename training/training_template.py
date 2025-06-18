@@ -146,9 +146,12 @@ class Blur_Image_Patch():
             heatmap = Ac
 
             ac_max = torch.amax(Ac, dim=(1, 2, 3), keepdim=True)
-            # mask = torch.where(Ac == ac_max, Ac, torch.zeros_like(Ac))  # 将所有值小于max的进行mask，该操作按维度进行
-            mask = Ac
-            mask[mask < ac_max*0.5] = 0
+
+            mask = torch.where(Ac == ac_max, Ac, torch.zeros_like(Ac))  # 将所有值小于max的进行mask，该操作按维度进行
+
+            # mask = Ac
+            # mask[mask < ac_max*0.5] = 0 # 将所有值小于T * max的进行mask，该操作按维度进行
+
             masked_image = images - images * mask
             # Ac_min = Ac.min()
             # Ac_max = Ac.max()
@@ -255,6 +258,7 @@ class Ped_Classifier():
         else:
             # 若是测试，则创建 test 文件夹用于存储结果
             self.callback_save_path = os.path.join(os.getcwd(), 'Test')
+            # todo 需要提示，如果该文件夹已经存在，存在覆盖历史数据的可能
             if not os.path.exists(self.callback_save_path):
                 os.mkdir(self.callback_save_path)
             print(f'Test saving dir:{self.callback_save_path}')
