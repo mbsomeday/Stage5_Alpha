@@ -621,7 +621,7 @@ class Ped_Classifier():
             self.update_learning_rate(EPOCH)
 
             if self.early_stopping.early_stop:
-                if EPOCH < 20 + self.opts.patience:
+                if EPOCH < (20 + self.opts.patience):
                     self.early_stopping.counter -= 8
                     print(f'Stopped to early (at {EPOCH}), still training')
                 else:
