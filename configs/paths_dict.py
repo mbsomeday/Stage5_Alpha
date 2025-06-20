@@ -26,7 +26,7 @@ LCA = {
 
 LOCAL = {
     'Stage6_org': {
-        'D1': r'D:\my_phd\dataset\Stage6\stage6_bdd100k',
+        'D4': r'D:\my_phd\dataset\Stage6\stage6_bdd100k',
 
     },
 
@@ -72,7 +72,7 @@ LOCAL = {
 
 KAGGLE = {
     'Stage6_org': {
-        'D1': r'D:\my_phd\dataset\Stage6\stage6_bdd100k',
+        'D4': r'D:\my_phd\dataset\Stage6\stage6_bdd100k',
 
     },
     'org_dataset': {
