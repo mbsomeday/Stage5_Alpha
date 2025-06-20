@@ -138,6 +138,11 @@ KAGGLE = {
 }
 
 NEXUS = {
+    'Stage6_org': {
+
+        'D4': r'/data/jcampos/jiawei_data/datasets/Stage6BDD100K',
+    },
+
     'org_dataset': {
         'D1': r'/data/jcampos/jiawei_data/datasets/D1',
         'D2': r'/data/jcampos/jiawei_data/datasets/D2',
