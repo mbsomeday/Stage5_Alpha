@@ -72,7 +72,7 @@ LOCAL = {
 
 KAGGLE = {
     'Stage6_org': {
-        'D4': r'D:\my_phd\dataset\Stage6\stage6_bdd100k',
+        'D4': r'/kaggle/input/stage6-dataset-bdd100k',
 
     },
     'org_dataset': {
