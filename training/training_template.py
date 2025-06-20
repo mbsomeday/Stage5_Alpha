@@ -258,7 +258,7 @@ class Ped_Classifier():
         else:
             # 若是测试，则创建 test 文件夹用于存储结果
             self.callback_save_path = os.path.join(os.getcwd(), 'Test')
-            # todo 需要提示，如果该文件夹已经存在，存在覆盖历史数据的可能
+            # 需要提示，如果该文件夹已经存在，存在覆盖历史数据的可能
             if not os.path.exists(self.callback_save_path):
                 os.mkdir(self.callback_save_path)
             print(f'Test saving dir:{self.callback_save_path}')
@@ -628,9 +628,6 @@ class Ped_Classifier():
                 else:
                     print(f'Early Stopping!')
                     break
-
-
-
 
 
             # if EPOCH == 2:
