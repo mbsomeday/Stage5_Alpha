@@ -284,16 +284,17 @@ class Ped_Classifier():
             os.mkdir(self.callback_save_path)
 
         # ********** blur，fade，等操作 **********
-        if self.opts.operator.lower() == 'fade':
-            self.image_operator = Blur_Image_Patch(model_obj=self.opts.ds_model_obj, ds_weights_path=self.opts.ds_weights_path)
-        elif self.opts.operator.lower() == 'blur':
-            # self.image_operator = Blur_Image_Patch(model_obj=self.opts.ds_model_obj, ds_weights_path=self.opts.ds_weights_path)
-            print('test blur')
-        else:
-            raise ValueError(f'The type of image operator evokes error, current:{self.opts.operator}')
+        if self.opts.beta > 0.0:
+            if self.opts.operator.lower() == 'fade':
+                self.image_operator = Blur_Image_Patch(model_obj=self.opts.ds_model_obj, ds_weights_path=self.opts.ds_weights_path)
+            elif self.opts.operator.lower() == 'blur':
+                # self.image_operator = Blur_Image_Patch(model_obj=self.opts.ds_model_obj, ds_weights_path=self.opts.ds_weights_path)
+                print('test blur')
+            else:
+                raise ValueError(f'The type of image operator evokes error, current:{self.opts.operator}')
 
         # ********** 数据准备 **********    augmentation_train
-        self.train_dataset = my_dataset(ds_name_list=self.opts.ds_name_list, path_key=self.opts.data_key, txt_name='augmentation_train.txt')
+        self.train_dataset = my_dataset(ds_name_list=self.opts.ds_name_list, path_key=self.opts.data_key, txt_name='train.txt')
         self.train_loader = DataLoader(self.train_dataset, batch_size=self.opts.batch_size, shuffle=True)
 
         self.val_dataset = my_dataset(ds_name_list=self.opts.ds_name_list, path_key=self.opts.data_key, txt_name='val.txt')
