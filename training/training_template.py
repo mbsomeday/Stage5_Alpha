@@ -277,7 +277,10 @@ class Ped_Classifier():
         for ds_name in self.opts.ds_name_list:
             info = '_' + ds_name
             self.callback_save_dir += info
-        self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_' + str(self.opts.beta) + self.opts.operator.lower() +'Loss'
+        if self.opts.beta > 0.0:
+            self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_' + str(self.opts.beta) + self.opts.operator.lower() +'Loss'
+        else:
+            self.callback_save_dir += '_' + str(self.opts.rand_seed) + '_Baseline'
         self.callback_save_path = os.path.join(os.getcwd(), self.callback_save_dir)
         print(f'Callback_save_dir:{self.callback_save_path}')
         if not os.path.exists(self.callback_save_path):
