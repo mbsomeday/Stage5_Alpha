@@ -56,7 +56,7 @@ class TrainArgs(BaseArgs):
 
         # callbacks
         parser.add_argument('--top_k', type=int, default=2)
-        parser.add_argument('--patience', type=int, default=15)
+        parser.add_argument('--patience', type=int, default=10)
 
         return parser
 
