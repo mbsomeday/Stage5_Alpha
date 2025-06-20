@@ -2,6 +2,8 @@
 import os, sys
 import random
 
+import matplotlib.pyplot as plt
+
 curPath = os.path.abspath(os.path.dirname(__file__))
 root_path = os.path.split(curPath)[0]
 sys.path.append(root_path)
@@ -10,8 +12,53 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from PIL import Image
 import numpy as np
+import random
+import torchvision.transforms.functional as F
 
 from configs.paths_dict import PATHS
+
+
+
+class RandomAug():
+    '''
+        对训练image进行randomaugmentation
+    '''
+    def __call__(self, img):
+
+        # 左右翻转
+        if random.random() > 0.5:
+            img = F.hflip(img)
+
+        # 随机旋转
+        if random.random() > 0.5:
+            angle = random.randint(-10, 10)
+            img = F.rotate(img, angle)
+
+        if random.random() > 0.5:
+            color_jitter = transforms.ColorJitter(
+                brightness=0.2,
+                contrast=0.2,
+                saturation=0.2,
+                hue=0.1
+            )
+            img = color_jitter(img)
+
+        # Random Gaussian blur
+        if random.random() > 0.3:
+            sigma = random.uniform(0.1, 1.0)
+            img = F.gaussian_blur(img, kernel_size=[5, 5], sigma=[sigma, sigma])
+
+        # Random posterize
+        if random.random() > 0.1:
+            bits = random.randint(3, 6)
+            img = F.posterize(img, bits)
+
+        # Convert to tensor and normalize
+        img = F.to_tensor(img)
+        img = F.normalize(img, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+        return img
+
 
 
 
@@ -29,9 +76,15 @@ class my_dataset(Dataset):
             self.ds_label_list.append(int(ds_name[1]) - 1)
 
         self.txt_name = txt_name
-        self.img_transforms = transforms.Compose([
-            transforms.ToTensor(),
-        ])
+        if 'train' in self.txt_name:
+            print(f'Training phase, using random augmentation')
+            self.img_transforms = RandomAug()
+        else:
+            print(f'Testing/Val phase, no image augmentation')
+            self.img_transforms = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
         self.images, self.ped_labels, self.ds_labels = self.init_ImagesLabels()
         print(f'Get dataset: {ds_name_list}, txt_name: {txt_name}, total {len(self.images)} images')
 
@@ -201,15 +254,28 @@ class dataset_clip(Dataset):
 
 
 
-# if __name__ == '__main__':
-#     ds_name_list = list(['D3'])
-#     path_key = 'org_dataset'
-#     txt_name = 'val.txt'
-#     batch_size = 8
-#     shuffle = True
-#
-#     # ds = my_dataset(ds_name_list, path_key, txt_name)
+if __name__ == '__main__':
+    image_path = r'img.jpg'
+    image = Image.open(image_path)
+    img_transform = RandomAug()
+    aug_image = img_transform(image)
+    plt_transformer = transforms.ToPILImage(aug_image)
 
+    plt.figure()
+    plt.subplot(121)
+    plt.imshow(image)
+    plt.subplot(122)
+    plt.imshow(aug_image)
+    plt.show()
+
+
+
+    # ds_name_list = list(['D3'])
+    # path_key = 'org_dataset'
+    # txt_name = 'val.txt'
+    # batch_size = 8
+    # shuffle = True
+#     # ds = my_dataset(ds_name_list, path_key, txt_name)
     # val_dataset, val_loader = get_data(ds_name_list, path_key, txt_name, batch_size, shuffle)
     # for idx, data_dict in enumerate(val_loader):
     #     images = data_dict['image']
